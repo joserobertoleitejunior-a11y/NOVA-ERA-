@@ -8,7 +8,7 @@
 
   let aberta = null;
 
-  NE.abrirConferencia = (c, { aoFiltrar } = {}) => {
+  NE.abrirConferencia = (c, { aoFiltrar, podeEnviar } = {}) => {
     fechar(true);
     const origemFoco = document.activeElement;
     const div = c.status === "divergencia";
@@ -63,8 +63,10 @@
       el("h3", {}, `Fotos (${fotos.length})`), fotos.length ? galeria : el("p", { class: "suave" }, "Sem fotos."),
       el("p", { class: "registro-protegido" }, ic("chave"), `Registro protegido: não pode ser alterado nem apagado. Código ${String(c.id).slice(0, 8).toUpperCase()}`));
 
-    const rodape = el("div", { class: "janela-rodape" },
-      el("button", { type: "button", class: "btn btn-azul", onclick: () => copiar(resumoTexto(c), "Resumo copiado. Cole no WhatsApp.") }, "Copiar resumo"),
+    const rodape = el("div", { class: "janela-rodape grade-acoes" },
+      podeEnviar && c.token_publico && el("button", { type: "button", class: "btn btn-verde", onclick: () => NE.enviarRastreio(c) }, ic("whatsapp"), "Enviar ao cliente"),
+      el("button", { type: "button", class: "btn btn-azul", onclick: () => NE.abrirEtiquetas(c) }, ic("etiqueta"), "Etiquetas"),
+      el("button", { type: "button", class: "btn btn-secundario", onclick: () => copiar(resumoTexto(c), "Resumo copiado. Cole no WhatsApp.") }, "Copiar resumo"),
       el("button", { type: "button", class: "btn btn-secundario", onclick: () => fechar() }, "Fechar"));
 
     const janela = el("div", { class: "janela", role: "dialog", "aria-modal": "true", "aria-labelledby": "janela-titulo" },

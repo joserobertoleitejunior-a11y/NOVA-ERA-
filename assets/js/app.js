@@ -10,7 +10,7 @@
     const area = $("#usuario");
     area.replaceChildren();
     if (!perfil) return;
-    const sair = el("button", { class: "btn btn-leve", type: "button", "aria-label": "Sair" }, ic("sair"));
+    const sair = el("button", { class: "link-acao", type: "button" }, ic("sair"), "Sair");
     sair.addEventListener("click", async () => { await NE.dados.sair(); perfil = null; iniciar(); });
     const ajuda = el("button", { class: "btn-ajuda", type: "button", id: "btn-ajuda" }, ic("ajuda"), "Ajuda");
     ajuda.addEventListener("click", abrirAjuda);
@@ -21,7 +21,7 @@
   const voltarVisao = () => (visao === "painel" ? painel() : inicioConferente());
   function abrirDicas() {
     $("main").className = "";
-    NE.abrirGuia("conferente", raiz(), voltarVisao);
+    NE.abrirGuia(tipoGuia(), raiz(), voltarVisao, { novaConferencia: conferir });
   }
   // Ajuda = tutorial guiado em cima da tela atual (volta para a tela inicial se estiver no meio de um passo a passo)
   function abrirAjuda() {
@@ -88,13 +88,13 @@
       el("h1", {}, `Olá, ${primeiroNome}`),
       el("p", {}, "Antes do caminhão sair, confira a carga com a nota. Leva uns 2 minutos."),
       nova,
-      el("button", { type: "button", class: "cartao-guia", onclick: abrirDicas }, ic("ajuda"), "Como fazer a conferência (dicas com exemplos)"),
+      el("button", { type: "button", class: "cartao-guia", onclick: abrirDicas }, ic("ajuda"), "Treinar a conferência (1 minuto)"),
       el("h2", { class: "secao-titulo" }, "Minhas conferências de hoje", el("small", {}, new Date().toLocaleDateString("pt-BR"))),
       lista));
     const dia = NE.hojeISO(), minhas = !NE.modoDemo;
     NE.carregarRapido(`conf-${dia}-${minhas ? "minhas" : "todas"}`, () => NE.dados.conferencias({ dia, somenteMinhas: minhas, idPerfil: perfil.id }), (lst) => {
       lista.replaceChildren(...(lst.length
-        ? lst.map((c) => NE.cartaoConferencia(c, (x) => NE.abrirConferencia(x)))
+        ? lst.map((c) => NE.cartaoConferencia(c, (x) => NE.abrirConferencia(x, { podeEnviar: perfil.papel === "admin" })))
         : [el("p", { class: "vazio" }, "Nenhuma conferência hoje. Toque em \"Nova conferência\" para começar.")]));
     }, (e) => { lista.replaceChildren(); NE.aviso(NE.mensagemErro(e), "erro", lista); });
   }

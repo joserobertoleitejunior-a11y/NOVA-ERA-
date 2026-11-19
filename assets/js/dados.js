@@ -115,7 +115,7 @@
     const exemplo = (minAtras, nota, v, conferente, itens, motivo) => {
       const div = itens.some((i) => i.qtd_nota !== i.qtd_carregada);
       return {
-        id: id(), numero_nota: nota, placa: v.placa, veiculo_id: v.id, motorista: null, conferente_id: conferente.id,
+        id: id(), token_publico: id(), numero_nota: nota, placa: v.placa, veiculo_id: v.id, motorista: null, conferente_id: conferente.id,
         conferente: { nome: conferente.nome }, status: div ? "divergencia" : "ok", motivo_divergencia: motivo || null, observacao: null,
         latitude: -23.5956, longitude: -48.0532, criado_em: new Date(agora - minAtras * 6e4).toISOString(),
         itens: itens.map((i) => ({ id: id(), ...i })),
@@ -149,7 +149,7 @@
         if (!d.fotos.some((f) => f.tipo === "carga") || !d.fotos.some((f) => f.tipo === "placa")) throw new Error("As fotos da carga e da placa são obrigatórias.");
         const div = d.itens.some((i) => Number(i.qtd_nota) !== Number(i.qtd_carregada));
         if (div && !d.motivo_divergencia?.trim()) throw new Error("Explique o motivo da diferença.");
-        const c = { ...d, id: id(), placa: d.placa.toUpperCase(), conferente_id: logado.id, conferente: { nome: logado.nome }, status: div ? "divergencia" : "ok", criado_em: new Date().toISOString(),
+        const c = { ...d, id: id(), token_publico: id(), placa: d.placa.toUpperCase(), conferente_id: logado.id, conferente: { nome: logado.nome }, status: div ? "divergencia" : "ok", criado_em: new Date().toISOString(),
           itens: d.itens.map((i) => ({ id: id(), ...i })), fotos: d.fotos.map((f) => ({ id: id(), ...f })) };
         conferencias.unshift(c);
         return c.id;
@@ -167,5 +167,5 @@
 
   NE.dados = modoDemo ? demo() : real();
   NE.tiposVeiculo = { caminhao: "Caminhão", truck_munck: "Truck com munck", betoneira: "Betoneira", basculante: "Basculante", outro: "Outro" };
-  NE.funcoes = { conferente: "Conferente", expedicao: "Expedição", motorista: "Motorista", ajudante: "Ajudante", diretoria: "Diretoria", administrativo: "Administrativo" };
+  NE.funcoes = { conferente: "Conferente", expedicao: "Expedição", vendedor: "Vendedor", motorista: "Motorista", ajudante: "Ajudante", diretoria: "Diretoria", administrativo: "Administrativo" };
 })();

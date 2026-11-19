@@ -1,32 +1,29 @@
-// Tutorial guiado em cima das telas de verdade: destaca cada botão e explica o que ele faz.
+// Tutorial guiado sobre as telas reais. Simples e objetivo: poucas dicas, frases curtas.
+// Enquanto ele está aberto a tela não rola; só avança tocando em "Próximo" ou no botão destacado.
 (() => {
   const NE = window.NE;
   const { el } = NE;
 
   const TOURS = {
-    // Durante qualquer passo a passo (não perde o que já foi preenchido)
     passo: [
-      { alvo: ".passos", titulo: "Onde você está", texto: "Esta barra mostra em qual passo você está e quantos faltam." },
-      { alvo: ".tela-titulo", titulo: "O que fazer agora", texto: "O título e a frase embaixo dizem exatamente o que fazer nesta tela." },
-      { alvo: "#btn-seguir", titulo: "Continuar", texto: "Quando terminar, toque aqui. Se faltar alguma coisa, o app avisa em vermelho o que é." },
-      { alvo: "#btn-voltar", titulo: "Voltar", texto: "Errou algo? Volte um passo. Nada do que você preencheu se perde." },
+      { alvo: ".tela-titulo", titulo: "O que fazer", texto: "Faça o que está escrito aqui." },
+      { alvo: "#btn-seguir", titulo: "Continuar", texto: "Terminou? Toque aqui. Se faltar algo, o app avisa." },
     ],
     conferente: [
-      { alvo: "#btn-nova", titulo: "Comece por aqui", texto: "Toque neste botão sempre que um caminhão for sair. O app te guia passo a passo, uma pergunta por tela." },
-      { alvo: ".cartao-guia", titulo: "Dicas com exemplos", texto: "Esqueceu como faz? Aqui tem as 7 dicas da conferência, com exemplos." },
-      { alvo: "#lista-minhas", titulo: "Suas conferências", texto: "Tudo que você conferiu hoje fica aqui. Toque numa para abrir a janela com itens, fotos e local." },
-      { alvo: "#btn-ajuda", titulo: "Ajuda sempre à mão", texto: "Este tutorial e as dicas ficam neste botão. Pode abrir quando quiser." },
+      { alvo: "#btn-nova", titulo: "Nova conferência", texto: "Toque aqui quando um caminhão for sair." },
+      { alvo: "#lista-minhas", titulo: "Suas conferências", texto: "Toque numa para ver tudo." },
+      { alvo: "#btn-ajuda", titulo: "Ajuda", texto: "Dúvida? Toque aqui." },
     ],
     painel: [
-      { alvo: ".numeros", titulo: "Resumo do dia", texto: "Quantas cargas saíram, quantas conferem e quantas tiveram diferença." },
-      { alvo: ".navegador-dia", titulo: "Trocar o dia", texto: "Use as setas para ver outros dias. Toque no meio para voltar para hoje." },
-      { alvo: ".filtros .chips", titulo: "Filtrar", texto: "Toque em \"Com diferença\" para ver só as cargas que não bateram com a nota." },
-      { alvo: ".conf", titulo: "Abrir uma conferência", texto: "Toque para abrir a janela com tudo: itens, fotos em tela cheia, local, conferente e o resumo para o WhatsApp." },
-      { alvo: ".abas", titulo: "Cadastros", texto: "Funcionários, caminhões e produtos. Todo cadastro é passo a passo." },
-      { alvo: "#btn-nova-painel", titulo: "Conferir daqui também", texto: "Quem é da expedição também pode fazer conferência por aqui." },
-      { alvo: "#btn-ajuda", titulo: "Ajuda sempre à mão", texto: "Este tutorial e as dicas ilustradas ficam neste botão." },
+      { alvo: ".numeros", titulo: "Resumo do dia", texto: "Laranja é carga com diferença." },
+      { alvo: ".filtros", titulo: "Buscar e filtrar", texto: "Troque o dia, busque a nota ou veja só as diferenças." },
+      { alvo: ".conf", titulo: "Abrir conferência", texto: "Itens, fotos, etiquetas e link para o cliente." },
+      { alvo: ".abas", titulo: "Cadastros", texto: "Funcionários, caminhões e produtos." },
     ],
   };
+
+  const bloquear = (e) => { if (!e.target.closest(".tour-balao")) e.preventDefault(); };
+  const teclas = (e) => { if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(e.key) && !e.target.closest(".tour-balao")) e.preventDefault(); };
 
   NE.iniciarTour = (tipo, { aoFim, verDicas } = {}) => {
     document.querySelector(".tour")?.remove();
@@ -35,34 +32,57 @@
     NE.memoria.gravar(`ne-tour-${tipo}`, true);
     let i = 0;
     const foco = el("div", { class: "tour-foco" });
-    const balao = el("div", { class: "tour-balao", role: "dialog", "aria-live": "polite", "aria-labelledby": "tour-titulo" });
+    const balao = el("div", { class: "tour-balao", role: "dialog", "aria-modal": "true", "aria-labelledby": "tour-titulo" });
     const camada = el("div", { class: "tour" }, foco, balao);
-    const terminar = () => { camada.remove(); window.removeEventListener("resize", posicionar); aoFim?.(); };
+
+    const terminar = () => {
+      camada.remove();
+      document.documentElement.classList.remove("sem-rolagem");
+      window.removeEventListener("resize", posicionar);
+      window.removeEventListener("wheel", bloquear, { capture: true });
+      window.removeEventListener("touchmove", bloquear, { capture: true });
+      window.removeEventListener("keydown", teclas, { capture: true });
+      aoFim?.();
+    };
+    const avancar = () => { if (i < passos.length - 1) { i++; desenhar(); } else terminar(); };
+
     function posicionar() {
       const alvo = document.querySelector(passos[i].alvo);
       if (!alvo) return;
       const r = alvo.getBoundingClientRect(), m = 6;
       Object.assign(foco.style, { top: `${r.top - m}px`, left: `${r.left - m}px`, width: `${r.width + m * 2}px`, height: `${r.height + m * 2}px` });
-      const abaixo = r.bottom + 12 + balao.offsetHeight < innerHeight - 12;
+      const abaixo = r.bottom + 14 + balao.offsetHeight < innerHeight - 12;
       balao.style.top = `${abaixo ? r.bottom + 14 : Math.max(12, r.top - balao.offsetHeight - 14)}px`;
     }
     function desenhar() {
       const p = passos[i];
       const alvo = document.querySelector(p.alvo);
+      // rola só por conta do tutorial (a pessoa não consegue rolar)
+      document.documentElement.classList.remove("sem-rolagem");
       alvo.scrollIntoView({ block: "center", behavior: "instant" });
+      document.documentElement.classList.add("sem-rolagem");
       const ultimo = i === passos.length - 1;
       balao.replaceChildren(
-        el("div", { class: "tour-contagem" }, `${i + 1} de ${passos.length}`),
+        el("div", { class: "tour-contagem" }, passos.map((_, k) => el("i", { class: k <= i ? "ativo" : "" }))),
         el("h2", { id: "tour-titulo" }, p.titulo), el("p", {}, p.texto),
         el("div", { class: "tour-botoes" },
-          el("button", { type: "button", class: "btn btn-leve", onclick: terminar }, ultimo ? "Fechar" : "Pular"),
-          ultimo && verDicas ? el("button", { type: "button", class: "btn btn-secundario", onclick: () => { terminar(); verDicas(); } }, "Ver dicas") : null,
-          el("button", { type: "button", class: "btn btn-principal", id: "tour-proximo", onclick: () => { if (ultimo) return terminar(); i++; desenhar(); } }, ultimo ? "Entendi" : "Próximo")));
+          el("button", { type: "button", class: "btn btn-secundario", onclick: terminar }, ultimo ? "Fechar" : "Pular"),
+          ultimo && verDicas ? el("button", { type: "button", class: "btn btn-azul", onclick: () => { terminar(); verDicas(); } }, "Ver dicas") : null,
+          el("button", { type: "button", class: "btn btn-principal", id: "tour-proximo", onclick: avancar }, ultimo ? "Entendi" : "Próximo")));
       requestAnimationFrame(posicionar);
       balao.querySelector("#tour-proximo").focus({ preventScroll: true });
     }
-    camada.addEventListener("click", (e) => { if (e.target === camada || e.target === foco) { if (i < passos.length - 1) { i++; desenhar(); } else terminar(); } });
+    // Toque no botão destacado também avança; fora dele, nada acontece
+    camada.addEventListener("click", (e) => {
+      if (e.target.closest(".tour-balao")) return;
+      const r = document.querySelector(passos[i].alvo)?.getBoundingClientRect();
+      if (r && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) avancar();
+      else balao.animate?.([{ transform: "translateX(0)" }, { transform: "translateX(-6px)" }, { transform: "translateX(6px)" }, { transform: "translateX(0)" }], { duration: 220 });
+    });
     window.addEventListener("resize", posicionar);
+    window.addEventListener("wheel", bloquear, { capture: true, passive: false });
+    window.addEventListener("touchmove", bloquear, { capture: true, passive: false });
+    window.addEventListener("keydown", teclas, { capture: true });
     document.body.append(camada);
     desenhar();
   };

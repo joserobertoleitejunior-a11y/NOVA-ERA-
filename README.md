@@ -12,6 +12,10 @@ App de **conferência nota × carga** da expedição. Problema definido na reuni
 
 **Painel (expedição/diretoria):** conferências do dia com totais, filtro "com diferença", detalhe com itens e fotos; cadastro de funcionários, caminhões e produtos.
 
+**Rastreio do cliente:** na janela da conferência, "Enviar ao cliente" abre o WhatsApp com o link `rastreio.html?c=CÓDIGO`. O cliente vê situação, horário de saída, itens carregados e a foto da carga. O código é secreto; a função `rastreio` devolve só esses dados (nada de conferente, diferenças ou motivo).
+
+**Etiquetas:** térmica 100 × 50 mm ou folha A4 (10 por folha), uma por produto ou uma por peça, com QR Code do rastreio.
+
 **Prova:** o registro (itens e fotos) não pode ser alterado nem apagado por ninguém (sem políticas de UPDATE/DELETE). Fotos em bucket privado com link temporário.
 
 ## Modo demonstração

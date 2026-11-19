@@ -29,11 +29,12 @@
             tela: (r) => NE.escolhaUnica([
               { valor: "conferente", rotulo: "Conferente", dica: "Confere a carga antes de sair" },
               { valor: "expedicao", rotulo: "Expedição", dica: "Organiza as saídas" },
+              { valor: "vendedor", rotulo: "Vendedor", dica: "Manda o rastreio ao cliente" },
               { valor: "motorista", rotulo: "Motorista", dica: "Dirige o caminhão" },
               { valor: "ajudante", rotulo: "Ajudante", dica: "Ajuda a carregar" },
               { valor: "administrativo", rotulo: "Administrativo", dica: "Escritório" },
               { valor: "diretoria", rotulo: "Diretoria", dica: "Gestão" },
-            ], d.funcao, (v) => { d.funcao = v; if (!d.papel) d.papel = ["expedicao", "diretoria"].includes(v) ? "admin" : "funcionario"; r(); }),
+            ], d.funcao, (v) => { d.funcao = v; if (!d.papel) d.papel = ["expedicao", "diretoria", "vendedor"].includes(v) ? "admin" : "funcionario"; r(); }),
             validar: () => (!d.funcao ? "Toque na função do funcionário." : null),
           },
           {

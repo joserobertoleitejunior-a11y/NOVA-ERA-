@@ -10,7 +10,7 @@ alter table public.perfis add column usuario text unique;
 alter table public.perfis drop constraint if exists perfis_funcao_check;
 alter table public.perfis alter column funcao set default 'conferente';
 alter table public.perfis add constraint perfis_funcao_check
-  check (funcao in ('conferente','motorista','ajudante','expedicao','diretoria','administrativo'));
+  check (funcao in ('conferente','motorista','ajudante','expedicao','vendedor','diretoria','administrativo'));
 
 -- Veículos com tipo
 alter table public.veiculos add column tipo text not null default 'caminhao'
@@ -37,7 +37,9 @@ create table public.conferencias (
   observacao text,
   latitude double precision,
   longitude double precision,
-  criado_em timestamptz not null default now()
+  criado_em timestamptz not null default now(),
+  -- código secreto do link de rastreio do cliente (só a função "rastreio" lê por ele)
+  token_publico uuid not null default gen_random_uuid() unique
 );
 create index on public.conferencias (criado_em desc);
 create index on public.conferencias (conferente_id);

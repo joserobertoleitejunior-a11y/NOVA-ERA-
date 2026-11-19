@@ -56,13 +56,15 @@
 
   const ABAS = {
     hoje(raiz) {
-      let dia = NE.hojeISO(), situacao = "todas", filtroExtra = null, todas = [];
+      let dia = NE.hojeISO(), situacao = "todas", filtroExtra = null, todas = [], busca = "";
       const numeros = el("div", { class: "numeros" });
       const navDia = el("div", { class: "navegador-dia" });
       const chips = el("div", { class: "chips" });
+      const campoBusca = el("input", { class: "entrada busca", id: "busca-nota", type: "search", inputmode: "search", autocomplete: "off", placeholder: "Buscar nota ou placa" });
+      campoBusca.addEventListener("input", () => { busca = campoBusca.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, ""); desenhar(); });
       const extra = el("div", {});
       const lista = el("div", { class: "lista-conf" }, el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }));
-      raiz.replaceChildren(numeros, el("div", { class: "filtros" }, navDia, chips), extra, lista);
+      raiz.replaceChildren(numeros, el("div", { class: "filtros" }, navDia, campoBusca, chips), extra, lista);
 
       const mudarDia = (d) => { dia = d; carregar(); };
       const desenharNav = () => {
@@ -89,8 +91,9 @@
           el("div", { class: "numero alerta" }, el("b", {}, String(div)), el("span", {}, "com diferença")));
         extra.replaceChildren(filtroExtra ? el("div", { class: "filtro-ativo" }, el("span", {}, "Mostrando: ", el("strong", {}, filtroExtra.rotulo)),
           el("button", { type: "button", class: "link-acao", onclick: () => { filtroExtra = null; desenhar(); } }, ic("fechar"), "Tirar filtro")) : "");
-        const vis = base.filter((c) => situacao === "todas" || c.status === situacao);
-        lista.replaceChildren(...(vis.length ? vis.map((c) => NE.cartaoConferencia(c, (x) => NE.abrirConferencia(x, { aoFiltrar })))
+        const vis = base.filter((c) => (situacao === "todas" || c.status === situacao)
+          && (!busca || String(c.numero_nota).includes(busca) || c.placa.includes(busca)));
+        lista.replaceChildren(...(vis.length ? vis.map((c) => NE.cartaoConferencia(c, (x) => NE.abrirConferencia(x, { aoFiltrar, podeEnviar: true })))
           : [el("p", { class: "vazio" }, situacao === "divergencia" ? "Nenhuma diferença neste dia." : "Nenhuma conferência neste dia.")]));
       }
       function carregar() {

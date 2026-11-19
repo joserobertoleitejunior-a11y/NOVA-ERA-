@@ -94,7 +94,7 @@
         lista.replaceChildren(...(estado.itens.length
           ? estado.itens.map((it, i) => el("div", { class: "item" },
             el("div", { class: "item-topo" }, el("strong", {}, it.descricao),
-              el("button", { type: "button", class: "btn btn-leve", "aria-label": `Remover ${it.descricao}`, onclick: () => { estado.itens.splice(i, 1); redesenhar(); } }, ic("fechar"))),
+              el("button", { type: "button", class: "link-acao", "aria-label": `Tirar ${it.descricao}`, onclick: () => { estado.itens.splice(i, 1); redesenhar(); } }, ic("fechar"), "Tirar")),
             el("div", { class: "rotulo" }, "Quantidade na nota"),
             contador(it.qtd_nota, (v) => { it.qtd_nota = v; it.situacao = null; }, `qtd-${i}`)))
           : [el("p", { class: "vazio" }, "Nenhum item ainda. Toque nos produtos abaixo para adicionar.")]));
