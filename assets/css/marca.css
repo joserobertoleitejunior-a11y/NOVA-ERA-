@@ -184,6 +184,15 @@ textarea.entrada { min-height: 96px; resize: vertical; }
 .aviso.alerta { background: var(--alerta-fundo); color: var(--alerta); }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(100px + env(safe-area-inset-bottom, 0px)); z-index: 50; max-width: min(92vw, 520px); box-shadow: 0 8px 24px #0003; }
 
+/* Leitura automática do número da nota */
+.leitura { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: var(--raio); font-weight: 600; font-size: .95rem; margin-top: 4px; }
+.leitura svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+.leitura.lendo { background: #eef3fb; color: var(--azul); align-items: center; }
+.leitura.ok { background: var(--ok-fundo); color: var(--ok); }
+.leitura.falhou { background: var(--alerta-fundo); color: var(--alerta); }
+.girando { width: 18px; height: 18px; border-radius: 50%; border: 3px solid currentColor; border-right-color: transparent; animation: gira .7s linear infinite; flex: none; }
+.chave-nfe { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .8rem; text-align: right; max-width: 22ch; overflow-wrap: anywhere; }
+
 /* Chips de motivo */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .chip { border: 2px solid var(--linha); background: var(--placa); border-radius: 99px; padding: 8px 14px; cursor: pointer; font-weight: 600; font-size: .95rem; }
@@ -318,7 +327,7 @@ tfoot th { color: var(--texto); font-size: .95rem; text-transform: none; letter-
 .janela-corpo h3 { font-size: 1.1rem; text-transform: uppercase; margin: 20px 0 8px; color: var(--texto-suave); letter-spacing: .04em; }
 .janela-corpo .resumo-linha { align-items: center; }
 .janela-rodape { display: flex; gap: 10px; padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--linha); }
-.janela-rodape .btn { flex: 1; min-height: 52px; font-size: 1.1rem; }
+.janela-rodape .btn { flex: 1; min-height: 52px; font-size: 1.05rem; white-space: nowrap; padding: 0 12px; }
 .faixa-status { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: var(--raio); font-weight: 700; margin-bottom: 14px; }
 .faixa-status svg { width: 22px; height: 22px; flex: none; }
 .faixa-status.ok { background: var(--ok-fundo); color: var(--ok); }

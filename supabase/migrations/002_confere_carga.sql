@@ -27,6 +27,7 @@ create table public.produtos (
 create table public.conferencias (
   id uuid primary key default gen_random_uuid(),
   numero_nota text not null,
+  chave_nfe text check (chave_nfe ~ '^[0-9]{44}$'), -- chave de acesso lida do código de barras da DANFE
   veiculo_id uuid references public.veiculos(id),
   placa text not null,
   motorista text,
@@ -113,9 +114,9 @@ begin
     raise exception 'Explique o motivo da diferença.';
   end if;
 
-  insert into conferencias (numero_nota, veiculo_id, placa, motorista, conferente_id, status,
+  insert into conferencias (numero_nota, chave_nfe, veiculo_id, placa, motorista, conferente_id, status,
                             motivo_divergencia, observacao, latitude, longitude)
-  values (trim(p->>'numero_nota'), nullif(p->>'veiculo_id', '')::uuid, upper(trim(p->>'placa')),
+  values (trim(p->>'numero_nota'), nullif(p->>'chave_nfe', ''), nullif(p->>'veiculo_id', '')::uuid, upper(trim(p->>'placa')),
           nullif(trim(p->>'motorista'), ''), v_uid, case when v_div then 'divergencia' else 'ok' end,
           nullif(trim(p->>'motivo_divergencia'), ''), nullif(trim(p->>'observacao'), ''),
           (p->>'latitude')::double precision, (p->>'longitude')::double precision)

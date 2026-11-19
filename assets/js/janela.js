@@ -36,6 +36,9 @@
       ["Motorista", el("span", {}, c.motorista || "Não informado")],
       ["Conferido por", el("span", { class: "linha-acoes" }, el("span", {}, c.conferente?.nome || "—"), filtro("conferente", c.conferente_id, c.conferente?.nome || "Conferente"))],
       ["Nota fiscal", el("span", { class: "linha-acoes" }, el("strong", {}, c.numero_nota), botaoCopiar(c.numero_nota, "Número da nota copiado."))],
+      c.chave_nfe && ["Chave de acesso", el("span", { class: "linha-acoes" },
+        el("span", { class: "chave-nfe" }, NE.nfe.formatarChave(c.chave_nfe)), botaoCopiar(c.chave_nfe, "Chave de acesso copiada."),
+        el("span", { class: "etiqueta ok" }, "Lida da foto"))],
       ["Local do registro", c.latitude != null
         ? el("a", { class: "link-acao", href: `https://www.google.com/maps?q=${c.latitude},${c.longitude}`, target: "_blank", rel: "noopener" }, ic("local"), "Abrir no mapa")
         : el("span", { class: "suave" }, "Localização não autorizada no celular")],
@@ -44,7 +47,7 @@
     const corpo = el("div", { class: "janela-corpo" },
       el("div", { class: `faixa-status ${div ? "alerta" : "ok"}` }, ic(div ? "alerta" : "check"),
         el("span", {}, div ? textoDif(itens.filter((i) => Number(i.qtd_nota) !== Number(i.qtd_carregada)).length) : "Tudo confere com a nota")),
-      el("div", { class: "resumo" }, linhas.map(([k, v]) => el("div", { class: "resumo-linha" }, el("span", {}, k), v))),
+      el("div", { class: "resumo" }, linhas.filter(Boolean).map(([k, v]) => el("div", { class: "resumo-linha" }, el("span", {}, k), v))),
       el("h3", {}, `Itens (${itens.length})`),
       el("div", { class: "tabela-wrap resumo" }, el("table", {},
         el("thead", {}, el("tr", {}, el("th", {}, "Produto"), el("th", { class: "num" }, "Nota"), el("th", { class: "num" }, "Subiu"), el("th", { class: "num" }, "Dif."))),

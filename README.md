@@ -4,7 +4,7 @@ App de **conferência nota × carga** da expedição. Problema definido na reuni
 ## Como funciona
 **Conferente (celular), 6 passos:**
 1. Caminhão: toca na placa ou digita.
-2. Nota fiscal: número + foto.
+2. Nota fiscal: foto da nota → o número é lido sozinho do código de barras (chave de 44 dígitos, com dígito verificador). Se não ler, digita.
 3. Itens da nota: toca nos produtos e informa a quantidade.
 4. Conferir: em cada item, "Confere" ou "Diferente" (e quantos subiram).
 5. Fotos: caminhão carregado e placa (obrigatórias), avarias (opcional).
@@ -34,5 +34,5 @@ Gerar o HTML único da demonstração: `python3 scripts/gerar-demo.py saida.html
 
 ## Pendências
 - Logotipo oficial (o atual é provisório, desenhado a partir da fachada).
-- Leitura automática da nota (foto com IA ou XML da NF-e) — fase 2.
+- Leitura dos itens da nota (foto com IA ou XML da NF-e) — fase 2. O número da nota já é lido pelo código de barras.
 - Lint (Biome), testes automatizados, Sentry, hospedagem (Netlify descartado).

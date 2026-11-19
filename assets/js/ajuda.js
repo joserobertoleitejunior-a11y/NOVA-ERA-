@@ -8,7 +8,7 @@
     conferente: [
       { icone: "caminhao", titulo: "Antes do caminhão sair", texto: "Toda carga é conferida com a nota antes de sair do pátio. Leva uns 2 minutos e protege você e a empresa.", exemplo: () => botaoFalso("Nova conferência", "caminhao") },
       { icone: "caminhao", titulo: "1. Escolha o caminhão", texto: "Toque na placa do caminhão que vai sair. Se não estiver na lista, digite a placa.", exemplo: () => el("div", { class: "grade-escolha" }, cartaoFalso("ABC1D23", "Caminhão", true), cartaoFalso("RST8U45", "Truck com munck")) },
-      { icone: "nota", titulo: "2. Nota fiscal", texto: "Digite o número da nota e tire uma foto dela inteira, sem sombra." },
+      { icone: "nota", titulo: "2. Nota fiscal", texto: "Tire uma foto da nota inteira, com o código de barras aparecendo. O app lê o número sozinho. Se não conseguir, é só digitar." },
       { icone: "caixas", titulo: "3. Itens da nota", texto: "Toque nos produtos que estão na nota e coloque a quantidade escrita nela." },
       { icone: "conferir", titulo: "4. Conferir a carga", texto: "Olhe o caminhão. Se a quantidade bate, toque em Confere. Se não bate, toque em Diferente e diga quantos subiram.", exemplo: () => el("div", { class: "par-botoes" }, el("span", { class: "opcao confere", "aria-pressed": "true" }, ic("check"), "Confere"), el("span", { class: "opcao diferente" }, ic("alerta"), "Diferente")) },
       { icone: "camera", titulo: "5. Fotos", texto: "Tire a foto do caminhão carregado e da placa. Se tiver peça quebrada ou dano, tire foto da avaria também." },

@@ -62,6 +62,18 @@
     } catch { return arquivo; }
   };
 
+  // Carrega uma biblioteca só quando ela é necessária (o app abre leve e rápido)
+  const scripts = new Map();
+  NE.carregarScript = (url) => {
+    if (!scripts.has(url)) scripts.set(url, new Promise((ok, falha) => {
+      const s = document.createElement("script");
+      s.src = url; s.async = true; s.crossOrigin = "anonymous";
+      s.onload = ok; s.onerror = () => { scripts.delete(url); falha(new Error("Sem internet para carregar o leitor.")); };
+      document.head.append(s);
+    }));
+    return scripts.get(url);
+  };
+
   NE.posicao = () => new Promise((ok) => {
     if (!navigator.geolocation) return ok(null);
     try {

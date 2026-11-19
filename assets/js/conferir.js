@@ -5,7 +5,7 @@
 
   const PASSOS = [
     { id: "caminhao", titulo: "Caminhão", icone: "caminhao", ajuda: "Toque no caminhão que vai sair." },
-    { id: "nota", titulo: "Nota fiscal", icone: "nota", ajuda: "Digite o número e tire a foto da nota." },
+    { id: "nota", titulo: "Nota fiscal", icone: "nota", ajuda: "Tire a foto da nota. O número aparece sozinho." },
     { id: "itens", titulo: "Itens da nota", icone: "caixas", ajuda: "Marque o que está escrito na nota e a quantidade." },
     { id: "conferir", titulo: "Conferir a carga", icone: "conferir", ajuda: "Olhe o caminhão. Cada item confere com a nota?" },
     { id: "fotos", titulo: "Fotos", icone: "camera", ajuda: "Tire as fotos que comprovam a saída." },
@@ -16,7 +16,7 @@
   let estado, perfil, catalogo, aoTerminar;
 
   function novoEstado() {
-    return { veiculo: null, placa: "", motorista: "", numero_nota: "", itens: [], fotos: { nota: [], carga: [], placa: [], avaria: [] }, motivo: "", observacao: "" };
+    return { veiculo: null, placa: "", motorista: "", numero_nota: "", chave_nfe: "", leitura: null, itens: [], fotos: { nota: [], carga: [], placa: [], avaria: [] }, motivo: "", observacao: "" };
   }
 
   NE.iniciarConferencia = async (perfilAtual, raiz, voltarInicio) => {
@@ -69,11 +69,23 @@
 
     nota(redesenhar) {
       const num = el("input", { class: "entrada entrada-grande", id: "numero-nota", inputmode: "numeric", placeholder: "Ex.: 48213", value: estado.numero_nota, autocomplete: "off" });
-      num.addEventListener("input", () => { estado.numero_nota = num.value.trim(); });
+      num.addEventListener("input", () => {
+        estado.numero_nota = num.value.trim();
+        // Digitou um número diferente do código de barras: a chave lida não vale mais
+        if (estado.leitura?.status === "ok" && estado.numero_nota !== estado.leitura.numero) { estado.chave_nfe = ""; estado.leitura = null; status.replaceChildren(); }
+      });
+      const status = el("div", { id: "leitura-nota", "aria-live": "polite" }, statusLeitura());
+      const aoNovaFoto = async (arquivo) => {
+        estado.leitura = { status: "lendo" };
+        const r = await NE.nfe.lerDaFoto(arquivo);
+        if (r) { estado.leitura = { status: "ok", ...r }; estado.numero_nota = r.numero; estado.chave_nfe = r.chave; }
+        else estado.leitura = { status: "falhou" };
+        if (document.getElementById("numero-nota")) redesenhar(); // só redesenha se ainda estiver neste passo
+      };
       return el("div", {},
-        el("div", { class: "campo" }, el("label", { for: "numero-nota" }, "Número da nota"),
-          el("span", { class: "dica" }, "Está no alto da nota, ao lado de \"Nº\"."), num),
-        blocoFoto("nota", "Foto da nota fiscal", "Obrigatória", "Enquadre a nota inteira, sem sombra.", false, redesenhar));
+        blocoFoto("nota", "Foto da nota fiscal", "Obrigatória", "Enquadre a nota inteira, com o código de barras aparecendo. O número é lido sozinho.", false, redesenhar, aoNovaFoto),
+        el("div", { class: "campo", style: "margin-top:16px" }, el("label", { for: "numero-nota" }, "Número da nota"),
+          el("span", { class: "dica" }, "Preenchido pela foto. Se não der, digite: fica no alto da nota, ao lado de \"Nº\"."), num, status));
     },
 
     itens(redesenhar) {
@@ -170,7 +182,7 @@
 
   const VALIDAR = {
     caminhao: () => (estado.placa.length < 7 ? "Escolha o caminhão ou digite a placa completa." : null),
-    nota: () => (!estado.numero_nota ? "Digite o número da nota." : !estado.fotos.nota.length ? "Tire a foto da nota fiscal." : null),
+    nota: () => (estado.leitura?.status === "lendo" ? "Aguarde um instante: estou lendo o número da nota na foto." : !estado.numero_nota ? "Digite o número da nota." : !estado.fotos.nota.length ? "Tire a foto da nota fiscal." : null),
     itens: () => (!estado.itens.length ? "Adicione pelo menos um produto da nota."
       : estado.itens.some((i) => !(Number(i.qtd_nota) > 0)) ? "Toda quantidade da nota precisa ser maior que zero." : null),
     conferir: () => {
@@ -195,7 +207,7 @@
       el("button", { type: "button", "aria-label": "Aumentar", html: NE.icone.mais, onclick: () => mudar(Number(inp.value) + 1) }));
   }
 
-  function blocoFoto(tipo, titulo, exigencia, dica, varias, redesenhar) {
+  function blocoFoto(tipo, titulo, exigencia, dica, varias, redesenhar, aoNovaFoto) {
     const lista = estado.fotos[tipo];
     const adicionar = async (arquivos) => {
       for (const arq of arquivos) {
@@ -203,7 +215,10 @@
         if (!varias) lista.splice(0).forEach((f) => URL.revokeObjectURL(f.url));
         lista.push({ blob, url: URL.createObjectURL(blob) });
       }
+      const original = arquivos[arquivos.length - 1];
+      if (aoNovaFoto && original) estado.leitura = { status: "lendo" };
       redesenhar();
+      if (aoNovaFoto && original) aoNovaFoto(original); // lê da foto original, em alta resolução
     };
     // Duas entradas: câmera direta e galeria (se o aparelho bloquear a câmera, a galeria ainda funciona)
     const entrada = (comCamera, rotulo) => {
@@ -215,7 +230,7 @@
     const obrig = exigencia === "Obrigatória";
     const rotuloCamera = feita ? (varias ? "Mais uma" : "Tirar outra") : "Tirar foto";
     const exemplo = NE.dados.fotoExemplo && el("button", { type: "button", class: "link-acao", style: "justify-self:center",
-      onclick: async () => adicionar([await NE.dados.fotoExemplo(titulo)]) }, "Usar foto de exemplo (demonstração)");
+      onclick: async () => adicionar([tipo === "nota" ? await NE.nfe.gerarExemplo() : await NE.dados.fotoExemplo(titulo)]) }, "Usar foto de exemplo (demonstração)");
     return el("div", { class: `foto-bloco${feita ? " feita" : ""}` },
       el("div", { class: "foto-bloco-topo" }, el("strong", {}, titulo),
         el("span", { class: `etiqueta ${feita ? "ok" : obrig ? "obrigatoria" : ""}` }, feita ? `${lista.length} foto${lista.length > 1 ? "s" : ""}` : exigencia)),
@@ -228,6 +243,14 @@
         el("label", { class: `btn ${!feita && obrig ? "btn-azul" : "btn-secundario"} botao-camera` }, ic("camera"), rotuloCamera, entrada(true, "Tirar foto")),
         el("label", { class: "btn btn-secundario botao-camera" }, ic("galeria"), "Galeria", entrada(false, "Escolher da galeria"))),
       exemplo);
+  }
+
+  function statusLeitura() {
+    const l = estado.leitura;
+    if (!l) return "";
+    if (l.status === "lendo") return el("div", { class: "leitura lendo" }, el("span", { class: "girando" }), "Lendo o número da nota na foto…");
+    if (l.status === "ok") return el("div", { class: "leitura ok" }, ic("check"), el("span", {}, `Número ${l.numero} lido do código de barras (série ${l.serie}). Confira com a nota.`));
+    return el("div", { class: "leitura falhou" }, ic("alerta"), el("span", {}, "Não consegui ler o código de barras. Digite o número ou tire outra foto mais perto, sem sombra."));
   }
 
   const linhaResumo = NE.linhaResumo;
@@ -244,7 +267,7 @@
       for (const f of lista) fotos.push({ tipo, caminho: await NE.dados.enviarFoto(f.blob, perfil.id) });
     }
     await NE.dados.registrarConferencia({
-      numero_nota: estado.numero_nota, veiculo_id: estado.veiculo?.id || "", placa: estado.placa, motorista: estado.motorista,
+      numero_nota: estado.numero_nota, chave_nfe: estado.chave_nfe, veiculo_id: estado.veiculo?.id || "", placa: estado.placa, motorista: estado.motorista,
       motivo_divergencia: estado.motivo, observacao: estado.observacao, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null,
       itens: estado.itens.map((i) => ({ produto_id: i.produto_id || "", descricao: i.descricao, qtd_nota: Number(i.qtd_nota), qtd_carregada: Number(i.qtd_carregada) })),
       fotos,
