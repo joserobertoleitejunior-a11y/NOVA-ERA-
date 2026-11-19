@@ -51,7 +51,12 @@
     topo();
     if (!perfil) return telaEntrar();
     if (!perfil.ativo) { await NE.dados.sair(); perfil = null; topo(); return telaEntrar("Seu acesso está desativado. Fale com a expedição."); }
-    visao = perfil.papel === "admin" && !NE.modoDemo ? "painel" : "conferente";
+    const entradaAdmin = window.NE_ENTRADA === "admin";
+    if (entradaAdmin && !NE.modoDemo && perfil.papel !== "admin") {
+      await NE.dados.sair(); perfil = null; topo();
+      return telaEntrar("Esta área é só da administração. Entre com um usuário de administrador.");
+    }
+    visao = entradaAdmin || (perfil.papel === "admin" && !NE.modoDemo) ? "painel" : "conferente";
     seloDemo();
     // Já busca caminhões e produtos para a conferência abrir na hora
     NE.dados.veiculos().catch(() => {}); NE.dados.produtos().catch(() => {});
@@ -67,7 +72,7 @@
     const btn = el("button", { class: "btn btn-principal btn-bloco", type: "submit" }, "Entrar");
     const avisoBox = el("div", {});
     const form = el("form", { class: "cartao" },
-      el("h1", {}, "Confere Carga"), el("p", {}, "Entre com o usuário e a senha que a expedição te passou."), avisoBox,
+      el("h1", {}, window.NE_ENTRADA === "admin" ? "Administração" : "Confere Carga"), el("p", {}, window.NE_ENTRADA === "admin" ? "Área da expedição e da diretoria. Entre com seu usuário e senha." : "Entre com o usuário e a senha que a expedição te passou."), avisoBox,
       el("div", { class: "campo" }, el("label", { for: "login-usuario" }, "Usuário"), usuario),
       el("div", { class: "campo" }, el("label", { for: "login-senha" }, "Senha"), senha), btn);
     if (msg) NE.aviso(msg, "erro", avisoBox);

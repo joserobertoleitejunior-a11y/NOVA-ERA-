@@ -43,7 +43,8 @@ Testar com `?qualidade=baixa` (ou `alta`, `media`, `estatica`). Também fixa a a
 ```
 index.html            Site institucional (hero, faixas, destaques, produtos, como funciona, concreto, calculadora,
                       drenagem, galeria, rastreio, FAQ, contato, flutuantes, gaveta de orçamento, foto em tela cheia)
-app.html              App Confere Carga (equipe)   ·   rastreio.html   Página do cliente (link do WhatsApp)
+app.html              App Confere Carga (conferentes)
+admin.html            Painel de administração (só papel admin; entrada no mesmo app.js via NE_ENTRADA)   ·   rastreio.html   Página do cliente (link do WhatsApp)
 assets/js/config.js   ★ Configuração única
 assets/js/dispositivo.js  Nível do aparelho, altura da tela, sem zoom
 assets/js/motion.js   Efeitos de rolagem

@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /app.html
 Disallow: /rastreio.html
+Disallow: /admin.html

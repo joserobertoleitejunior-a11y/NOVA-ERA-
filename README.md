@@ -1,6 +1,7 @@
 # Nova Era · site institucional + Confere Carga
 - `index.html` — site institucional para os clientes (fotos reais da fábrica, produtos, concreto, drenagem, entrega rastreada, contato).
-- `app.html` — app Confere Carga (equipe). `rastreio.html` — página do cliente.
+- `app.html` — app Confere Carga (conferentes, no celular). `admin.html` — **painel de administração** (expedição e diretoria: conferências do dia, funcionários, caminhões, produtos, etiquetas, envio do rastreio). `rastreio.html` — página do cliente.
+- Demonstração sem login: `app.html?demo` e `admin.html?demo`.
 - Visual: Liquid Glass (vidro translúcido) com as cores da Nova Era; versão sólida automática em aparelho sem suporte.
 
 App de **conferência nota × carga** da expedição. Problema definido na reunião de 19/11: sai produto a mais do que está na nota e o estoque fica errado.
