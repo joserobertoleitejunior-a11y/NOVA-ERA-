@@ -12,6 +12,16 @@ Busquei na web e **não achei uma transportadora "Nova Era" sediada em Itapetini
 - Nova Era Transportes — CNPJ 49.883.996/0001-10 (São Paulo/SP); 07.918.499/0001-60 (Uberaba/MG); 12.001.402/0001-90 (Maceió/AL); 54.868.228/0001-27 (Nuporanga/SP).
 - SA Transporte de Logística (fantasia "Nova Era") — CNPJ 58.536.875/0001-92.
 
+### Hipótese atual (print do Google Maps, 19/11)
+Em Itapetininga aparecem **duas empresas juntas** na Rod. Raposo Tavares (~nº 620): **Nova Era Drenagem e Pré-Moldados Ltda** (4,7★/26) e **Nova Era Concreto** (concreto pronto, 4,3★/38), abertas até 18h. Provável grupo com **frota própria** (entrega de pré-moldados/tubos e betoneiras). A "transportadora" seria a logística interna do grupo. **Não confirmado** — validar na reunião.
+
+Se for isso, a carga/descarga tem duas realidades:
+- **Pré-moldados (tubos, galerias, peças pesadas):** carregamento com munck/empilhadeira, controle de quantidade e peso, avaria/trinca, amarração, conferência na obra do cliente.
+- **Concreto usinado (betoneira):** nota/ticket por viagem, horário de saída da usina e de início/fim da descarga (concreto tem prazo de uso), volume em m³, aceite na obra.
+→ O app precisa de **tipos de carga configuráveis** (roteiro de fotos e campos diferentes por tipo).
+
+Perguntas extras: os caminhões/betoneiras são da empresa ou terceirizados? Quantas viagens/dia por produto? Quem confirma a entrega na obra?
+
 ➡️ **Ação:** pedir o CNPJ/razão social na reunião (ou ao funcionário) para consultar Receita Federal e RNTRC/ANTT (frota). Não usar dado de homônimo como se fosse do cliente.
 
 ## 3. Perguntas para a reunião
