@@ -51,3 +51,16 @@ Perguntas extras: quantos caminhões e de que tipo (betoneira, munck, carreta, b
 
 ## 6. Dor pública observada
 Avaliações de clientes citam atraso em entrega de concreto (pedreiros esperando a manhã toda). Argumento forte para cronômetro de entrega + alerta ao gestor.
+
+## 7. Reunião de 19/11 — anotações do caderno (José)
+- **Responsável pela operação:** Suellen (expedição). Outra pessoa da expedição citada (nome ilegível no caderno).
+- **Frota de entrega:** 7 caminhões + 2 trucks com munck.
+- **Entregas/dia:** de 4 a 7.
+- **Maior problema:** **bater a nota fiscal com a carga**. Sai produto a mais que não está na nota (precisam de "contraprova" das notas).
+- **Localização dos caminhões:** já têm **rastreador** → o app NÃO precisa rastrear.
+- **Celular e internet:** sim.
+- **Funcionários:** ~100; **20 a 30** usariam o app.
+- **Sistema atual:** todo o processo operacional fica no sistema deles (José ouviu "Gateway"; o caderno diz "base 44" — confirmar o nome). O **estoque está sendo mal alimentado**.
+- **Querem agora:** algo simples e didático. "Urgente para agora é mais um app", que resolva a divergência produto × nota, com fotos no check-in e cadastro de funcionários.
+- **Objetivos ditos:** saber de fato o que foi carregado (fotos e análise); registrar no momento se a carga está em perfeitas condições (foto do caminhão carregado); registrar quem está fazendo.
+- Perguntas 10 a 17 ficaram sem resposta.
