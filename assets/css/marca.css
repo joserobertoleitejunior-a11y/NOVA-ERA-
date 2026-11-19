@@ -557,3 +557,5 @@ html[data-qualidade="baixa"] { --desfoque: none; --vidro: linear-gradient(180deg
 @media (max-width: 380px) { .logo-nome small { display: none; } }
 .et-marca .logo-ne svg { height: 7mm; } .et-marca .logo-nome b { font-size: 4mm; } .et-marca .logo-nome small { display: none; }
 .logo-cliente .logo-ne { justify-content: center; width: 100%; } .logo-cliente svg { height: 44px; margin: 0; }
+
+.selo-demo .demo-link { color: #fff; font-size: .85rem; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; padding: 6px 4px; }

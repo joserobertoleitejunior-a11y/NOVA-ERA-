@@ -43,7 +43,8 @@
       });
       return x;
     };
-    box.replaceChildren(el("span", {}, "Demonstração com dados de exemplo · nada é gravado"), b("conferente", "Celular do conferente"), b("painel", "Painel da expedição"));
+    box.replaceChildren(el("span", {}, "Demonstração com dados de exemplo · nada é gravado"), b("conferente", "Celular do conferente"), b("painel", "Painel da expedição"),
+      el("a", { href: "index.html", class: "demo-link" }, "Ver o site"), el("a", { href: "rastreio.html?c=00000000-0000-4000-8000-000000000000&demo", class: "demo-link" }, "Tela do cliente"));
   }
 
   async function iniciar() {

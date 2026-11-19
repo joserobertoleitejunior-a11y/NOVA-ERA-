@@ -49,7 +49,13 @@
 
   // Página pública
   NE.iniciarRastreioPublico = async (raiz) => {
-    const token = new URLSearchParams(location.search).get("c") || "";
+    const params = new URLSearchParams(location.search);
+    const token = params.get("c") || "";
+    if (params.has("demo")) { // demonstração: mostra uma entrega de exemplo, sem consultar o banco
+      raiz.replaceChildren(NE.renderRastreio({ numero_nota: "48213", placa: "ABC1D23", conferido_em: new Date(Date.now() - 36e5).toISOString(), entregue_em: null,
+        itens: [{ descricao: "Meio-fio", quantidade: 40 }, { descricao: "Boca de lobo", quantidade: 4 }], foto_carga: null }));
+      return;
+    }
     raiz.replaceChildren(el("div", { class: "esqueleto", style: "height:120px" }), el("div", { class: "esqueleto", style: "height:220px" }));
     if (!/^[0-9a-f-]{36}$/i.test(token)) return falha(raiz, "Link incompleto. Peça um novo link ao seu vendedor.");
     try {
