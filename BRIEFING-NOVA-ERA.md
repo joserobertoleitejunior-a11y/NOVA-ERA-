@@ -53,7 +53,8 @@ Perguntas extras: quantos caminhões e de que tipo (betoneira, munck, carreta, b
 Avaliações de clientes citam atraso em entrega de concreto (pedreiros esperando a manhã toda). Argumento forte para cronômetro de entrega + alerta ao gestor.
 
 ## 7. Reunião de 19/11 — anotações do caderno (José)
-- **Responsável pela operação:** Suellen (expedição). Outra pessoa da expedição citada (nome ilegível no caderno).
+- **Suellen:** diretora, responsável geral por esse processo (quem decide e aprova).
+- **Eduardo:** cuida da expedição (quem confere e despacha as cargas no dia a dia).
 - **Frota de entrega:** 7 caminhões + 2 trucks com munck.
 - **Entregas/dia:** de 4 a 7.
 - **Maior problema:** **bater a nota fiscal com a carga**. Sai produto a mais que não está na nota (precisam de "contraprova" das notas).
