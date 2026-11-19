@@ -165,6 +165,9 @@ textarea.entrada { min-height: 96px; resize: vertical; }
 .etiqueta.ok { background: var(--ok-fundo); color: var(--ok); }
 .etiqueta.alerta { background: var(--alerta-fundo); color: var(--alerta); }
 .botao-camera { position: relative; overflow: hidden; }
+.foto-acoes { display: grid; grid-template-columns: 1.6fr 1fr; gap: 8px; }
+.foto-acoes .btn { padding: 0 10px; font-size: 1.05rem; white-space: nowrap; gap: 8px; }
+@media (max-width: 360px) { .foto-acoes { grid-template-columns: 1fr; } }
 .botao-camera input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .miniaturas { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
 .miniaturas figure { margin: 0; position: relative; }

@@ -197,17 +197,25 @@
 
   function blocoFoto(tipo, titulo, exigencia, dica, varias, redesenhar) {
     const lista = estado.fotos[tipo];
-    const input = el("input", { type: "file", accept: "image/*", capture: "environment", multiple: varias || false, "aria-label": `Tirar foto: ${titulo}` });
-    input.addEventListener("change", async () => {
-      for (const arq of input.files) {
+    const adicionar = async (arquivos) => {
+      for (const arq of arquivos) {
         const blob = await NE.reduzirFoto(arq);
         if (!varias) lista.splice(0).forEach((f) => URL.revokeObjectURL(f.url));
         lista.push({ blob, url: URL.createObjectURL(blob) });
       }
       redesenhar();
-    });
+    };
+    // Duas entradas: câmera direta e galeria (se o aparelho bloquear a câmera, a galeria ainda funciona)
+    const entrada = (comCamera, rotulo) => {
+      const inp = el("input", { type: "file", accept: "image/*", capture: comCamera ? "environment" : false, multiple: varias || false, "aria-label": `${rotulo}: ${titulo}` });
+      inp.addEventListener("change", () => { if (inp.files?.length) adicionar([...inp.files]); });
+      return inp;
+    };
     const feita = lista.length > 0;
     const obrig = exigencia === "Obrigatória";
+    const rotuloCamera = feita ? (varias ? "Mais uma" : "Tirar outra") : "Tirar foto";
+    const exemplo = NE.dados.fotoExemplo && el("button", { type: "button", class: "link-acao", style: "justify-self:center",
+      onclick: async () => adicionar([await NE.dados.fotoExemplo(titulo)]) }, "Usar foto de exemplo (demonstração)");
     return el("div", { class: `foto-bloco${feita ? " feita" : ""}` },
       el("div", { class: "foto-bloco-topo" }, el("strong", {}, titulo),
         el("span", { class: `etiqueta ${feita ? "ok" : obrig ? "obrigatoria" : ""}` }, feita ? `${lista.length} foto${lista.length > 1 ? "s" : ""}` : exigencia)),
@@ -216,8 +224,10 @@
         el("img", { src: f.url, alt: `${titulo} ${i + 1}` }),
         el("button", { type: "button", class: "remover", "aria-label": "Apagar esta foto", html: NE.icone.fechar,
           onclick: () => { URL.revokeObjectURL(f.url); lista.splice(i, 1); redesenhar(); } })))),
-      el("label", { class: `btn ${feita ? "btn-secundario" : obrig ? "btn-azul" : "btn-secundario"} btn-bloco botao-camera` },
-        ic("camera"), feita ? (varias ? "Tirar mais uma" : "Tirar de novo") : "Tirar foto", input));
+      el("div", { class: "foto-acoes" },
+        el("label", { class: `btn ${!feita && obrig ? "btn-azul" : "btn-secundario"} botao-camera` }, ic("camera"), rotuloCamera, entrada(true, "Tirar foto")),
+        el("label", { class: "btn btn-secundario botao-camera" }, ic("galeria"), "Galeria", entrada(false, "Escolher da galeria"))),
+      exemplo);
   }
 
   const linhaResumo = NE.linhaResumo;

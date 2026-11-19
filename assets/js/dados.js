@@ -131,6 +131,12 @@
     let logado = eu;
     return {
       emCache: () => null,
+      // Só na demonstração: gera uma foto de exemplo para testar onde a câmera não abre
+      fotoExemplo: (rotulo) => new Promise((ok) => {
+        const img = new Image();
+        img.onload = () => { const cv = Object.assign(document.createElement("canvas"), { width: img.width, height: img.height }); cv.getContext("2d").drawImage(img, 0, 0); cv.toBlob(ok, "image/jpeg", 0.8); };
+        img.src = fotoExemplo(rotulo, "#c8202a");
+      }),
       entrar: async () => { await espera(); logado = eu; },
       sair: async () => { logado = null; },
       perfil: async () => logado,

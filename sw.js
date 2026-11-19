@@ -1,6 +1,6 @@
 // Service worker: abre o app na hora (mesmo com sinal fraco) usando os arquivos guardados no aparelho.
 // Dados do Supabase NUNCA passam por aqui (sempre ao vivo e protegidos).
-const VERSAO = "confere-carga-20261120a";
+const VERSAO = "confere-carga-20261120b";
 const ESSENCIAIS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (e) => {

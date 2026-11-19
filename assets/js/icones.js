@@ -20,12 +20,13 @@
     usuario: s('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>'),
     chave: s('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'),
     ajuda: s('<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17.5v.01"/>'),
+    galeria: s('<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-9 8"/>'),
     local: s('<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
   };
   // Logotipo provisório inspirado na fachada (círculo NE + letreiro condensado).
   NE.logo = `<svg viewBox="0 0 200 48" role="img" aria-label="Nova Era">
     <circle cx="24" cy="24" r="21" fill="none" stroke="#c8202a" stroke-width="4"/>
-    <text x="24" y="31" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="21" fill="#1d4c9a">NE</text>
-    <text x="54" y="35" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="34" letter-spacing="1" fill="#c8202a">NOVA ERA</text>
+    <text x="24" y="31" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="21" fill="#1d4c9a" textLength="26" lengthAdjust="spacingAndGlyphs">NE</text>
+    <text x="54" y="35" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="34" letter-spacing="1" fill="#c8202a" textLength="142" lengthAdjust="spacingAndGlyphs">NOVA ERA</text>
   </svg>`;
 })();
