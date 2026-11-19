@@ -5,8 +5,8 @@
 ## 0. Contexto do projeto
 
 ```
-Projeto: NOVA ERA — App de check-in de carga/descarga + painel admin
-Cliente: Nova Era (transportadora, Itapetininga-SP) — CNPJ/razão social: A CONFIRMAR na reunião
+Projeto: NOVA ERA — Confere Carga
+Cliente: Nova Era Drenagem e Pré-Moldados (Itapetininga-SP), frota própria. Contato: Eduardo (expedição). Decisão: Suellen (diretora)
 Tipo: "Confere Carga" — conferência nota × carga na expedição (celular) + painel
 Stack: HTML/CSS/JS puro (sem build) + Supabase (Auth, Postgres com RLS, Storage privado, Edge Function). Hospedagem a definir (Netlify descartado)
 Supabase: projeto "Nova Era Transportes" (sa-east-1) — ref kfazxjertfzoeewfsime
@@ -47,7 +47,7 @@ Dados de empresa e de funcionários (CPF, telefone, fotos, localização) são *
 - Mobile-first (uso real: celular, no pátio, com luva/sol). Botões grandes (≥48 px), contraste AA, HTML semântico, `alt`/`aria-label`.
 
 ## 6. Deploy e rollback
-- Deploy via Netlify rodando lint + testes antes. Tag da última versão estável sempre identificável.
+- Deploy (hospedagem a definir) rodando lint + testes antes. Tag da última versão estável sempre identificável.
 - Migrations testadas em branch/staging; nunca alterar schema de produção "na mão".
 
 ## 7. Checklist de início
@@ -56,7 +56,7 @@ Dados de empresa e de funcionários (CPF, telefone, fotos, localização) são *
 - [x] Sem segredo no código
 - [ ] Criar 1º usuário admin (ver README)
 - [ ] Sentry, lint (Biome), testes
-- [ ] Domínio próprio, Netlify, backup testado
+- [ ] Domínio próprio, hospedagem, backup testado
 - [ ] Definir com o cliente: quem é admin, política de retenção de fotos, funções dos funcionários
 
 *Arquivo vivo — atualizar conforme o VIBE CODING PROCESS evoluir.*
