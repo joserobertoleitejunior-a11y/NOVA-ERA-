@@ -2,7 +2,7 @@
 Uso: python3 scripts/gerar-demo.py SAIDA.html"""
 import pathlib, sys
 raiz = pathlib.Path(__file__).resolve().parent.parent
-js = ["icones.js", "ui.js", "dados.js", "conferir.js", "painel.js", "app.js"]
+js = ["icones.js", "ui.js", "dados.js", "assistente.js", "conferir.js", "painel.js", "cadastros.js", "ajuda.js", "app.js"]
 css = (raiz / "assets/css/marca.css").read_text(encoding="utf-8")
 scripts = "\n".join(f"<script>\n{(raiz / 'assets/js' / f).read_text(encoding='utf-8')}\n</script>" for f in js)
 html = f"""<title>Confere Carga Nova Era</title>

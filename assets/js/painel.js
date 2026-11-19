@@ -50,15 +50,19 @@
   };
 
   // ── Painel ────────────────────────────────────────────
-  NE.iniciarPainel = (perfil, raiz, abrirConferencia) => {
+  NE.iniciarPainel = (perfil, raiz, abrirConferencia, abaInicial = "hoje") => {
     const abas = [["hoje", "Conferências"], ["funcionarios", "Funcionários"], ["caminhoes", "Caminhões"], ["produtos", "Produtos"]];
-    let atual = "hoje";
+    let atual = abaInicial;
+    const abrirCadastro = (tipo) => {
+      document.querySelector("main").className = "";
+      NE.cadastros[tipo](raiz, () => { document.querySelector("main").className = "largo"; NE.iniciarPainel(perfil, raiz, abrirConferencia, atual); });
+    };
     const conteudo = el("div", {});
     const barra = el("div", { class: "abas", role: "tablist" });
     const trocar = (id) => {
       atual = id;
       barra.querySelectorAll(".aba").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.id === id)));
-      ABAS[id](conteudo, perfil);
+      ABAS[id](conteudo, abrirCadastro);
     };
     abas.forEach(([id, nome]) => barra.append(el("button", { class: "aba", role: "tab", "data-id": id, "aria-selected": String(id === atual), onclick: () => trocar(id) }, nome)));
     const nova = el("button", { class: "btn btn-principal", type: "button" }, ic("mais"), "Nova conferência");
@@ -106,103 +110,50 @@
       carregar();
     },
 
-    async funcionarios(raiz) {
+    async funcionarios(raiz, abrirCadastro) {
       const lista = el("div", { class: "lista-simples" }, el("div", { class: "esqueleto" }));
-      const f = {
-        nome: el("input", { class: "entrada", id: "f-nome", required: true, autocomplete: "off" }),
-        usuario: el("input", { class: "entrada", id: "f-usuario", required: true, autocomplete: "off", placeholder: "ex.: carlos" }),
-        senha: el("input", { class: "entrada", id: "f-senha", required: true, minlength: "6", type: "text", autocomplete: "new-password" }),
-        funcao: el("select", { class: "entrada", id: "f-funcao" }, Object.entries(NE.funcoes).map(([v, n]) => el("option", { value: v }, n))),
-        papel: el("select", { class: "entrada", id: "f-papel" }, el("option", { value: "funcionario" }, "Só faz conferência"), el("option", { value: "admin" }, "Vê o painel (admin)")),
-      };
-      const btn = el("button", { class: "btn btn-principal", type: "submit" }, ic("mais"), "Cadastrar");
-      const form = el("form", { class: "cartao" },
-        el("h2", { style: "font-size:1.4rem;text-transform:uppercase;margin-bottom:12px" }, "Cadastrar funcionário"),
-        el("div", { class: "form-linha" },
-          campo("Nome", f.nome), campo("Usuário (para entrar)", f.usuario), campo("Senha (mín. 6)", f.senha),
-          campo("Função", f.funcao), campo("Acesso", f.papel), btn));
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        NE.comCarregando(btn, async () => {
-          const usuario = f.usuario.value.trim().toLowerCase();
-          if (!/^[a-z0-9._-]{3,30}$/.test(usuario)) throw new Error("Usuário: use de 3 a 30 letras ou números, sem espaço e sem acento.");
-          if (f.senha.value.length < 6) throw new Error("A senha precisa ter pelo menos 6 caracteres.");
-          await NE.dados.criarFuncionario({ nome: f.nome.value.trim(), usuario, senha: f.senha.value, funcao: f.funcao.value, papel: f.papel.value });
-          NE.aviso(`${f.nome.value.trim()} cadastrado. Entra com o usuário "${usuario}".`, "ok");
-          form.reset(); carregar();
-        });
-      });
-      raiz.replaceChildren(form, lista);
-      const carregar = async () => {
-        try {
-          const pessoas = await NE.dados.funcionarios();
-          lista.replaceChildren(...pessoas.map((p) => el("div", {},
-            el("div", {}, el("strong", {}, p.nome), el("div", { class: "meta" }, `${NE.funcoes[p.funcao] || p.funcao} · usuário: ${p.usuario || "—"}${p.papel === "admin" ? " · vê o painel" : ""}`)),
-            interruptor(p.ativo, "Ativo", (v) => NE.dados.alterarFuncionario(p.id, { ativo: v })))));
-        } catch (e) { NE.aviso(NE.mensagemErro(e), "erro", lista); }
-      };
-      carregar();
+      raiz.replaceChildren(cabecalhoAba("Funcionários", "Quem pode entrar no app.", "Cadastrar funcionário", () => abrirCadastro("funcionario")), lista);
+      try {
+        const pessoas = await NE.dados.funcionarios();
+        lista.replaceChildren(...(pessoas.length ? pessoas.map((p) => el("div", {},
+          el("div", {}, el("strong", {}, p.nome), el("div", { class: "meta" }, `${NE.funcoes[p.funcao] || p.funcao} · usuário: ${p.usuario || "—"}${p.papel === "admin" ? " · painel completo" : ""}`)),
+          interruptor(p.ativo, "Pode entrar", (v) => NE.dados.alterarFuncionario(p.id, { ativo: v }))))
+          : [vazio("Nenhum funcionário ainda.")]));
+      } catch (e) { NE.aviso(NE.mensagemErro(e), "erro", lista); }
     },
 
-    async caminhoes(raiz) {
+    async caminhoes(raiz, abrirCadastro) {
       const lista = el("div", { class: "lista-simples" }, el("div", { class: "esqueleto" }));
-      const placa = el("input", { class: "entrada", id: "v-placa", required: true, maxlength: "8", placeholder: "ABC1D23", autocomplete: "off" });
-      const tipo = el("select", { class: "entrada", id: "v-tipo" }, Object.entries(NE.tiposVeiculo).map(([v, n]) => el("option", { value: v }, n)));
-      const desc = el("input", { class: "entrada", id: "v-desc", placeholder: "Ex.: VW 24.250 vermelho" });
-      const btn = el("button", { class: "btn btn-principal", type: "submit" }, ic("mais"), "Cadastrar");
-      const form = el("form", { class: "cartao" }, el("h2", { style: "font-size:1.4rem;text-transform:uppercase;margin-bottom:12px" }, "Cadastrar caminhão"),
-        el("div", { class: "form-linha" }, campo("Placa", placa), campo("Tipo", tipo), campo("Descrição", desc), btn));
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        NE.comCarregando(btn, async () => {
-          const p = placa.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
-          if (!/^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/.test(p)) throw new Error("Placa inválida. Use o formato ABC1D23 ou ABC1234.");
-          await NE.dados.criarVeiculo({ placa: p, tipo: tipo.value, descricao: desc.value.trim() || null });
-          NE.aviso(`Caminhão ${p} cadastrado.`, "ok"); form.reset(); carregar();
-        });
-      });
-      raiz.replaceChildren(form, lista);
-      const carregar = async () => {
-        try {
-          const vs = await NE.dados.veiculos(true);
-          lista.replaceChildren(...vs.map((v) => el("div", {},
-            el("div", {}, el("span", { class: "placa-br" }, v.placa), el("div", { class: "meta" }, `${NE.tiposVeiculo[v.tipo] || v.tipo}${v.descricao ? " · " + v.descricao : ""}`)),
-            interruptor(v.ativo, "Em uso", (x) => NE.dados.alterarVeiculo(v.id, { ativo: x })))));
-        } catch (e) { NE.aviso(NE.mensagemErro(e), "erro", lista); }
-      };
-      carregar();
+      raiz.replaceChildren(cabecalhoAba("Caminhões", "Aparecem na hora de escolher o caminhão.", "Cadastrar caminhão", () => abrirCadastro("caminhao")), lista);
+      try {
+        const vs = await NE.dados.veiculos(true);
+        lista.replaceChildren(...(vs.length ? vs.map((v) => el("div", {},
+          el("div", {}, el("span", { class: "placa-br" }, v.placa), el("div", { class: "meta" }, `${NE.tiposVeiculo[v.tipo] || v.tipo}${v.descricao ? " · " + v.descricao : ""}`)),
+          interruptor(v.ativo, "Em uso", (x) => NE.dados.alterarVeiculo(v.id, { ativo: x }))))
+          : [vazio("Nenhum caminhão ainda.")]));
+      } catch (e) { NE.aviso(NE.mensagemErro(e), "erro", lista); }
     },
 
-    async produtos(raiz) {
+    async produtos(raiz, abrirCadastro) {
       const lista = el("div", { class: "lista-simples" }, el("div", { class: "esqueleto" }));
-      const nome = el("input", { class: "entrada", id: "p-nome", required: true, placeholder: "Ex.: Caixa 1x1", autocomplete: "off" });
-      const btn = el("button", { class: "btn btn-principal", type: "submit" }, ic("mais"), "Cadastrar");
-      const form = el("form", { class: "cartao" }, el("h2", { style: "font-size:1.4rem;text-transform:uppercase;margin-bottom:6px" }, "Cadastrar produto"),
-        el("p", { style: "margin:0 0 12px;color:var(--texto-suave)" }, "Use o mesmo nome que aparece na nota. Fica mais rápido para quem confere."),
-        el("div", { class: "form-linha" }, campo("Nome do produto", nome), btn));
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        NE.comCarregando(btn, async () => {
-          if (!nome.value.trim()) throw new Error("Digite o nome do produto.");
-          await NE.dados.criarProduto({ nome: nome.value.trim() });
-          NE.aviso("Produto cadastrado.", "ok"); form.reset(); carregar();
-        });
-      });
-      raiz.replaceChildren(form, lista);
-      const carregar = async () => {
-        try {
-          const ps = await NE.dados.produtos(true);
-          lista.replaceChildren(...ps.map((p) => el("div", {}, el("strong", {}, p.nome),
-            interruptor(p.ativo, "Aparece na conferência", (x) => NE.dados.alterarProduto(p.id, { ativo: x })))));
-        } catch (e) { NE.aviso(NE.mensagemErro(e), "erro", lista); }
-      };
-      carregar();
+      raiz.replaceChildren(cabecalhoAba("Produtos", "Use o mesmo nome que aparece na nota.", "Cadastrar produto", () => abrirCadastro("produto")), lista);
+      try {
+        const ps = await NE.dados.produtos(true);
+        lista.replaceChildren(...(ps.length ? ps.map((p) => el("div", {},
+          el("div", {}, el("strong", {}, p.nome), el("div", { class: "meta" }, NE.unidades[p.unidade] || p.unidade)),
+          interruptor(p.ativo, "Aparece na conferência", (x) => NE.dados.alterarProduto(p.id, { ativo: x }))))
+          : [vazio("Nenhum produto ainda.")]));
+      } catch (e) { NE.aviso(NE.mensagemErro(e), "erro", lista); }
     },
   };
 
-  function campo(rotulo, entrada) {
-    return el("div", { class: "campo" }, el("label", { for: entrada.id }, rotulo), entrada);
+  function cabecalhoAba(titulo, dica, rotulo, acao) {
+    return el("div", { class: "cabecalho-aba" },
+      el("div", {}, el("h2", {}, titulo), el("p", {}, dica)),
+      el("button", { type: "button", class: "btn btn-azul", onclick: acao }, ic("mais"), rotulo));
   }
+  const vazio = (t) => el("p", { class: "vazio", style: "flex:1" }, t);
+
   function interruptor(ligado, rotulo, aoMudar) {
     const cb = el("input", { type: "checkbox", checked: !!ligado });
     cb.addEventListener("change", async () => {

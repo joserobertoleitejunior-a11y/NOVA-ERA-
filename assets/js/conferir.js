@@ -13,7 +13,7 @@
   ];
   const MOTIVOS = ["Nota vai ser corrigida", "Peça extra autorizada pelo responsável", "Peça faltando no estoque", "Outro motivo"];
 
-  let estado, passo, perfil, catalogo, aoTerminar;
+  let estado, perfil, catalogo, aoTerminar;
 
   function novoEstado() {
     return { veiculo: null, placa: "", motorista: "", numero_nota: "", itens: [], fotos: { nota: [], carga: [], placa: [], avaria: [] }, motivo: "", observacao: "" };
@@ -21,49 +21,20 @@
 
   NE.iniciarConferencia = async (perfilAtual, raiz, voltarInicio) => {
     perfil = perfilAtual; aoTerminar = voltarInicio;
-    estado = novoEstado(); passo = 0;
+    estado = novoEstado();
     raiz.replaceChildren(el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }));
     try {
       const [veiculos, produtos] = await Promise.all([NE.dados.veiculos(), NE.dados.produtos()]);
       catalogo = { veiculos, produtos };
     } catch (e) { NE.aviso(NE.mensagemErro(e)); catalogo = { veiculos: [], produtos: [] }; }
-    desenhar(raiz);
+    NE.assistente({
+      raiz,
+      passos: PASSOS.map((p) => ({ ...p, tela: TELAS[p.id], validar: VALIDAR[p.id] })),
+      rotuloFinal: "Registrar conferência",
+      aoConcluir: () => registrar(raiz),
+      aoCancelar: () => aoTerminar(),
+    });
   };
-
-  // ── Desenho geral ─────────────────────────────────────
-  function desenhar(raiz) {
-    const p = PASSOS[passo];
-    const avisoBox = el("div", { id: "aviso-passo" });
-    const barra = el("div", { class: "passos-barra", style: `--total:${PASSOS.length}` },
-      PASSOS.map((_, i) => el("i", { class: i < passo ? "feito" : i === passo ? "atual" : "" })));
-    const tela = el("section", { class: "tela", "aria-labelledby": "titulo-passo" },
-      el("div", { class: "passos" },
-        el("div", { class: "passos-rotulo" }, el("span", {}, `Passo ${passo + 1} de ${PASSOS.length}`), el("span", {}, p.titulo)), barra),
-      el("div", { class: "tela-titulo" },
-        el("div", { class: "icone-grande", html: NE.icone[p.icone] }),
-        el("div", {}, el("h1", { id: "titulo-passo" }, p.titulo), el("p", {}, p.ajuda))),
-      avisoBox,
-      TELAS[p.id](() => desenhar(raiz)));
-    tela.addEventListener("click", (e) => { if (e.target.closest("button, label") && !e.target.closest("#aviso-passo")) avisoBox.replaceChildren(); });
-    tela.addEventListener("input", () => avisoBox.replaceChildren());
-
-    const ultimo = passo === PASSOS.length - 1;
-    const btnSeguir = el("button", { class: "btn btn-principal", type: "button", id: "btn-seguir" },
-      ultimo ? "Registrar conferência" : "Continuar", ic(ultimo ? "check" : "seguir"));
-    btnSeguir.addEventListener("click", () => {
-      const erro = VALIDAR[p.id]();
-      if (erro) { NE.aviso(erro, "erro", avisoBox); avisoBox.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
-      if (ultimo) return registrar(btnSeguir, raiz);
-      passo++; desenhar(raiz); window.scrollTo({ top: 0 });
-    });
-    const btnVoltar = el("button", { class: "btn btn-secundario", type: "button", "aria-label": passo === 0 ? "Cancelar conferência" : "Voltar" },
-      ic(passo === 0 ? "fechar" : "voltar"));
-    btnVoltar.addEventListener("click", () => {
-      if (passo === 0) return aoTerminar();
-      passo--; desenhar(raiz); window.scrollTo({ top: 0 });
-    });
-    raiz.replaceChildren(tela, el("div", { class: "acoes" }, el("div", { class: "acoes-dentro" }, btnVoltar, btnSeguir)));
-  }
 
   // ── Telas ─────────────────────────────────────────────
   const TELAS = {
@@ -242,44 +213,40 @@
         ic("camera"), feita ? (varias ? "Tirar mais uma" : "Tirar de novo") : "Tirar foto", input));
   }
 
-  const linhaResumo = (k, v) => el("div", { class: "resumo-linha" }, el("span", {}, k), el("strong", {}, v));
+  const linhaResumo = NE.linhaResumo;
   function textoDiferenca(d) {
     if (d === 0) return "Igual à nota";
     return d > 0 ? `${d} a mais que a nota` : `${-d} a menos que a nota`;
   }
 
   // ── Registro ──────────────────────────────────────────
-  async function registrar(btn, raiz) {
-    await NE.comCarregando(btn, async () => {
-      const pos = await NE.posicao();
-      const fotos = [];
-      for (const [tipo, lista] of Object.entries(estado.fotos)) {
-        for (const f of lista) fotos.push({ tipo, caminho: await NE.dados.enviarFoto(f.blob, perfil.id) });
-      }
-      await NE.dados.registrarConferencia({
-        numero_nota: estado.numero_nota, veiculo_id: estado.veiculo?.id || "", placa: estado.placa, motorista: estado.motorista,
-        motivo_divergencia: estado.motivo, observacao: estado.observacao, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null,
-        itens: estado.itens.map((i) => ({ produto_id: i.produto_id || "", descricao: i.descricao, qtd_nota: Number(i.qtd_nota), qtd_carregada: Number(i.qtd_carregada) })),
-        fotos,
-      });
-      const temDif = estado.itens.some((i) => Number(i.qtd_carregada) !== Number(i.qtd_nota));
-      telaFim(raiz, temDif);
+  async function registrar(raiz) {
+    const pos = await NE.posicao();
+    const fotos = [];
+    for (const [tipo, lista] of Object.entries(estado.fotos)) {
+      for (const f of lista) fotos.push({ tipo, caminho: await NE.dados.enviarFoto(f.blob, perfil.id) });
+    }
+    await NE.dados.registrarConferencia({
+      numero_nota: estado.numero_nota, veiculo_id: estado.veiculo?.id || "", placa: estado.placa, motorista: estado.motorista,
+      motivo_divergencia: estado.motivo, observacao: estado.observacao, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null,
+      itens: estado.itens.map((i) => ({ produto_id: i.produto_id || "", descricao: i.descricao, qtd_nota: Number(i.qtd_nota), qtd_carregada: Number(i.qtd_carregada) })),
+      fotos,
     });
+    telaFim(raiz, estado.itens.some((i) => Number(i.qtd_carregada) !== Number(i.qtd_nota)));
   }
 
   function telaFim(raiz, temDif) {
     Object.values(estado.fotos).flat().forEach((f) => URL.revokeObjectURL(f.url));
-    const nova = el("button", { class: "btn btn-principal btn-bloco btn-gigante", type: "button" }, ic("mais"), "Nova conferência");
-    const inicio = el("button", { class: "btn btn-secundario btn-bloco", type: "button", style: "margin-top:10px" }, "Voltar ao início");
-    nova.addEventListener("click", () => NE.iniciarConferencia(perfil, raiz, aoTerminar));
-    inicio.addEventListener("click", () => aoTerminar());
-    raiz.replaceChildren(el("section", { class: "tela fim" },
-      el("div", { class: `selo ${temDif ? "alerta" : "ok"}`, html: NE.icone[temDif ? "alerta" : "check"] }),
-      el("h1", {}, temDif ? "Registrada com diferença" : "Carga conferida"),
-      el("p", {}, temDif
+    NE.telaFim(raiz, {
+      tipo: temDif ? "alerta" : "ok",
+      titulo: temDif ? "Registrada com diferença" : "Carga conferida",
+      texto: temDif
         ? `Nota ${estado.numero_nota} · ${estado.placa}. A diferença e o motivo ficaram registrados para a expedição.`
-        : `Nota ${estado.numero_nota} · ${estado.placa}. Tudo confere. O caminhão pode sair.`),
-      nova, inicio));
-    window.scrollTo({ top: 0 });
+        : `Nota ${estado.numero_nota} · ${estado.placa}. Tudo confere. O caminhão pode sair.`,
+      botoes: [
+        { rotulo: "Nova conferência", icone: "mais", acao: () => NE.iniciarConferencia(perfil, raiz, aoTerminar) },
+        { rotulo: "Voltar ao início", acao: () => aoTerminar() },
+      ],
+    });
   }
 })();

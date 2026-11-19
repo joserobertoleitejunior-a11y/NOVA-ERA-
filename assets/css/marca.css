@@ -255,6 +255,21 @@ tr.dif td { background: var(--alerta-fundo); }
 .entrar h1 { font-size: 2rem; text-transform: uppercase; font-weight: 800; margin-bottom: 4px; }
 .entrar p { color: var(--texto-suave); margin: 0 0 18px; }
 
+/* Cabeçalho das abas de cadastro */
+.cabecalho-aba { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cabecalho-aba h2 { font-size: 1.5rem; text-transform: uppercase; }
+.cabecalho-aba p { margin: 2px 0 0; color: var(--texto-suave); }
+.btn-ajuda { display: inline-flex; align-items: center; gap: 6px; border: 2px solid var(--linha); background: var(--placa); border-radius: 99px; padding: 6px 12px 6px 8px; font-weight: 700; font-size: .9rem; color: var(--azul); cursor: pointer; }
+.btn-ajuda svg { width: 22px; height: 22px; }
+
+/* Guia "Como usar" */
+.guia-texto { font-size: 1.3rem; line-height: 1.5; margin: 0 0 20px; max-width: 34ch; }
+.guia-exemplo { pointer-events: none; padding: 16px; border-radius: var(--raio); background: var(--placa); border: 2px dashed var(--linha); }
+.guia-exemplo .numeros { margin: 0; }
+.cartao-guia { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; margin-top: 12px; padding: 14px; background: var(--placa); border: 1px solid var(--linha); border-radius: var(--raio); cursor: pointer; font-weight: 600; color: var(--azul); }
+.cartao-guia svg { width: 28px; height: 28px; flex: none; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+@media (max-width: 480px) { .usuario > span { display: none; } }

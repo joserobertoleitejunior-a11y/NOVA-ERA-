@@ -12,7 +12,16 @@
     if (!perfil) return;
     const sair = el("button", { class: "btn btn-leve", type: "button", "aria-label": "Sair" }, ic("sair"));
     sair.addEventListener("click", async () => { await NE.dados.sair(); perfil = null; iniciar(); });
-    area.append(el("span", {}, perfil.nome), NE.modoDemo ? "" : sair);
+    const ajuda = el("button", { class: "btn-ajuda", type: "button", id: "btn-ajuda" }, ic("ajuda"), "Ajuda");
+    ajuda.addEventListener("click", abrirAjuda);
+    area.append(ajuda, el("span", {}, perfil.nome), NE.modoDemo ? "" : sair);
+  }
+
+  const tipoGuia = () => (visao === "painel" ? "painel" : "conferente");
+  const voltarVisao = () => (visao === "painel" ? painel() : inicioConferente());
+  function abrirAjuda() {
+    $("main").className = "";
+    NE.abrirGuia(tipoGuia(), raiz(), voltarVisao);
   }
 
   function seloDemo() {
@@ -34,7 +43,9 @@
     if (!perfil.ativo) { await NE.dados.sair(); perfil = null; topo(); return telaEntrar("Seu acesso está desativado. Fale com a expedição."); }
     visao = perfil.papel === "admin" && !NE.modoDemo ? "painel" : "conferente";
     seloDemo();
-    visao === "painel" ? painel() : inicioConferente();
+    // Primeiro acesso: mostra o passo a passo de como usar (no modo demonstração, só pelo botão Ajuda)
+    if (!NE.modoDemo && !NE.guiaJaVisto(tipoGuia())) return abrirAjuda();
+    voltarVisao();
   }
 
   function telaEntrar(msg) {
@@ -66,6 +77,7 @@
       el("h1", {}, `Olá, ${primeiroNome}`),
       el("p", {}, "Antes do caminhão sair, confira a carga com a nota. Leva uns 2 minutos."),
       nova,
+      el("button", { type: "button", class: "cartao-guia", onclick: abrirAjuda }, ic("ajuda"), "Como usar o app (1 minuto)"),
       el("h2", { class: "secao-titulo" }, "Minhas conferências de hoje", el("small", {}, new Date().toLocaleDateString("pt-BR"))),
       lista, detalhe));
     try {
