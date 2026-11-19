@@ -29,7 +29,7 @@
   // Logotipo provisório inspirado na fachada (círculo NE + letreiro condensado).
   NE.logo = `<svg viewBox="0 0 200 48" role="img" aria-label="Nova Era">
     <circle cx="24" cy="24" r="21" fill="none" stroke="#c8202a" stroke-width="4"/>
-    <text x="24" y="31" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="21" fill="#1d4c9a" textLength="26" lengthAdjust="spacingAndGlyphs">NE</text>
-    <text x="54" y="35" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="34" letter-spacing="1" fill="#c8202a" textLength="142" lengthAdjust="spacingAndGlyphs">NOVA ERA</text>
+    <text x="24" y="31" text-anchor="middle" font-family="Archivo NE, Arial Narrow, sans-serif" style="font-stretch:75%" font-weight="800" font-size="21" fill="#1d4c9a" textLength="26" lengthAdjust="spacingAndGlyphs">NE</text>
+    <text x="54" y="35" font-family="Archivo NE, Arial Narrow, sans-serif" style="font-stretch:75%" font-weight="800" font-size="34" letter-spacing="1" fill="#c8202a" textLength="142" lengthAdjust="spacingAndGlyphs">NOVA ERA</text>
   </svg>`;
 })();

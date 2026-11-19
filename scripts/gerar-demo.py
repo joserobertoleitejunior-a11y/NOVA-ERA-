@@ -2,12 +2,14 @@
 Uso: python3 scripts/gerar-demo.py SAIDA.html"""
 import pathlib, sys
 raiz = pathlib.Path(__file__).resolve().parent.parent
-js = ["icones.js", "ui.js", "dados.js", "assistente.js", "nfe.js", "conferir.js", "janela.js", "rastreio.js", "etiquetas.js", "tour.js", "painel.js", "cadastros.js", "ajuda.js", "app.js"]
+js = ["dispositivo.js", "icones.js", "ui.js", "dados.js", "assistente.js", "nfe.js", "conferir.js", "janela.js", "rastreio.js", "etiquetas.js", "tour.js", "painel.js", "cadastros.js", "ajuda.js", "app.js"]
+import base64
 css = (raiz / "assets/css/marca.css").read_text(encoding="utf-8")
+fonte = base64.b64encode((raiz / "assets/fonts/archivo-latin.woff2").read_bytes()).decode()
+css = css.replace('url("../fonts/archivo-latin.woff2")', f'url("data:font/woff2;base64,{fonte}")')
 scripts = "\n".join(f"<script>\n{(raiz / 'assets/js' / f).read_text(encoding='utf-8')}\n</script>" for f in js)
 html = f"""<title>Confere Carga Nova Era</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap">
 <style>
 {css}
 </style>
