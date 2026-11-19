@@ -128,12 +128,11 @@
     { nome: "Muros pré-moldados", texto: "Muros e fechamentos para ferrovias, indústrias e loteamentos.", d: des('<path d="M4 20h56v30H4z"/><path d="M18 20v30M32 20v30M46 20v30"/><path d="M4 50h56"/>') },
     { nome: "Dissipadores e alas", texto: "Saída de bueiros e proteção.", d: des('<path d="M8 48l14-28h20l14 28z"/><path d="M22 48l6-12h8l6 12"/>') },
   ];
-  $("#grade-produtos").append(...PRODUTOS.map((p) => el("article", { class: "produto vidro", "data-tilt": true },
+  $("#grade-produtos").append(...PRODUTOS.map((p) => el("article", { class: "produto" },
     el("span", { class: "produto-desenho", html: p.d }),
-    el("h3", {}, p.nome), el("p", {}, p.texto),
-    el("div", { class: "produto-acoes" },
-      el("button", { type: "button", class: "btn btn-principal", onclick: () => adicionar(p.nome, 1, "peças") }, ic("mais"), "Adicionar"),
-      el("button", { type: "button", class: "link-acao", onclick: () => { adicionar(p.nome, 1, "peças"); abrirLista(); } }, "Orçar agora")))));
+    el("div", { class: "produto-texto" }, el("h3", {}, p.nome), el("p", {}, p.texto)),
+    el("button", { type: "button", class: "produto-add", "aria-label": `Adicionar ${p.nome} à lista de orçamento`, onclick: () => adicionar(p.nome, 1, "peças") },
+      ic("mais"), el("span", {}, "Adicionar")))));
 
   // ── Calculadora de concreto (Humberto) ───────────────
   const num = (id) => Number(String($(id).value).replace(",", ".")) || 0;
@@ -147,7 +146,7 @@
     $("#calc-m3").textContent = m3 > 0 ? `${fmt(m3)} m³` : "—";
     $("#calc-detalhe").textContent = m3 > 0 ? `${fmt(base)} m³ + 5% de folga` : "Preencha as medidas";
     $("#calc-viagens").textContent = m3 > 0 ? String(Math.ceil(m3 / cap)) : "—";
-    $("#calc-cap").textContent = `betoneira de até ${cap} m³`;
+    $("#calc-cap").textContent = `viagem de até ${cap} m³`;
   }
   $$("#form-calc input").forEach((i) => i.addEventListener("input", calcular));
   $("#form-calc").addEventListener("submit", (e) => {
@@ -238,7 +237,7 @@
     const resposta = el("div", { class: "faq-resposta", id, role: "region" }, el("p", {}, r));
     const botao = el("button", { type: "button", class: "faq-pergunta", "aria-expanded": "false", "aria-controls": id }, el("span", {}, p), el("span", { class: "faq-sinal", html: NE.icone.mais }));
     botao.addEventListener("click", () => { const aberto = botao.getAttribute("aria-expanded") === "true"; botao.setAttribute("aria-expanded", String(!aberto)); });
-    return el("div", { class: "faq-item vidro" }, botao, resposta);
+    return el("div", { class: "faq-item" }, botao, resposta);
   }));
 
   // ── Rastreio por link ───────────────────────────────
@@ -253,6 +252,12 @@
     try { await navigator.clipboard.writeText(texto); NE.aviso(msg, "ok"); }
     catch { NE.aviso("Não deu para copiar neste aparelho.", "alerta"); }
   }
+
+  // Botão flutuante da lista só aparece depois da primeira tela (tela inicial limpa)
+  const hero = $("#inicio");
+  if (hero && "IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => document.body.classList.toggle("passou-hero", !e.isIntersecting), { threshold: 0.15 }).observe(hero);
+  } else document.body.classList.add("passou-hero");
 
   // Efeitos de rolagem depois que o conteúdo dinâmico existe
   window.NEMotion?.iniciar();
