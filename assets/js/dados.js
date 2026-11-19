@@ -15,21 +15,37 @@
     const sb = window.supabase.createClient(C.supabaseUrl, C.supabaseAnonKey);
     const ok = ({ data, error }) => { if (error) throw new Error(error.message); return data; };
     const cacheUrl = new Map();
+    // Memória local: as telas abrem na hora com o último dado e atualizam quando a internet responde.
+    const mem = new Map();
+    const cache = {
+      ler(k) { if (mem.has(k)) return mem.get(k); const v = NE.memoria.ler(`ne-c-${k}`); if (v) mem.set(k, v); return v; },
+      gravar(k, v) { mem.set(k, v); NE.memoria.gravar(`ne-c-${k}`, v); return v; },
+      limpar() { mem.clear(); try { Object.keys(localStorage).filter((k) => k.startsWith("ne-c-")).forEach((k) => localStorage.removeItem(k)); } catch { /* ok */ } },
+    };
+    const buscarPerfil = async (id) => {
+      const { data } = await sb.from("perfis").select("*").eq("id", id).maybeSingle();
+      if (data) cache.gravar("perfil", data);
+      return data;
+    };
     return {
+      emCache: (k) => cache.ler(k),
       async entrar(usuario, senha) {
         const { error } = await sb.auth.signInWithPassword({ email: emailDe(usuario), password: senha });
         if (error) throw new Error("Usuário ou senha incorretos.");
       },
-      sair: () => sb.auth.signOut(),
+      async sair() { cache.limpar(); await sb.auth.signOut(); },
       async perfil() {
-        const { data: { session } } = await sb.auth.getSession();
+        const { data: { session } } = await sb.auth.getSession(); // lê do aparelho, sem esperar a rede
         if (!session) return null;
-        const { data } = await sb.from("perfis").select("*").eq("id", session.user.id).maybeSingle();
-        return data;
+        const guardado = cache.ler("perfil");
+        if (guardado?.id === session.user.id) { buscarPerfil(session.user.id).catch(() => {}); return guardado; }
+        return buscarPerfil(session.user.id);
       },
-      veiculos: async (todos = false) => ok(await (todos ? sb.from("veiculos").select("*") : sb.from("veiculos").select("*").eq("ativo", true)).order("placa")),
-      produtos: async (todos = false) => ok(await (todos ? sb.from("produtos").select("*") : sb.from("produtos").select("*").eq("ativo", true)).order("nome")),
-      funcionarios: async () => ok(await sb.from("perfis").select("*").order("nome")),
+      veiculos: async (todos = false) => cache.gravar(todos ? "veiculos-todos" : "veiculos",
+        ok(await (todos ? sb.from("veiculos").select("*") : sb.from("veiculos").select("*").eq("ativo", true)).order("placa"))),
+      produtos: async (todos = false) => cache.gravar(todos ? "produtos-todos" : "produtos",
+        ok(await (todos ? sb.from("produtos").select("*") : sb.from("produtos").select("*").eq("ativo", true)).order("nome"))),
+      funcionarios: async () => cache.gravar("funcionarios", ok(await sb.from("perfis").select("*").order("nome"))),
       async enviarFoto(blob, idPerfil) {
         const caminho = `${idPerfil}/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.jpg`;
         ok(await sb.storage.from(C.bucketFotos).upload(caminho, blob, { contentType: "image/jpeg", upsert: false }));
@@ -43,7 +59,7 @@
           .gte("criado_em", ini.toISOString()).lt("criado_em", fim.toISOString())
           .order("criado_em", { ascending: false });
         if (somenteMinhas) q = q.eq("conferente_id", idPerfil);
-        return ok(await q);
+        return cache.gravar(`conf-${dia}-${somenteMinhas ? "minhas" : "todas"}`, ok(await q));
       },
       async urlFoto(caminho) {
         const c = cacheUrl.get(caminho);
@@ -111,9 +127,10 @@
       exemplo(95, "48207", veiculos[7], funcionarios[2], [{ descricao: "Caixa para galeria", qtd_nota: 6, qtd_carregada: 8 }], "Peças extras autorizadas, nota vai ser corrigida"),
       exemplo(160, "48199", veiculos[3], funcionarios[1], [{ descricao: "Tubo de concreto", qtd_nota: 12, qtd_carregada: 12 }, { descricao: "Aduela", qtd_nota: 2, qtd_carregada: 2 }]),
     ];
-    const espera = (ms = 350) => new Promise((r) => setTimeout(r, ms));
+    const espera = () => Promise.resolve(); // demonstração: resposta imediata
     let logado = eu;
     return {
+      emCache: () => null,
       entrar: async () => { await espera(); logado = eu; },
       sair: async () => { logado = null; },
       perfil: async () => logado,

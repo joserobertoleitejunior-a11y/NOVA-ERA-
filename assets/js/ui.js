@@ -3,6 +3,10 @@
   const NE = window.NE;
   NE.$ = (sel, raiz = document) => raiz.querySelector(sel);
 
+  // Bloqueia zoom de pinça no iPhone (o Safari ignora user-scalable=no) e o zoom de toque duplo
+  ["gesturestart", "gesturechange"].forEach((ev) => document.addEventListener(ev, (e) => e.preventDefault(), { passive: false }));
+  document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
   NE.el = (tag, attrs = {}, ...filhos) => {
     const n = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) {

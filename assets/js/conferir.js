@@ -1,7 +1,7 @@
 // Conferência passo a passo (tela do conferente). Uma decisão por tela, texto grande, botão principal embaixo.
 (() => {
   const NE = window.NE;
-  const { el, ic, $ } = NE;
+  const { el, ic } = NE;
 
   const PASSOS = [
     { id: "caminhao", titulo: "Caminhão", icone: "caminhao", ajuda: "Toque no caminhão que vai sair." },
@@ -22,11 +22,18 @@
   NE.iniciarConferencia = async (perfilAtual, raiz, voltarInicio) => {
     perfil = perfilAtual; aoTerminar = voltarInicio;
     estado = novoEstado();
-    raiz.replaceChildren(el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }));
-    try {
-      const [veiculos, produtos] = await Promise.all([NE.dados.veiculos(), NE.dados.produtos()]);
-      catalogo = { veiculos, produtos };
-    } catch (e) { NE.aviso(NE.mensagemErro(e)); catalogo = { veiculos: [], produtos: [] }; }
+    // Abre na hora com a lista guardada no aparelho; atualiza em segundo plano
+    const cv = NE.dados.emCache("veiculos"), cp = NE.dados.emCache("produtos");
+    if (cv && cp) {
+      catalogo = { veiculos: cv, produtos: cp };
+      NE.dados.veiculos().catch(() => {}); NE.dados.produtos().catch(() => {});
+    } else {
+      raiz.replaceChildren(el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }));
+      try {
+        const [veiculos, produtos] = await Promise.all([NE.dados.veiculos(), NE.dados.produtos()]);
+        catalogo = { veiculos, produtos };
+      } catch (e) { NE.aviso(NE.mensagemErro(e)); catalogo = { veiculos: [], produtos: [] }; }
+    }
     NE.assistente({
       raiz,
       passos: PASSOS.map((p) => ({ ...p, tela: TELAS[p.id], validar: VALIDAR[p.id] })),
@@ -179,7 +186,7 @@
 
   // ── Peças reutilizáveis ───────────────────────────────
   function contador(valor, aoMudar, idCampo) {
-    const inp = el("input", { type: "number", inputmode: "numeric", min: "0", id: idCampo, value: String(valor), "aria-label": "Quantidade" });
+    const inp = el("input", { type: "text", inputmode: "numeric", pattern: "[0-9]*", autocomplete: "off", id: idCampo, value: String(valor), "aria-label": "Quantidade" });
     const mudar = (v) => { const n = Math.max(0, Math.round(Number(v) || 0)); inp.value = String(n); aoMudar(n); };
     inp.addEventListener("change", () => mudar(inp.value));
     return el("div", { class: "contador" },
