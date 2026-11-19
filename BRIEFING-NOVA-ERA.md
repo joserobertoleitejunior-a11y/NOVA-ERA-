@@ -13,14 +13,14 @@ Busquei na web e **não achei uma transportadora "Nova Era" sediada em Itapetini
 - SA Transporte de Logística (fantasia "Nova Era") — CNPJ 58.536.875/0001-92.
 
 ### Hipótese atual (print do Google Maps, 19/11)
-Em Itapetininga aparecem **duas empresas juntas** na Rod. Raposo Tavares (~nº 620): **Nova Era Drenagem e Pré-Moldados Ltda** (4,7★/26) e **Nova Era Concreto** (concreto pronto, 4,3★/38), abertas até 18h. Provável grupo com **frota própria** (entrega de pré-moldados/tubos e betoneiras). A "transportadora" seria a logística interna do grupo. **Não confirmado** — validar na reunião.
+Em Itapetininga aparecem **duas empresas juntas** na Rod. Raposo Tavares (~nº 620): **Nova Era Drenagem e Pré-Moldados Ltda** (4,7★/26) e **Nova Era Concreto** (concreto pronto, 4,3★/38), abertas até 18h. **Frota própria CONFIRMADA pelo José** (muitos caminhões). Empresa: fabricante de pré-moldados + concreto usinado + serviços de drenagem (site novaeradrenagem.com.br, Rod. Raposo Tavares km 167). O CNPJ exato ainda precisa ser confirmado; a logística é interna do grupo.
 
 Se for isso, a carga/descarga tem duas realidades:
 - **Pré-moldados (tubos, galerias, peças pesadas):** carregamento com munck/empilhadeira, controle de quantidade e peso, avaria/trinca, amarração, conferência na obra do cliente.
 - **Concreto usinado (betoneira):** nota/ticket por viagem, horário de saída da usina e de início/fim da descarga (concreto tem prazo de uso), volume em m³, aceite na obra.
 → O app precisa de **tipos de carga configuráveis** (roteiro de fotos e campos diferentes por tipo).
 
-Perguntas extras: os caminhões/betoneiras são da empresa ou terceirizados? Quantas viagens/dia por produto? Quem confirma a entrega na obra?
+Perguntas extras: quantos caminhões e de que tipo (betoneira, munck, carreta, basculante)? Quantas viagens/dia por produto? Há motoristas fixos por caminhão? Quem confirma a entrega na obra?
 
 ➡️ **Ação:** pedir o CNPJ/razão social na reunião (ou ao funcionário) para consultar Receita Federal e RNTRC/ANTT (frota). Não usar dado de homônimo como se fosse do cliente.
 
@@ -48,3 +48,6 @@ Perguntas extras: os caminhões/betoneiras são da empresa ou terceirizados? Qua
 ## 5. Estado técnico (feito nesta sessão)
 - Supabase "Nova Era Transportes" (sa-east-1) criado, schema + RLS + bucket privado `fotos-cargas` aplicados; advisor de segurança sem pendência crítica.
 - Esqueleto do app (login + check-in com foto) e painel admin neste repositório.
+
+## 6. Dor pública observada
+Avaliações de clientes citam atraso em entrega de concreto (pedreiros esperando a manhã toda). Argumento forte para cronômetro de entrega + alerta ao gestor.
