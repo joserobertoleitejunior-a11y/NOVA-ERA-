@@ -2,42 +2,162 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#c8202a">
-<meta name="robots" content="noindex, nofollow">
-<title>Confere Carga · Nova Era</title>
-<link rel="manifest" href="manifest.json">
+<title>Nova Era · Pré-moldados e concreto em Itapetininga</title>
+<meta name="description" content="Pré-moldados de concreto, concreto usinado e serviços de drenagem em Itapetininga e região. Frota própria, carga conferida com a nota e rastreio da entrega pelo WhatsApp.">
+<link rel="canonical" href="./">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Nova Era · Pré-moldados e concreto em Itapetininga">
+<meta property="og:description" content="Pré-moldados, concreto usinado e drenagem com frota própria e entrega rastreada.">
+<!-- og:image precisa de endereço completo: trocar quando o domínio for definido -->
+<meta property="og:image" content="assets/img/site/fabrica-silos-1600.webp">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap">
-<link rel="preload" href="assets/js/app.js?v=20261120d" as="script">
-<link rel="stylesheet" href="assets/css/marca.css?v=20261120d">
+<link rel="preload" as="image" href="assets/img/site/fabrica-silos-1600.webp" imagesrcset="assets/img/site/fabrica-silos-900.webp 900w, assets/img/site/fabrica-silos-1600.webp 1600w" imagesizes="100vw">
+<link rel="stylesheet" href="assets/css/marca.css?v=20261120e">
+<link rel="stylesheet" href="assets/css/site.css?v=20261120e">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HomeAndConstructionBusiness",
+  "name": "Nova Era Drenagem e Pré-Moldados",
+  "description": "Pré-moldados de concreto, concreto usinado e serviços de drenagem.",
+  "telephone": "+55-15-3273-1159",
+  "address": { "@type": "PostalAddress", "streetAddress": "Rodovia Raposo Tavares (SP-270), km 167", "addressLocality": "Itapetininga", "addressRegion": "SP", "addressCountry": "BR" },
+  "areaServed": "Itapetininga e região",
+  "image": "assets/img/site/fabrica-silos-1600.webp"
+}
+</script>
 </head>
-<body>
-<header class="topo">
-  <div class="topo-linha">
-    <span class="logo"><span id="logo"></span><small>Confere Carga</small></span>
-    <div class="usuario" id="usuario"></div>
+<body class="site">
+<header class="site-topo" id="topo">
+  <div class="site-topo-dentro">
+    <a class="logo" href="#inicio" aria-label="Nova Era, início"><span id="logo"></span></a>
+    <nav class="site-menu" aria-label="Menu">
+      <a class="menu-item" href="#produtos">Produtos</a>
+      <a class="menu-item" href="#concreto">Concreto</a>
+      <a class="menu-item" href="#drenagem">Drenagem</a>
+      <a class="menu-item" href="#entrega">Entrega</a>
+      <a class="menu-item" href="#contato">Contato</a>
+    </nav>
+    <a class="btn btn-principal btn-topo" href="#contato">Orçamento</a>
   </div>
-  <div class="faixas" aria-hidden="true"></div>
 </header>
-<div class="selo-demo" id="selo-demo" hidden></div>
-<main><div id="conteudo"></div></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/js/config.js?v=20261120d"></script>
-<script src="assets/js/icones.js?v=20261120d"></script>
-<script src="assets/js/ui.js?v=20261120d"></script>
-<script src="assets/js/dados.js?v=20261120d"></script>
-<script src="assets/js/assistente.js?v=20261120d"></script>
-<script src="assets/js/nfe.js?v=20261120d"></script>
-<script src="assets/js/conferir.js?v=20261120d"></script>
-<script src="assets/js/janela.js?v=20261120d"></script>
-<script src="assets/js/rastreio.js?v=20261120d"></script>
-<script src="assets/js/etiquetas.js?v=20261120d"></script>
-<script src="assets/js/tour.js?v=20261120d"></script>
-<script src="assets/js/painel.js?v=20261120d"></script>
-<script src="assets/js/cadastros.js?v=20261120d"></script>
-<script src="assets/js/ajuda.js?v=20261120d"></script>
-<script src="assets/js/app.js?v=20261120d"></script>
+
+<main class="site-main">
+  <section class="hero" id="inicio">
+    <picture class="hero-foto">
+      <source srcset="assets/img/site/fabrica-silos-900.webp 900w, assets/img/site/fabrica-silos-1600.webp 1600w" sizes="100vw" type="image/webp">
+      <img src="assets/img/site/fabrica-silos-1600.webp" alt="Fábrica da Nova Era em Itapetininga, com os silos de concreto e o galpão vermelho" fetchpriority="high">
+    </picture>
+    <div class="hero-vidro vidro">
+      <span class="sobretitulo">Itapetininga · SP · Rodovia Raposo Tavares</span>
+      <h1>Pré-moldados e concreto com entrega própria</h1>
+      <p>Fabricamos peças de concreto para drenagem e obra, entregamos com a nossa frota e conferimos cada carga com a nota antes de sair.</p>
+      <div class="hero-botoes">
+        <a class="btn btn-principal" href="#contato">Pedir orçamento</a>
+        <a class="btn btn-secundario" href="#produtos">Ver produtos</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="faixa-destaques" aria-label="Destaques">
+    <div class="destaque vidro"><strong>Fábrica própria</strong><span>Peças feitas aqui em Itapetininga</span></div>
+    <div class="destaque vidro"><strong>Frota própria</strong><span>Caminhões com munck e betoneiras</span></div>
+    <div class="destaque vidro"><strong>Carga conferida</strong><span>Cada peça bate com a sua nota</span></div>
+    <div class="destaque vidro"><strong>Entrega rastreada</strong><span>Link no WhatsApp para acompanhar</span></div>
+  </section>
+
+  <section class="secao" id="produtos">
+    <div class="secao-cabeca">
+      <span class="sobretitulo">Pré-moldados</span>
+      <h2>Peças de concreto para drenagem e obra</h2>
+      <p>Produção em série e sob medida. Fale com a equipe para medidas, quantidades e prazo.</p>
+    </div>
+    <div class="grade-produtos" id="grade-produtos"></div>
+  </section>
+
+  <section class="secao duas-colunas" id="concreto">
+    <figure class="foto-vidro">
+      <img src="assets/img/site/patio-betoneira-900.webp" srcset="assets/img/site/patio-betoneira-900.webp 900w, assets/img/site/patio-betoneira-1600.webp 1600w" sizes="(min-width: 900px) 50vw, 100vw" alt="Betoneira da Nova Era no pátio, ao lado das peças pré-moldadas" loading="lazy" decoding="async">
+    </figure>
+    <div class="texto-vidro vidro">
+      <span class="sobretitulo">Concreto usinado</span>
+      <h2>Concreto pronto na sua obra</h2>
+      <p>Usina própria e betoneiras da casa para entregar no horário combinado.</p>
+      <ul class="lista-check">
+        <li>Concreto usinado para fundações, lajes e pisos</li>
+        <li>Aluguel de bomba de concreto</li>
+        <li>Pisos polidos</li>
+      </ul>
+      <a class="btn btn-azul" href="#contato">Programar uma concretagem</a>
+    </div>
+  </section>
+
+  <section class="secao" id="drenagem">
+    <div class="secao-cabeca">
+      <span class="sobretitulo">Serviços</span>
+      <h2>Drenagem completa, da peça à instalação</h2>
+    </div>
+    <div class="grade-servicos">
+      <div class="servico vidro"><strong>Galerias</strong><span>Canalização com peças pré-moldadas</span></div>
+      <div class="servico vidro"><strong>Bueiros e tubulações</strong><span>Concreto armado e tubos de concreto</span></div>
+      <div class="servico vidro"><strong>Guias e sarjetas</strong><span>Meio-fio e acabamento de rua</span></div>
+      <div class="servico vidro"><strong>Bocas de lobo</strong><span>Instalação e caixas de inspeção</span></div>
+      <div class="servico vidro"><strong>Desassoreamento</strong><span>Rios, córregos e lagoas</span></div>
+    </div>
+  </section>
+
+  <section class="secao duas-colunas invertida" id="entrega">
+    <figure class="foto-vidro">
+      <img src="assets/img/site/frota-munck-900.webp" srcset="assets/img/site/frota-munck-900.webp 900w, assets/img/site/frota-munck-1600.webp 1600w" sizes="(min-width: 900px) 50vw, 100vw" alt="Caminhões da Nova Era com guindaste munck em frente ao galpão" loading="lazy" decoding="async">
+    </figure>
+    <div class="texto-vidro vidro">
+      <span class="sobretitulo">Entrega com frota própria</span>
+      <h2>Você acompanha a sua carga</h2>
+      <p>Antes de sair do pátio, cada carga é conferida peça por peça com a nota fiscal e fotografada. Você recebe um link no WhatsApp para acompanhar.</p>
+      <form class="rastrear" id="form-rastrear" novalidate>
+        <label for="campo-rastreio">Recebeu o link de rastreio? Cole aqui:</label>
+        <div class="rastrear-linha">
+          <input class="entrada" id="campo-rastreio" inputmode="url" autocomplete="off" placeholder="Cole o link que chegou no WhatsApp">
+          <button class="btn btn-principal" type="submit">Acompanhar</button>
+        </div>
+        <div id="aviso-rastreio" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+
+  <section class="secao" id="contato">
+    <div class="contato vidro">
+      <div class="contato-texto">
+        <span class="sobretitulo">Orçamento e atendimento</span>
+        <h2>Fale com a Nova Era</h2>
+        <p class="endereco">Rodovia Raposo Tavares (SP-270), km 167<br>Itapetininga · SP</p>
+        <p class="telefone-grande" id="telefone">(15) 3273-1159</p>
+        <p class="suave">Atendimento comercial até as 18h.</p>
+      </div>
+      <div class="contato-botoes">
+        <a class="btn btn-principal btn-bloco" href="tel:+551532731159">Ligar agora</a>
+        <button class="btn btn-secundario btn-bloco" type="button" id="copiar-telefone">Copiar telefone</button>
+        <a class="btn btn-azul btn-bloco" href="https://www.google.com/maps/search/?api=1&query=Nova+Era+Drenagem+e+Pr%C3%A9-Moldados+Itapetininga" target="_blank" rel="noopener">Como chegar</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-rodape">
+  <div class="site-rodape-dentro">
+    <span>© <span id="ano"></span> Nova Era Drenagem e Pré-Moldados · Itapetininga/SP</span>
+    <a class="link-acao" href="app.html">Área da equipe</a>
+  </div>
+</footer>
+
+<script src="assets/js/config.js?v=20261120e"></script>
+<script src="assets/js/icones.js?v=20261120e"></script>
+<script src="assets/js/ui.js?v=20261120e"></script>
+<script src="assets/js/site.js?v=20261120e"></script>
 </body>
 </html>

@@ -1,4 +1,8 @@
-# Confere Carga · Nova Era
+# Nova Era · site institucional + Confere Carga
+- `index.html` — site institucional para os clientes (fotos reais da fábrica, produtos, concreto, drenagem, entrega rastreada, contato).
+- `app.html` — app Confere Carga (equipe). `rastreio.html` — página do cliente.
+- Visual: Liquid Glass (vidro translúcido) com as cores da Nova Era; versão sólida automática em aparelho sem suporte.
+
 App de **conferência nota × carga** da expedição. Problema definido na reunião de 19/11: sai produto a mais do que está na nota e o estoque fica errado.
 
 ## Como funciona
@@ -19,7 +23,7 @@ App de **conferência nota × carga** da expedição. Problema definido na reuni
 **Prova:** o registro (itens e fotos) não pode ser alterado nem apagado por ninguém (sem políticas de UPDATE/DELETE). Fotos em bucket privado com link temporário.
 
 ## Modo demonstração
-`index.html?demo` roda com dados de exemplo, sem login e sem gravar nada.
+`app.html?demo` roda com dados de exemplo, sem login e sem gravar nada.
 Gerar o HTML único da demonstração: `python3 scripts/gerar-demo.py saida.html`.
 
 ## Rodar local

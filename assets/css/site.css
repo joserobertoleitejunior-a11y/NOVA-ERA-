@@ -1,0 +1,102 @@
+/* Site institucional Nova Era — Liquid Glass sobre fotos reais da fábrica.
+   Layout: foto da fábrica em tela cheia no topo com painel de vidro; seções em vidro
+   alternando foto e texto; contato no fim. Usa os tokens e botões de marca.css. */
+.site { font-size: 18px; }
+.vidro {
+  background: var(--vidro);
+  -webkit-backdrop-filter: var(--desfoque); backdrop-filter: var(--desfoque);
+  border: 1px solid var(--borda-vidro);
+  box-shadow: var(--sombra-vidro);
+  border-radius: 26px;
+}
+.sobretitulo { display: inline-block; font-family: var(--fonte-marca); font-weight: 700; font-size: .9rem; letter-spacing: .14em; text-transform: uppercase; color: var(--vermelho); }
+
+/* Topo flutuante de vidro */
+.site-topo { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; z-index: 30; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
+.site-topo-dentro { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 14px; padding: 8px 8px 8px 16px; border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255,255,255,.62), rgba(255,255,255,.40)); -webkit-backdrop-filter: var(--desfoque); backdrop-filter: var(--desfoque);
+  border: 1px solid rgba(255,255,255,.7); box-shadow: var(--sombra-vidro); transition: background-color .2s, box-shadow .2s; }
+.site-topo.rolou .site-topo-dentro { background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.70)); }
+.site-topo .logo svg { height: 34px; }
+.site-menu { display: flex; gap: 4px; margin-left: auto; }
+.menu-item { font-family: var(--fonte-marca); font-weight: 700; font-size: 1.05rem; text-transform: uppercase; letter-spacing: .04em; color: var(--texto); text-decoration: none;
+  padding: 10px 14px; border-radius: 14px; border: 1px solid transparent; transition: background-color .15s; }
+.menu-item:hover, .menu-item:focus-visible { background: rgba(255,255,255,.7); border-color: rgba(255,255,255,.8); }
+.btn-topo { min-height: 46px; font-size: 1.05rem; padding: 0 18px; }
+@media (max-width: 860px) { .site-menu { display: none; } .btn-topo { margin-left: auto; } }
+
+/* Hero */
+.hero { position: relative; min-height: min(92vh, 860px); display: grid; align-items: end; padding: 120px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px)); overflow: hidden; }
+.hero-foto, .hero-foto img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero-foto img { object-fit: cover; object-position: 50% 62%; max-width: none; }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20, 30, 60, .05) 30%, rgba(20, 30, 60, .35) 100%); pointer-events: none; }
+.hero-vidro { position: relative; z-index: 1; max-width: 640px; padding: clamp(22px, 4vw, 38px); margin: 0 auto 0 max(0px, calc((100vw - 1180px) / 2));
+  background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.50)); }
+.hero h1 { font-size: clamp(2.3rem, 6vw, 4.2rem); font-weight: 800; text-transform: uppercase; margin: 10px 0 12px; line-height: .98; }
+.hero p { margin: 0 0 22px; font-size: 1.12rem; max-width: 48ch; }
+.hero-botoes { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Destaques */
+.faixa-destaques { max-width: 1180px; margin: -18px auto 0; position: relative; z-index: 2; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.destaque { padding: 18px 20px; display: grid; gap: 2px; border-radius: 20px; }
+.destaque strong { font-family: var(--fonte-marca); font-size: 1.35rem; text-transform: uppercase; }
+.destaque span { color: var(--texto-suave); font-size: .98rem; }
+
+/* Seções */
+.site-main { padding: 0; max-width: none; }
+.secao { max-width: 1180px; margin: 0 auto; padding-block: clamp(48px, 8vw, 96px) 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.secao-cabeca { max-width: 720px; margin-bottom: 26px; }
+.secao h2 { font-size: clamp(2rem, 4.6vw, 3rem); font-weight: 800; text-transform: uppercase; margin: 8px 0 10px; line-height: 1; }
+.secao-cabeca p { margin: 0; color: var(--texto-suave); font-size: 1.1rem; }
+
+.grade-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.produto { display: grid; gap: 6px; align-content: start; padding: 22px; text-decoration: none; color: var(--texto); transition: transform .15s ease, box-shadow .15s ease; }
+.produto:hover, .produto:focus-visible { transform: translateY(-3px); box-shadow: var(--sombra-vidro), 0 18px 40px rgba(28, 38, 68, .16); }
+.produto-desenho { width: 64px; height: 64px; border-radius: 18px; display: grid; place-items: center; color: var(--azul); margin-bottom: 8px;
+  background: linear-gradient(180deg, rgba(236, 242, 252, .95), rgba(205, 220, 247, .7)); border: 1px solid rgba(255,255,255,.8); box-shadow: inset 0 1px 0 #fff; }
+.produto-desenho svg { width: 42px; height: 42px; }
+.produto strong { font-family: var(--fonte-marca); font-size: 1.5rem; text-transform: uppercase; }
+.produto > span:not(.produto-desenho):not(.link-acao) { color: var(--texto-suave); }
+.produto .link-acao { justify-self: start; margin-top: 10px; }
+
+.duas-colunas { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 0; align-items: center; }
+.duas-colunas.invertida .foto-vidro { order: 2; }
+.foto-vidro { margin: 0; border-radius: 28px; overflow: hidden; box-shadow: 0 24px 60px rgba(28, 38, 68, .22); aspect-ratio: 4 / 3; max-width: 100%; }
+.foto-vidro img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.texto-vidro { padding: clamp(22px, 4vw, 40px); margin-left: -60px; position: relative; z-index: 1; }
+.invertida .texto-vidro { margin-left: 0; margin-right: -60px; }
+.texto-vidro p { margin: 0 0 14px; font-size: 1.08rem; }
+@media (max-width: 900px) {
+  .duas-colunas { grid-template-columns: minmax(0, 1fr); }
+  .duas-colunas.invertida .foto-vidro { order: 0; }
+  .texto-vidro, .invertida .texto-vidro { margin: -50px 12px 0; }
+}
+.lista-check { list-style: none; padding: 0; margin: 0 0 20px; display: grid; gap: 8px; }
+.lista-check li { position: relative; padding-left: 32px; font-weight: 600; }
+.lista-check li::before { content: ""; position: absolute; left: 0; top: 3px; width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(180deg, #34b56a, #1f8f4e) center / 100% no-repeat; box-shadow: inset 0 1px 0 rgba(255,255,255,.5); }
+.lista-check li::after { content: ""; position: absolute; left: 7px; top: 8px; width: 8px; height: 5px; border: solid #fff; border-width: 0 0 2.5px 2.5px; transform: rotate(-45deg); }
+
+.grade-servicos { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 12px; }
+.servico { padding: 20px; display: grid; gap: 4px; border-radius: 20px; }
+.servico strong { font-family: var(--fonte-marca); font-size: 1.3rem; text-transform: uppercase; }
+.servico span { color: var(--texto-suave); }
+
+.rastrear { display: grid; gap: 8px; margin-top: 8px; }
+.rastrear label { font-weight: 700; }
+.rastrear-linha { display: flex; gap: 8px; flex-wrap: wrap; }
+.rastrear-linha .entrada { flex: 1 1 220px; min-height: 52px; font-size: 1rem; }
+.rastrear-linha .btn { min-height: 52px; font-size: 1.1rem; }
+
+.contato { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; padding: clamp(24px, 4vw, 44px); align-items: center; }
+@media (max-width: 760px) { .contato { grid-template-columns: minmax(0, 1fr); } }
+.endereco { font-size: 1.15rem; font-weight: 600; margin: 0 0 8px; }
+.telefone-grande { font-family: var(--fonte-marca); font-size: clamp(2.2rem, 6vw, 3.2rem); font-weight: 800; color: var(--azul); margin: 0; user-select: all; }
+.contato-botoes { display: grid; gap: 10px; }
+
+.site-rodape { margin-top: clamp(48px, 8vw, 96px); padding: 22px max(16px, env(safe-area-inset-right, 0px)) calc(22px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.8)); -webkit-backdrop-filter: var(--desfoque); backdrop-filter: var(--desfoque); border-top: 1px solid var(--borda-vidro); }
+.site-rodape-dentro { max-width: 1180px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; color: var(--texto-suave); font-size: .95rem; }
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
