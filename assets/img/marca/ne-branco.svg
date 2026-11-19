@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140" role="img" aria-label="Nova Era">
+  <defs>
+    <mask id="ne-m" maskUnits="userSpaceOnUse">
+      <rect width="220" height="140" fill="#fff"/>
+      <rect x="86" y="-2" width="12" height="30" fill="#000"/>
+      <rect x="124" y="104" width="12" height="40" fill="#000"/>
+      <path d="M21 33 L49 33 L87 85 L87 33 L111 33 L111 110 L84 110 L46 58 L46 104 L21 127 Z" fill="#000" stroke="#000" stroke-width="9" stroke-linejoin="round"/><path d="M126 33 L193 33 L193 52 L150 52 L150 62 L186 62 L186 80 L150 80 L150 91 L195 91 L195 110 L126 110 Z" fill="#000" stroke="#000" stroke-width="9" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+  <path mask="url(#ne-m)" fill="#FFFFFF" fill-rule="evenodd" d="M4 72 A106 66 0 1 0 216 72 A106 66 0 1 0 4 72 Z M24 71 A87 45 -13 1 0 200 71 A87 45 -13 1 0 24 71 Z"/>
+  <path fill="#FFFFFF" d="M21 33 L49 33 L87 85 L87 33 L111 33 L111 110 L84 110 L46 58 L46 104 L21 127 Z"/>
+  <path fill="#FFFFFF" d="M126 33 L193 33 L193 52 L150 52 L150 62 L186 62 L186 80 L150 80 L150 91 L195 91 L195 110 L126 110 Z"/>
+</svg>

@@ -119,7 +119,7 @@
         conferente: { nome: conferente.nome }, status: div ? "divergencia" : "ok", motivo_divergencia: motivo || null, observacao: null,
         latitude: -23.5956, longitude: -48.0532, criado_em: new Date(agora - minAtras * 6e4).toISOString(),
         itens: itens.map((i) => ({ id: id(), ...i })),
-        fotos: [fotoFake("nota", "Nota fiscal", "#e8e4df"), fotoFake("placa", "Placa", "#c8202a"), fotoFake("carga", "Carga", "#c8202a")],
+        fotos: [fotoFake("nota", "Nota fiscal", "#e8e4df"), fotoFake("placa", "Placa", "#d9141e"), fotoFake("carga", "Carga", "#d9141e")],
       };
     };
     const conferencias = [
@@ -135,7 +135,7 @@
       fotoExemplo: (rotulo) => new Promise((ok) => {
         const img = new Image();
         img.onload = () => { const cv = Object.assign(document.createElement("canvas"), { width: img.width, height: img.height }); cv.getContext("2d").drawImage(img, 0, 0); cv.toBlob(ok, "image/jpeg", 0.8); };
-        img.src = fotoExemplo(rotulo, "#c8202a");
+        img.src = fotoExemplo(rotulo, "#d9141e");
       }),
       entrar: async () => { await espera(); logado = eu; },
       sair: async () => { logado = null; },

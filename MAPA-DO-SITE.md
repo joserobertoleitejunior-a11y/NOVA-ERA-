@@ -16,7 +16,9 @@
 | Layout do site | `assets/css/site.css` | |
 | Fonte | `assets/fonts/archivo-latin.woff2` (Archivo variável, peso + largura) | `@font-face` no topo de `marca.css`; títulos usam `--largura-marca` |
 | Efeitos de rolagem | `assets/js/motion.js` | atributos no HTML (abaixo) |
-| Logo | `assets/js/icones.js` → `NE.logo` | **provisório** — trocar pelo oficial |
+| Logo NE (oficial, em vetor) | `assets/img/marca/ne-cor.svg`, `ne-branco.svg`, `ne-azul.svg` + `NE.marca()` em `icones.js` | redesenhado do logo da empresa |
+| Posts do Instagram (26, sem as marcas do app) | `assets/img/insta/*-540/1080.webp` + `posts.json`; lista em `site.js` → `FOTOS` | |
+| Fotos de fundo (sem texto) | `assets/img/fundo/` | usadas nas faixas estilo post |
 | Versão de cache | `index.html`, `app.html`, `rastreio.html` (`?v=`) e `sw.js` (`VERSAO`) | trocar a cada publicação |
 
 ## 2. Efeitos de rolagem (`motion.js`, sem bibliotecas)
@@ -30,6 +32,8 @@
 | `data-linha-progresso` | linha do passo a passo que enche |
 | `data-tilt` / `data-magnetico` | card inclina / botão puxado pelo mouse (só PC) |
 | `.progresso-leitura`, header `data-esconde` | barra no topo; topo some ao descer e volta ao subir |
+
+**Leveza:** em navegador atual, faixas, profundidade, barra e linha usam a animação de rolagem do próprio navegador (CSS `animation-timeline`, placa de vídeo, zero JavaScript). Navegador antigo usa `motion.js` (lê tudo e depois escreve tudo, um laço por quadro). Letras sem desfoque. Seções longe da tela com `content-visibility: auto`. Medido com processador 4× mais lento: 60 quadros/s, nenhuma travada.
 
 ## 3. Níveis de aparelho (`dispositivo.js`, no `<head>`)
 `html[data-qualidade]`: `alta` (PC forte) · `media` · `baixa` (≤ 4 GB/4 núcleos: vidro sem desfoque, títulos por palavra) · `estatica` (menos movimento, economia de dados, 2G: sem efeitos).

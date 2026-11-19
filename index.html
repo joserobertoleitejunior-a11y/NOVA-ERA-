@@ -12,23 +12,25 @@
 <meta property="og:title" content="Nova Era · Pré-moldados e concreto em Itapetininga">
 <meta property="og:description" content="Pré-moldados, concreto usinado e drenagem com frota própria e entrega rastreada.">
 <!-- og:image precisa de endereço completo: trocar quando o domínio for definido -->
-<meta property="og:image" content="assets/img/site/fabrica-silos-1600.webp">
+<meta property="og:image" content="assets/img/insta/resultado-solido-1080.webp">
 <meta name="twitter:card" content="summary_large_image">
-<script src="assets/js/dispositivo.js?v=20261120f"></script>
+<link rel="icon" href="assets/img/marca/ne-cor.svg" type="image/svg+xml">
+<script src="assets/js/dispositivo.js?v=20261120g"></script>
 <link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" as="image" href="assets/img/site/fabrica-silos-1600.webp" imagesrcset="assets/img/site/fabrica-silos-900.webp 900w, assets/img/site/fabrica-silos-1600.webp 1600w" imagesizes="100vw">
-<link rel="stylesheet" href="assets/css/marca.css?v=20261120f">
-<link rel="stylesheet" href="assets/css/site.css?v=20261120f">
+<link rel="preload" as="image" href="assets/img/fundo/hero-sede-1600.webp" imagesrcset="assets/img/fundo/hero-sede-800.webp 800w, assets/img/fundo/hero-sede-1600.webp 1062w" imagesizes="100vw">
+<link rel="stylesheet" href="assets/css/marca.css?v=20261120g">
+<link rel="stylesheet" href="assets/css/site.css?v=20261120g">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "HomeAndConstructionBusiness",
   "name": "Nova Era Drenagem e Pré-Moldados",
-  "description": "Pré-moldados de concreto, concreto usinado e serviços de drenagem.",
+  "description": "40 anos de experiência em saneamento e infraestrutura viária: artefatos de concreto, pré-moldados, caixas para drenagem e concreto usinado.",
+  "sameAs": ["https://www.instagram.com/novaeradrenagem/"],
   "telephone": "+55-15-3273-1159",
   "address": { "@type": "PostalAddress", "streetAddress": "Rodovia Raposo Tavares (SP-270), km 167", "addressLocality": "Itapetininga", "addressRegion": "SP", "addressCountry": "BR" },
   "areaServed": "Itapetininga e região",
-  "image": "assets/img/site/fabrica-silos-1600.webp"
+  "image": "assets/img/insta/resultado-solido-1080.webp"
 }
 </script>
 </head>
@@ -51,21 +53,18 @@
 </header>
 
 <main class="site-main">
-  <!-- ===== HERO -->
-  <section class="hero" id="inicio">
-    <div class="hero-foto" data-parallax="0.22">
-      <picture>
-        <source srcset="assets/img/site/fabrica-silos-900.webp 900w, assets/img/site/fabrica-silos-1600.webp 1600w" sizes="100vw" type="image/webp">
-        <img src="assets/img/site/fabrica-silos-1600.webp" alt="Fábrica da Nova Era em Itapetininga, com os silos de concreto e o galpão vermelho" fetchpriority="high">
-      </picture>
+  <!-- ===== HERO (estilo dos posts do Instagram: foto inteira + título branco) -->
+  <section class="hero post-faixa" id="inicio">
+    <div class="post-fundo" data-parallax="0.18">
+      <img src="assets/img/fundo/hero-sede-1600.webp" srcset="assets/img/fundo/hero-sede-800.webp 800w, assets/img/fundo/hero-sede-1600.webp 1062w" sizes="100vw" alt="Vista aérea da sede da Nova Era na Rodovia Raposo Tavares, com a frota de betoneiras" fetchpriority="high">
     </div>
-    <div class="hero-vidro vidro">
-      <span class="sobretitulo">Itapetininga · SP · Rodovia Raposo Tavares</span>
-      <h1 data-letras>Pré-moldados e concreto com entrega própria</h1>
-      <p>Fabricamos peças de concreto para drenagem e obra, entregamos com a nossa frota e conferimos cada carga com a nota antes de sair.</p>
+    <div class="post-conteudo centro">
+      <img class="marca-branca" src="assets/img/marca/ne-branco.svg" alt="" width="110" height="70">
+      <h1 class="titulo-post" data-letras>Resultado sólido, obra segura.</h1>
+      <p class="post-url">Itapetininga · SP · 40 anos de experiência</p>
       <div class="hero-botoes">
         <button class="btn btn-principal" type="button" data-abrir-lista data-magnetico>Montar meu orçamento</button>
-        <a class="btn btn-secundario" href="#produtos" data-magnetico>Ver produtos</a>
+        <a class="btn btn-vidro" href="#produtos" data-magnetico>Ver produtos</a>
       </div>
       <div class="atalhos" aria-label="Atalhos">
         <a class="atalho" data-link-telefone href="#">Ligar</a>
@@ -83,10 +82,25 @@
 
   <!-- ===== DESTAQUES -->
   <section class="faixa-destaques" aria-label="Destaques" data-revelar-grupo>
-    <div class="destaque vidro"><strong>Fábrica própria</strong><span>Peças feitas aqui em Itapetininga</span></div>
-    <div class="destaque vidro"><strong>Frota própria</strong><span>Caminhões com munck e betoneiras</span></div>
+    <div class="destaque vidro"><strong>40 anos</strong><span>de experiência em saneamento e infraestrutura</span></div>
+    <div class="destaque vidro"><strong>Frota própria</strong><span>Carretas, munck, betoneiras e bomba</span></div>
     <div class="destaque vidro"><strong>Carga conferida</strong><span>Cada peça bate com a sua nota</span></div>
     <div class="destaque vidro"><strong>Entrega rastreada</strong><span>Link no WhatsApp para acompanhar</span></div>
+  </section>
+
+  <!-- ===== SOBRE -->
+  <section class="secao duas-colunas" id="sobre">
+    <figure class="foto-vidro" data-revelar="cortina">
+      <img src="assets/img/fundo/fabrica-800.webp" srcset="assets/img/fundo/fabrica-800.webp 800w, assets/img/fundo/fabrica-1600.webp 1056w" sizes="(min-width: 900px) 50vw, 100vw" alt="Galpão de fabricação de pré-moldados da Nova Era" loading="lazy" decoding="async">
+    </figure>
+    <div class="texto-vidro vidro" data-revelar="dir">
+      <span class="sobretitulo">Quem somos</span>
+      <h2>Referência em artefatos de concreto</h2>
+      <p>São 40 anos de experiência em saneamento e infraestrutura viária. Fabricamos pré-moldados e caixas para drenagem, produzimos concreto na nossa usina e entregamos com frota própria.</p>
+      <div class="segmentos" aria-label="Onde atuamos">
+        <span>Rodovias</span><span>Aeroportos</span><span>Indústrias</span><span>Loteamentos</span><span>Saneamento</span>
+      </div>
+    </div>
   </section>
 
   <!-- ===== PRODUTOS -->
@@ -97,6 +111,14 @@
       <p data-revelar>Produção em série e sob medida. Toque em "Adicionar" para montar sua lista de orçamento.</p>
     </div>
     <div class="grade-produtos" id="grade-produtos" data-revelar-grupo></div>
+  </section>
+
+  <section class="post-faixa" aria-label="Onde tem Nova Era, tem resistência e confiança">
+    <div class="post-fundo" data-parallax="0.15"><img src="assets/img/fundo/carreta-1600.webp" srcset="assets/img/fundo/carreta-800.webp 800w, assets/img/fundo/carreta-1600.webp 1062w" sizes="100vw" alt="Carreta da Nova Era carregada com caixas de concreto" loading="lazy" decoding="async"></div>
+    <div class="post-conteudo esquerda-baixo">
+      <p class="titulo-post" data-letras>Onde tem Nova Era, tem resistência e confiança.</p>
+      <img class="marca-branca pequena" src="assets/img/marca/ne-branco.svg" alt="" width="80" height="51" loading="lazy">
+    </div>
   </section>
 
   <!-- ===== COMO FUNCIONA A ENTREGA -->
@@ -116,13 +138,14 @@
   <!-- ===== CONCRETO + CALCULADORA -->
   <section class="secao duas-colunas" id="concreto">
     <figure class="foto-vidro" data-revelar="cortina">
-      <img src="assets/img/site/patio-betoneira-900.webp" srcset="assets/img/site/patio-betoneira-900.webp 900w, assets/img/site/patio-betoneira-1600.webp 1600w" sizes="(min-width: 900px) 50vw, 100vw" alt="Betoneira da Nova Era no pátio, ao lado das peças pré-moldadas" loading="lazy" decoding="async">
+      <img src="assets/img/fundo/concretagem-800.webp" srcset="assets/img/fundo/concretagem-800.webp 800w, assets/img/fundo/concretagem-1600.webp 1062w" sizes="(min-width: 900px) 50vw, 100vw" alt="Betoneira e bomba da Nova Era concretando o piso de um galpão" loading="lazy" decoding="async">
     </figure>
     <div class="texto-vidro vidro" data-revelar="dir">
       <span class="sobretitulo">Concreto usinado</span>
       <h2>Concreto pronto na sua obra</h2>
       <p>Usina própria e betoneiras da casa para entregar no horário combinado.</p>
       <ul class="lista-check">
+        <li>Usina de concreto própria</li>
         <li>Concreto usinado para fundações, lajes e pisos</li>
         <li>Aluguel de bomba de concreto</li>
         <li>Pisos polidos</li>
@@ -153,6 +176,14 @@
     </div>
   </section>
 
+  <section class="post-faixa" aria-label="Estrutura de ponta, qualidade de verdade">
+    <div class="post-fundo" data-parallax="0.15"><img src="assets/img/fundo/galpoes-1600.webp" srcset="assets/img/fundo/galpoes-800.webp 800w, assets/img/fundo/galpoes-1600.webp 1062w" sizes="100vw" alt="Vista aérea dos galpões e do pátio da Nova Era" loading="lazy" decoding="async"></div>
+    <div class="post-conteudo centro">
+      <img class="marca-branca pequena" src="assets/img/marca/ne-branco.svg" alt="" width="80" height="51" loading="lazy">
+      <p class="titulo-post" data-letras>Estrutura de ponta, qualidade de verdade!</p>
+    </div>
+  </section>
+
   <!-- ===== DRENAGEM -->
   <section class="secao" id="drenagem">
     <div class="secao-cabeca">
@@ -168,19 +199,23 @@
     </div>
   </section>
 
-  <!-- ===== GALERIA -->
-  <section class="secao" id="galeria">
-    <div class="secao-cabeca">
-      <span class="sobretitulo" data-revelar>A Nova Era por dentro</span>
-      <h2 data-letras>Fábrica, pátio e frota</h2>
+  <!-- ===== INSTAGRAM -->
+  <section class="secao" id="instagram">
+    <div class="secao-cabeca cabeca-linha">
+      <div>
+        <span class="sobretitulo" data-revelar>@novaeradrenagem</span>
+        <h2 data-letras>Nossas obras no Instagram</h2>
+      </div>
+      <a class="btn btn-azul" data-link-instagram href="#" target="_blank" rel="noopener" data-magnetico>Seguir no Instagram</a>
     </div>
-    <div class="galeria" id="galeria-fotos" data-revelar-grupo></div>
+    <div class="insta-grade" id="insta-grade"></div>
+    <button class="btn btn-secundario btn-bloco ver-mais" type="button" id="insta-mais">Ver mais fotos</button>
   </section>
 
   <!-- ===== ENTREGA / RASTREIO -->
   <section class="secao duas-colunas invertida" id="entrega">
     <figure class="foto-vidro" data-revelar="cortina">
-      <img src="assets/img/site/frota-munck-900.webp" srcset="assets/img/site/frota-munck-900.webp 900w, assets/img/site/frota-munck-1600.webp 1600w" sizes="(min-width: 900px) 50vw, 100vw" alt="Caminhões da Nova Era com guindaste munck em frente ao galpão" loading="lazy" decoding="async">
+      <img src="assets/img/fundo/frota-munck-800.webp" srcset="assets/img/fundo/frota-munck-800.webp 800w, assets/img/fundo/frota-munck-1600.webp 1062w" sizes="(min-width: 900px) 50vw, 100vw" alt="Caminhão munck da Nova Era em frente à sede" loading="lazy" decoding="async">
     </figure>
     <div class="texto-vidro vidro" data-revelar="esq">
       <span class="sobretitulo">Entrega com frota própria</span>
@@ -207,20 +242,24 @@
   </section>
 
   <!-- ===== CONTATO -->
-  <section class="secao" id="contato">
-    <div class="contato vidro" data-revelar>
-      <div class="contato-texto">
-        <span class="sobretitulo">Orçamento e atendimento</span>
-        <h2>Fale com a Nova Era</h2>
-        <p class="endereco" data-endereco></p>
-        <p class="telefone-grande" data-telefone></p>
-        <p class="horario-linha"><span class="selo-horario" data-selo-horario hidden></span> <span class="suave" data-texto-horario></span></p>
-      </div>
-      <div class="contato-botoes">
-        <button class="btn btn-principal btn-bloco" type="button" data-abrir-lista data-magnetico>Montar orçamento</button>
-        <a class="btn btn-azul btn-bloco" data-link-telefone href="#">Ligar agora</a>
-        <button class="btn btn-secundario btn-bloco" type="button" data-copiar-telefone>Copiar telefone</button>
-        <a class="btn btn-secundario btn-bloco" data-link-mapa href="#" target="_blank" rel="noopener">Como chegar</a>
+  <section class="post-faixa contato-faixa" id="contato">
+    <div class="post-fundo" data-parallax="0.12"><img src="assets/img/fundo/patio-1600.webp" srcset="assets/img/fundo/patio-800.webp 800w, assets/img/fundo/patio-1600.webp 1062w" sizes="100vw" alt="Pátio da Nova Era com caixas de concreto e pá carregadeira" loading="lazy" decoding="async"></div>
+    <div class="post-conteudo">
+      <p class="titulo-post" data-letras>Faça agora mesmo um orçamento sem compromisso!</p>
+      <div class="contato vidro" data-revelar>
+        <div class="contato-texto">
+          <span class="sobretitulo">Orçamento e atendimento</span>
+          <h2>Fale com a Nova Era</h2>
+          <p class="endereco" data-endereco></p>
+          <p class="telefone-grande" data-telefone></p>
+          <p class="horario-linha"><span class="selo-horario" data-selo-horario hidden></span> <span class="suave" data-texto-horario></span></p>
+        </div>
+        <div class="contato-botoes">
+          <button class="btn btn-principal btn-bloco" type="button" data-abrir-lista data-magnetico>Montar orçamento</button>
+          <a class="btn btn-azul btn-bloco" data-link-telefone href="#">Ligar agora</a>
+          <button class="btn btn-secundario btn-bloco" type="button" data-copiar-telefone>Copiar telefone</button>
+          <a class="btn btn-secundario btn-bloco" data-link-mapa href="#" target="_blank" rel="noopener">Como chegar</a>
+        </div>
       </div>
     </div>
   </section>
@@ -254,10 +293,10 @@
 <!-- ===== FOTO EM TELA CHEIA -->
 <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Foto em tela cheia"></div>
 
-<script src="assets/js/config.js?v=20261120f"></script>
-<script src="assets/js/icones.js?v=20261120f"></script>
-<script src="assets/js/ui.js?v=20261120f"></script>
-<script src="assets/js/motion.js?v=20261120f"></script>
-<script src="assets/js/site.js?v=20261120f"></script>
+<script src="assets/js/config.js?v=20261120g"></script>
+<script src="assets/js/icones.js?v=20261120g"></script>
+<script src="assets/js/ui.js?v=20261120g"></script>
+<script src="assets/js/motion.js?v=20261120g"></script>
+<script src="assets/js/site.js?v=20261120g"></script>
 </body>
 </html>

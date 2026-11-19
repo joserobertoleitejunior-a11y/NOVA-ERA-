@@ -125,6 +125,7 @@
     { nome: "Caixa para galeria", texto: "Canalização de grandes vazões.", d: des('<rect x="10" y="14" width="44" height="36" rx="3"/><rect x="18" y="22" width="28" height="20" rx="2"/>') },
     { nome: "Caixa de inspeção", texto: "Inspeção e passagem da rede.", d: des('<path d="M14 18h36v32H14z"/><path d="M20 12h24v6H20z"/><circle cx="32" cy="34" r="7"/>') },
     { nome: "Tubos e aduelas", texto: "Concreto armado para drenagem.", d: des('<ellipse cx="18" cy="32" rx="8" ry="14"/><path d="M18 18h28M18 46h28"/><ellipse cx="46" cy="32" rx="8" ry="14"/>') },
+    { nome: "Muros pré-moldados", texto: "Muros e fechamentos para ferrovias, indústrias e loteamentos.", d: des('<path d="M4 20h56v30H4z"/><path d="M18 20v30M32 20v30M46 20v30"/><path d="M4 50h56"/>') },
     { nome: "Dissipadores e alas", texto: "Saída de bueiros e proteção.", d: des('<path d="M8 48l14-28h20l14 28z"/><path d="M22 48l6-12h8l6 12"/>') },
   ];
   $("#grade-produtos").append(...PRODUTOS.map((p) => el("article", { class: "produto vidro", "data-tilt": true },
@@ -156,21 +157,59 @@
   });
   calcular();
 
-  // ── Galeria + foto em tela cheia ─────────────────────
+  // ── Instagram: posts da empresa (marcas do app do Instagram removidas) + foto em tela cheia ──
   const FOTOS = [
-    { src: "assets/img/site/fabrica-silos", alt: "Silos de concreto da Nova Era e o galpão vermelho" },
-    { src: "assets/img/site/frota-munck", alt: "Caminhões com munck da frota Nova Era" },
-    { src: "assets/img/site/patio-betoneira", alt: "Betoneira e peças pré-moldadas no pátio" },
-  ];
-  $("#galeria-fotos").append(...FOTOS.map((f, i) => el("button", { type: "button", class: "galeria-item", "aria-label": `Ampliar: ${f.alt}`, onclick: () => abrirFoto(i) },
-    el("img", { src: `${f.src}-900.webp`, alt: f.alt, loading: "lazy", decoding: "async" }), el("span", { class: "galeria-legenda" }, f.alt))));
+    {"arquivo": "resultado-solido", "legenda": "Resultado sólido, obra segura."},
+    {"arquivo": "tecnologia-forca", "legenda": "Tecnologia, força e segurança."},
+    {"arquivo": "resistencia-confianca", "legenda": "Onde tem Nova Era, tem resistência e confiança."},
+    {"arquivo": "fabrica-galpao", "legenda": "Fábrica de pré-moldados por dentro"},
+    {"arquivo": "seguranca-praticidade", "legenda": "Mais segurança. Mais praticidade. Nova Era."},
+    {"arquivo": "resistencia", "legenda": "Resistência que você pode confiar."},
+    {"arquivo": "piso-polido", "legenda": "Concretagem de piso polido."},
+    {"arquivo": "estrutura-grandes-projetos", "legenda": "Estrutura para grandes projetos."},
+    {"arquivo": "excelencia", "legenda": "Excelência do início à entrega."},
+    {"arquivo": "patio-caixas", "legenda": "Pátio de caixas e pá carregadeira"},
+    {"arquivo": "grandes-obras", "legenda": "Grandes obras exigem grandes estruturas."},
+    {"arquivo": "qualidade-confiar", "legenda": "Qualidade que você pode confiar."},
+    {"arquivo": "equipamentos-modernos", "legenda": "Os melhores e mais modernos equipamentos do mercado!"},
+    {"arquivo": "base-forte", "legenda": "Todo grande projeto começa com uma base forte."},
+    {"arquivo": "concretagem-galpao", "legenda": "Concretagem de galpão com bomba"},
+    {"arquivo": "equipamentos-novos", "legenda": "Equipamentos novos e modernos para uma entrega excelente!"},
+    {"arquivo": "parcerias", "legenda": "Parcerias de sucesso."},
+    {"arquivo": "planejamento", "legenda": "Quando o planejamento funciona, a obra anda no ritmo certo!"},
+    {"arquivo": "grandes-projetos-aqui", "legenda": "Grandes projetos começam aqui."},
+    {"arquivo": "qualidade-durabilidade", "legenda": "Onde qualidade encontra durabilidade."},
+    {"arquivo": "seguranca-estrutura", "legenda": "Segurança, estrutura e qualidade para o seu projeto."},
+    {"arquivo": "tecnologia-agilidade", "legenda": "Tecnologia, resistência e agilidade para transformar projetos em realidade."},
+    {"arquivo": "estrutura-ponta", "legenda": "Estrutura de ponta, qualidade de verdade!"},
+    {"arquivo": "outro-nivel", "legenda": "Sua obra em outro nível!"},
+    {"arquivo": "frota-munck", "legenda": "Caminhão munck da frota em frente à sede"},
+    {"arquivo": "orcamento", "legenda": "Faça agora mesmo um orçamento sem compromisso!"}
+  ].map((p) => ({ src: `assets/img/insta/${p.arquivo}`, alt: p.legenda }));
+  const grade = $("#insta-grade"), botaoMais = $("#insta-mais");
+  let mostrando = 0;
+  const POR_VEZ = matchMedia("(min-width: 900px)").matches ? 9 : 6;
+  function mostrarMais() {
+    const fim = Math.min(FOTOS.length, mostrando + POR_VEZ);
+    for (let i = mostrando; i < fim; i++) {
+      const f = FOTOS[i];
+      grade.append(el("button", { type: "button", class: "insta-item", "aria-label": `Ampliar: ${f.alt}`, onclick: () => abrirFoto(i) },
+        el("img", { src: `${f.src}-540.webp`, alt: f.alt, loading: "lazy", decoding: "async", width: "540", height: "675" })));
+    }
+    mostrando = fim;
+    botaoMais.hidden = mostrando >= FOTOS.length;
+    botaoMais.textContent = `Ver mais fotos (${FOTOS.length - mostrando})`;
+  }
+  botaoMais.addEventListener("click", mostrarMais);
+  mostrarMais();
+  $$("[data-link-instagram]").forEach((a) => { a.href = C.instagram || "#"; });
   const lb = $("#lightbox");
   let fotoAtual = 0;
   function abrirFoto(i) {
     fotoAtual = (i + FOTOS.length) % FOTOS.length;
     const f = FOTOS[fotoAtual];
     lb.replaceChildren(
-      el("img", { src: `${f.src}-1600.webp`, alt: f.alt }),
+      el("img", { src: `${f.src}-1080.webp`, alt: f.alt }),
       el("button", { type: "button", class: "janela-fechar claro", "aria-label": "Fechar foto", html: NE.icone.fechar, onclick: fecharFoto }),
       el("button", { type: "button", class: "foto-seta esq", "aria-label": "Foto anterior", html: NE.icone.voltar, onclick: () => abrirFoto(fotoAtual - 1) }),
       el("button", { type: "button", class: "foto-seta dir", "aria-label": "Próxima foto", html: NE.icone.seguir, onclick: () => abrirFoto(fotoAtual + 1) }),
@@ -188,6 +227,7 @@
   const FAQ = [
     ["Vocês entregam na obra?", "Sim. Temos frota própria, com caminhões com munck para as peças e betoneiras para o concreto. Consulte o prazo e a sua região com a equipe."],
     ["Como acompanho a minha entrega?", "Quando a carga sai do pátio, você recebe um link no WhatsApp. Nele aparecem o horário de saída, o que foi carregado e a foto da carga."],
+    ["Vocês atendem obras grandes?", "Sim. Atendemos rodovias, aeroportos, indústrias, loteamentos e obras de saneamento, com fábrica, usina de concreto e frota próprias."],
     ["Vocês fazem peças sob medida?", "Sim. Além das peças em série, fabricamos sob encomenda. Mande as medidas na lista de orçamento ou ligue."],
     ["Como peço um orçamento?", "Monte a sua lista aqui no site (sem preço e sem compromisso) e envie para a equipe, ou ligue para (15) 3273-1159."],
     ["Quanto concreto eu preciso?", "Use a calculadora de concreto desta página para uma estimativa. A equipe confirma as medidas antes da entrega."],

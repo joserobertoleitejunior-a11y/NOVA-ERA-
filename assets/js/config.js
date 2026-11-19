@@ -10,6 +10,7 @@ window.NOVA_ERA = {
   telefoneEmpresa: "(15) 3273-1159",
   telefoneLink: "+551532731159",
   whatsapp: "", // ← WhatsApp comercial só com números, ex.: "5515999999999". Vazio = o site oferece ligar/copiar
+  instagram: "https://www.instagram.com/novaeradrenagem/",
   endereco: "Rodovia Raposo Tavares (SP-270), km 167 · Itapetininga/SP",
   mapaUrl: "https://www.google.com/maps/search/?api=1&query=Nova+Era+Drenagem+e+Pr%C3%A9-Moldados+Itapetininga",
 

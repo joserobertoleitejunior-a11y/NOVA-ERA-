@@ -26,10 +26,15 @@
     etiqueta: s('<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>'),
     local: s('<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
   };
-  // Logotipo provisório inspirado na fachada (círculo NE + letreiro condensado).
-  NE.logo = `<svg viewBox="0 0 200 48" role="img" aria-label="Nova Era">
-    <circle cx="24" cy="24" r="21" fill="none" stroke="#c8202a" stroke-width="4"/>
-    <text x="24" y="31" text-anchor="middle" font-family="Archivo NE, Arial Narrow, sans-serif" style="font-stretch:75%" font-weight="800" font-size="21" fill="#1d4c9a" textLength="26" lengthAdjust="spacingAndGlyphs">NE</text>
-    <text x="54" y="35" font-family="Archivo NE, Arial Narrow, sans-serif" style="font-stretch:75%" font-weight="800" font-size="34" letter-spacing="1" fill="#c8202a" textLength="142" lengthAdjust="spacingAndGlyphs">NOVA ERA</text>
-  </svg>`;
+  // Logo oficial NE (redesenhado em vetor a partir do logo da empresa) — arquivos em assets/img/marca/
+  const N = "M21 33 L49 33 L87 85 L87 33 L111 33 L111 110 L84 110 L46 58 L46 104 L21 127 Z";
+  const E = "M126 33 L193 33 L193 52 L150 52 L150 62 L186 62 L186 80 L150 80 L150 91 L195 91 L195 110 L126 110 Z";
+  let seq = 0;
+  NE.marca = (letra = "#E3121B", elipse = "#16168C", recorte = false) => {
+    const id = `ne-m${++seq}`;
+    const corte = recorte ? `<path d="${N}" fill="#000" stroke="#000" stroke-width="9" stroke-linejoin="round"/><path d="${E}" fill="#000" stroke="#000" stroke-width="9" stroke-linejoin="round"/>` : "";
+    return `<svg viewBox="0 0 220 140" role="img" aria-label="Nova Era"><defs><mask id="${id}" maskUnits="userSpaceOnUse"><rect width="220" height="140" fill="#fff"/><rect x="86" y="-2" width="12" height="30" fill="#000"/><rect x="124" y="104" width="12" height="40" fill="#000"/>${corte}</mask></defs><path mask="url(#${id})" fill="${elipse}" fill-rule="evenodd" d="M4 72 A106 66 0 1 0 216 72 A106 66 0 1 0 4 72 Z M24 71 A87 45 -13 1 0 200 71 A87 45 -13 1 0 24 71 Z"/><path fill="${letra}" d="${N}"/><path fill="${letra}" d="${E}"/></svg>`;
+  };
+  // Logo com nome (topo do app e do site)
+  Object.defineProperty(NE, "logo", { get: () => `<span class="logo-ne">${NE.marca()}<span class="logo-nome"><b>NOVA ERA</b><small>Drenagem e pré-moldados</small></span></span>` });
 })();

@@ -16,6 +16,11 @@
   const pc = html.dataset.toque !== "sim" && matchMedia("(hover: hover)").matches;
   const porLetra = pc && nivel !== "baixa";
   html.classList.add(estatico ? "sem-efeitos" : "com-efeitos");
+  // Animação ligada à rolagem feita pelo próprio navegador (sem JavaScript por quadro) quando disponível
+  const nativo = !estatico && CSS.supports?.("animation-timeline: view()");
+  if (nativo) html.classList.add("rolagem-nativa");
+  // Celular fraco: sem profundidade nas fotos (é o efeito que mais gasta)
+  const semParallax = nivel === "baixa";
 
   // ── Letras / palavras ───────────────────────────────
   function quebrar(el) {
@@ -61,24 +66,28 @@
   function quadro() {
     pedido = false;
     const y = scrollY, h = innerHeight, total = document.documentElement.scrollHeight - h;
-    if (barra) barra.style.transform = `scaleX(${total > 0 ? Math.min(1, y / total) : 0})`;
+    if (barra && !nativo) barra.style.transform = `scaleX(${total > 0 ? Math.min(1, y / total) : 0})`;
     if (topo) {
       if (y > 140 && y > ultimoY + 4) topo.classList.add("escondido");
       else if (y < ultimoY - 4 || y < 140) topo.classList.remove("escondido");
       topo.classList.toggle("rolou", y > 24);
     }
     ultimoY = y;
-    if (estatico) return;
+    if (estatico || nativo) return;
+    const leituras = [];
     for (const el of ativos) {
-      const r = el.getBoundingClientRect();
+      const alvo = el.dataset.parallax ? el.parentElement : el;
+      leituras.push([el, alvo.getBoundingClientRect()]);
+    }
+    for (const [el, r] of leituras) {
       if (el.dataset.faixa) {
         const d = Number(el.dataset.faixa) || 1;
         el.style.transform = `translate3d(${(((r.top + r.height / 2) - h / 2) * 0.35 * d).toFixed(1)}px,0,0)`;
       } else if (el.dataset.parallax) {
-        el.style.transform = `translate3d(0,${(-r.top * Number(el.dataset.parallax)).toFixed(1)}px,0) scale(1.08)`;
+        const desloc = ((r.top + r.height / 2) - h / 2) * -Number(el.dataset.parallax);
+        el.style.transform = `translate3d(0,${Math.max(-r.height * 0.06, Math.min(r.height * 0.06, desloc)).toFixed(1)}px,0)`;
       } else if (el.hasAttribute("data-linha-progresso")) {
-        const p = Math.min(1, Math.max(0, (h * 0.7 - r.top) / (r.height || 1)));
-        el.style.setProperty("--progresso", p.toFixed(3));
+        el.style.setProperty("--progresso", Math.min(1, Math.max(0, (h * 0.7 - r.top) / (r.height || 1))).toFixed(3));
       }
     }
   }
@@ -107,7 +116,8 @@
 
   function iniciar() {
     preparar();
-    if (vigia) document.querySelectorAll("[data-faixa], [data-parallax], [data-linha-progresso]").forEach((el) => vigia.observe(el));
+    if (semParallax) document.querySelectorAll("[data-parallax]").forEach((el) => el.removeAttribute("data-parallax"));
+    if (vigia && !nativo) document.querySelectorAll("[data-faixa], [data-parallax], [data-linha-progresso]").forEach((el) => vigia.observe(el));
     addEventListener("scroll", agendar, { passive: true });
     addEventListener("resize", agendar, { passive: true });
     ligarPC();
