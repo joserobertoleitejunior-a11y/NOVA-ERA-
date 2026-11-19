@@ -1,0 +1,11 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0f1720"><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="assets/css/app.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="assets/js/config.js"></script><title>Nova Era — Check-in</title><meta name="robots" content="noindex"></head><body>
+<p id="aviso" class="msg hide" role="alert"></p>
+<section id="login" class="hide"><main><div class="card"><h1>Nova Era</h1><form id="form-login"><label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required><label for="senha">Senha</label><input id="senha" type="password" autocomplete="current-password" required><p><button type="submit">Entrar</button></p></form></div></main></section>
+<section id="app" class="hide"><header><h1>Nova Era</h1><span><span id="quem"></span> <a id="link-admin" class="hide" href="admin.html">Admin</a> <button id="sair" class="sec" type="button">Sair</button></span></header>
+<main><div id="lista"><h2>Minhas cargas</h2><div id="cargas"></div></div>
+<div id="checkin" class="hide"><button id="voltar" class="sec" type="button">← Voltar</button><h2 id="titulo-carga"></h2>
+<form id="form-checkin" class="card"><label for="etapa">Etapa</label><select id="etapa"><option value="chegada">Chegada</option><option value="inicio">Início</option><option value="fim">Fim</option><option value="ocorrencia">Ocorrência / avaria</option></select>
+<label for="fotos">Fotos</label><input id="fotos" type="file" accept="image/*" capture="environment" multiple><div id="previa" class="fotos"></div>
+<label for="obs">Observação</label><textarea id="obs" rows="3"></textarea><p><button id="enviar" type="submit">Registrar check-in</button></p>
+<small>O app usa a câmera e a localização para comprovar o check-in.</small></form></div></main></section>
+<script type="module" src="assets/js/app.js"></script></body></html>
