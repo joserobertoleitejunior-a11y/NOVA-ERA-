@@ -7,8 +7,8 @@
 ```
 Projeto: NOVA ERA — App de check-in de carga/descarga + painel admin
 Cliente: Nova Era (transportadora, Itapetininga-SP) — CNPJ/razão social: A CONFIRMAR na reunião
-Tipo: aplicativo web instalável (PWA) para celular + painel administrativo
-Stack: HTML/CSS/JS puro (sem build) + Supabase (Auth, Postgres com RLS, Storage privado) + Netlify
+Tipo: "Confere Carga" — conferência nota × carga na expedição (celular) + painel
+Stack: HTML/CSS/JS puro (sem build) + Supabase (Auth, Postgres com RLS, Storage privado, Edge Function). Hospedagem a definir (Netlify descartado)
 Supabase: projeto "Nova Era Transportes" (sa-east-1) — ref kfazxjertfzoeewfsime
 Repositório: github.com/joserobertoleitejunior-a11y/NOVA-ERA-
 Projetos-base (SOMENTE LEITURA): Humberto-Imperio-dos-EPS, San-comercio, remop-retifica
@@ -52,7 +52,7 @@ Dados de empresa e de funcionários (CPF, telefone, fotos, localização) são *
 
 ## 7. Checklist de início
 - [x] Repositório e este arquivo
-- [x] Projeto Supabase criado, schema + RLS aplicados, advisors de segurança verificados
+- [x] Projeto Supabase criado, schema + RLS aplicados, advisors de segurança verificados (migration 002 aguardando confirmação)
 - [x] Sem segredo no código
 - [ ] Criar 1º usuário admin (ver README)
 - [ ] Sentry, lint (Biome), testes

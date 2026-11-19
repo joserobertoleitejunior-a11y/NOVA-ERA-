@@ -1,0 +1,28 @@
+// Ícones em linha (SVG) e logotipo PROVISÓRIO — trocar pelo arquivo oficial da Nova Era quando o cliente enviar.
+(() => {
+  const s = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+  window.NE = window.NE || {};
+  NE.icone = {
+    caminhao: s('<path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>'),
+    nota: s('<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 12h7M9 16h7"/>'),
+    caixas: s('<path d="M3 13h8v8H3zM13 13h8v8h-8zM8 3h8v8H8z"/>'),
+    conferir: s('<path d="M9 5H6v16h12V5h-3"/><path d="M9 3h6v4H9z"/><path d="m9 14 2 2 4-4"/>'),
+    camera: s('<path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13.5" r="3.5"/>'),
+    check: s('<path d="m5 12.5 4.5 4.5L19 7"/>'),
+    alerta: s('<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17.5v.01"/>'),
+    mais: s('<path d="M12 5v14M5 12h14"/>'),
+    menos: s('<path d="M5 12h14"/>'),
+    voltar: s('<path d="M15 5l-7 7 7 7"/>'),
+    seguir: s('<path d="M9 5l7 7-7 7"/>'),
+    fechar: s('<path d="M6 6l12 12M18 6 6 18"/>'),
+    sair: s('<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>'),
+    lista: s('<path d="M8 6h12M8 12h12M8 18h12M4 6v.01M4 12v.01M4 18v.01"/>'),
+    local: s('<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>'),
+  };
+  // Logotipo provisório inspirado na fachada (círculo NE + letreiro condensado).
+  NE.logo = `<svg viewBox="0 0 200 48" role="img" aria-label="Nova Era">
+    <circle cx="24" cy="24" r="21" fill="none" stroke="#c8202a" stroke-width="4"/>
+    <text x="24" y="31" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="21" fill="#1d4c9a">NE</text>
+    <text x="54" y="35" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="34" letter-spacing="1" fill="#c8202a">NOVA ERA</text>
+  </svg>`;
+})();

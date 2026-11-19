@@ -1,13 +1,38 @@
-# NOVA ERA — App de check-in de carga/descarga
-PWA para funcionários (check-in com fotos + localização) e painel admin. Stack: HTML/JS puro + Supabase + Netlify. Padrões: `PADROES-AGENCIA.md`. Preparação da reunião: `BRIEFING-NOVA-ERA.md`.
+# Confere Carga · Nova Era
+App de **conferência nota × carga** da expedição. Problema definido na reunião de 19/11: sai produto a mais do que está na nota e o estoque fica errado.
+
+## Como funciona
+**Conferente (celular), 6 passos:**
+1. Caminhão: toca na placa ou digita.
+2. Nota fiscal: número + foto.
+3. Itens da nota: toca nos produtos e informa a quantidade.
+4. Conferir: em cada item, "Confere" ou "Diferente" (e quantos subiram).
+5. Fotos: caminhão carregado e placa (obrigatórias), avarias (opcional).
+6. Revisar: se há diferença, o motivo é obrigatório. Registra.
+
+**Painel (expedição/diretoria):** conferências do dia com totais, filtro "com diferença", detalhe com itens e fotos; cadastro de funcionários, caminhões e produtos.
+
+**Prova:** o registro (itens e fotos) não pode ser alterado nem apagado por ninguém (sem políticas de UPDATE/DELETE). Fotos em bucket privado com link temporário.
+
+## Modo demonstração
+`index.html?demo` roda com dados de exemplo, sem login e sem gravar nada.
+Gerar o HTML único da demonstração: `python3 scripts/gerar-demo.py saida.html`.
 
 ## Rodar local
-`python3 -m http.server 8080` → http://localhost:8080 (câmera/GPS exigem HTTPS ou localhost).
+`python3 -m http.server 8080` → http://localhost:8080 (câmera exige HTTPS ou localhost).
 
-## Criar o 1º admin
-1. Supabase → Authentication → Add user (e-mail + senha).
-2. SQL Editor: `insert into perfis (id, nome, papel) values ('<uuid do usuário>', 'Nome', 'admin');`
-Funcionários: mesmo processo com `papel = 'funcionario'` (tela de cadastro no admin = próxima etapa).
+## Supabase
+- Migrations em `supabase/migrations/` (001 inicial, 002 Confere Carga).
+- Função `criar-funcionario`: cria login e perfil; só admin chama; chave de serviço só no servidor.
+- Funcionário entra com **usuário + senha** (não precisa de e-mail).
 
-## Segurança
-Só a chave pública está no front; tudo protegido por RLS; fotos em bucket privado com URL assinada (5 min).
+### Criar o 1º admin (uma vez)
+1. Supabase → Authentication → Add user: e-mail `eduardo@func.novaera.app` (ou um e-mail real) + senha.
+2. SQL Editor:
+   `insert into perfis (id, nome, usuario, funcao, papel) values ('<uuid>', 'Eduardo', 'eduardo', 'expedicao', 'admin');`
+3. Daí em diante, os outros funcionários são cadastrados pelo painel.
+
+## Pendências
+- Logotipo oficial (o atual é provisório, desenhado a partir da fachada).
+- Leitura automática da nota (foto com IA ou XML da NF-e) — fase 2.
+- Lint (Biome), testes automatizados, Sentry, hospedagem (Netlify descartado).

@@ -1,71 +1,91 @@
-import { sb, $, el, aviso, comCarregando, perfilAtual, telaLogin, sair, fmt } from "./base.js";
-const C = window.NOVA_ERA;
-let perfil, cargaAtual;
+// Início do app: login → conferente (passo a passo) ou painel (admin).
+(() => {
+  const NE = window.NE;
+  const { el, ic, $ } = NE;
+  const raiz = () => $("#conteudo");
+  let perfil, visao;
 
-async function iniciar() {
-  perfil = await perfilAtual();
-  if (!perfil) return telaLogin(iniciar);
-  if (!perfil.ativo) { await sair(); return; }
-  $("#login").classList.add("hide"); $("#app").classList.remove("hide");
-  $("#quem").textContent = perfil.nome;
-  if (perfil.papel === "admin") $("#link-admin").classList.remove("hide");
-  $("#sair").onclick = sair;
-  listarCargas();
-}
+  function topo() {
+    $("#logo").innerHTML = NE.logo;
+    const area = $("#usuario");
+    area.replaceChildren();
+    if (!perfil) return;
+    const sair = el("button", { class: "btn btn-leve", type: "button", "aria-label": "Sair" }, ic("sair"));
+    sair.addEventListener("click", async () => { await NE.dados.sair(); perfil = null; iniciar(); });
+    area.append(el("span", {}, perfil.nome), NE.modoDemo ? "" : sair);
+  }
 
-async function listarCargas() {
-  const box = $("#cargas"); box.replaceChildren(el("div", { class: "skel" }), el("div", { class: "skel" }));
-  const { data, error } = await sb.from("cargas").select("*").in("status", ["agendada", "em_andamento", "ocorrencia"]).order("agendada_para");
-  if (error) return aviso("Não foi possível carregar as cargas.");
-  box.replaceChildren(...(data.length ? data.map(cartao) : [el("p", {}, "Nenhuma carga para você agora.")]));
-}
-const cartao = (c) => el("div", { class: "card" },
-  el("strong", {}, `${c.tipo === "carga" ? "Carga" : "Descarga"} ${c.codigo}`), " ", el("span", { class: "tag" }, c.status),
-  el("div", {}, [c.cliente, c.destino].filter(Boolean).join(" → ") || ""),
-  el("div", {}, fmt(c.agendada_para)),
-  el("button", { onclick: () => abrir(c) }, "Fazer check-in"));
+  function seloDemo() {
+    const box = $("#selo-demo");
+    if (!NE.modoDemo) { box.hidden = true; return; }
+    box.hidden = false;
+    const b = (id, nome) => {
+      const x = el("button", { type: "button", "aria-pressed": String(visao === id) }, nome);
+      x.addEventListener("click", () => { visao = id; seloDemo(); id === "painel" ? painel() : inicioConferente(); });
+      return x;
+    };
+    box.replaceChildren(el("span", {}, "Demonstração com dados de exemplo · nada é gravado"), b("conferente", "Celular do conferente"), b("painel", "Painel da expedição"));
+  }
 
-function abrir(c) {
-  cargaAtual = c;
-  $("#lista").classList.add("hide"); $("#checkin").classList.remove("hide");
-  $("#titulo-carga").textContent = `${c.tipo === "carga" ? "Carga" : "Descarga"} ${c.codigo}`;
-}
-$("#voltar").onclick = () => { $("#checkin").classList.add("hide"); $("#lista").classList.remove("hide"); listarCargas(); };
+  async function iniciar() {
+    try { perfil = await NE.dados.perfil(); } catch { perfil = null; }
+    topo();
+    if (!perfil) return telaEntrar();
+    if (!perfil.ativo) { await NE.dados.sair(); perfil = null; topo(); return telaEntrar("Seu acesso está desativado. Fale com a expedição."); }
+    visao = perfil.papel === "admin" && !NE.modoDemo ? "painel" : "conferente";
+    seloDemo();
+    visao === "painel" ? painel() : inicioConferente();
+  }
 
-function posicao() {
-  return new Promise((ok) => navigator.geolocation
-    ? navigator.geolocation.getCurrentPosition((p) => ok(p.coords), () => ok(null), { timeout: 8000, enableHighAccuracy: true })
-    : ok(null));
-}
-async function reduzir(file) { // reduz foto p/ ~1600px: economiza dados móveis
-  const bmp = await createImageBitmap(file); const s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
-  const cv = Object.assign(document.createElement("canvas"), { width: bmp.width * s, height: bmp.height * s });
-  cv.getContext("2d").drawImage(bmp, 0, 0, cv.width, cv.height);
-  return new Promise((r) => cv.toBlob(r, "image/jpeg", 0.8));
-}
-$("#fotos").onchange = (e) => {
-  const prev = $("#previa"); prev.replaceChildren();
-  for (const f of e.target.files) prev.append(el("img", { src: URL.createObjectURL(f), alt: "Pré-visualização da foto" }));
-};
-$("#form-checkin").onsubmit = (e) => {
-  e.preventDefault();
-  comCarregando($("#enviar"), async () => {
-    const files = [...$("#fotos").files];
-    if (!files.length && $("#etapa").value !== "ocorrencia") throw new Error("Tire pelo menos uma foto.");
-    const pos = await posicao();
-    const { data: ck, error } = await sb.from("checkins").insert({
-      carga_id: cargaAtual.id, funcionario_id: perfil.id, etapa: $("#etapa").value,
-      observacao: $("#obs").value.trim() || null, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null,
-    }).select().single();
-    if (error) throw new Error("Falha ao registrar. Você está escalado nesta carga?");
-    for (const f of files) {
-      const blob = await reduzir(f);
-      const caminho = `${perfil.id}/${ck.id}-${crypto.randomUUID()}.jpg`;
-      const up = await sb.storage.from(C.bucketFotos).upload(caminho, blob, { contentType: "image/jpeg" });
-      if (up.error) throw new Error("Falha ao enviar foto. Tente de novo.");
-      await sb.from("checkin_fotos").insert({ checkin_id: ck.id, caminho });
-    }
-    aviso("Check-in registrado!", "ok"); e.target.reset(); $("#previa").replaceChildren();
-  });
-};
-iniciar();
+  function telaEntrar(msg) {
+    $("main").className = "";
+    const usuario = el("input", { class: "entrada", id: "login-usuario", autocomplete: "username", autocapitalize: "none", required: true });
+    const senha = el("input", { class: "entrada", id: "login-senha", type: "password", autocomplete: "current-password", required: true });
+    const btn = el("button", { class: "btn btn-principal btn-bloco", type: "submit" }, "Entrar");
+    const avisoBox = el("div", {});
+    const form = el("form", { class: "cartao" },
+      el("h1", {}, "Confere Carga"), el("p", {}, "Entre com o usuário e a senha que a expedição te passou."), avisoBox,
+      el("div", { class: "campo" }, el("label", { for: "login-usuario" }, "Usuário"), usuario),
+      el("div", { class: "campo" }, el("label", { for: "login-senha" }, "Senha"), senha), btn);
+    if (msg) NE.aviso(msg, "erro", avisoBox);
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      NE.comCarregando(btn, async () => { await NE.dados.entrar(usuario.value, senha.value); await iniciar(); });
+    });
+    raiz().replaceChildren(el("div", { class: "entrar" }, form));
+  }
+
+  async function inicioConferente() {
+    $("main").className = "";
+    const primeiroNome = perfil.nome.split(" ")[0];
+    const nova = el("button", { class: "btn btn-principal btn-bloco btn-gigante", type: "button", id: "btn-nova" }, ic("caminhao"), "Nova conferência");
+    nova.addEventListener("click", conferir);
+    const lista = el("div", {}, el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }));
+    const detalhe = el("div", { class: "cartao", hidden: true, style: "margin-top:14px" });
+    raiz().replaceChildren(el("section", { class: "tela boas-vindas" },
+      el("h1", {}, `Olá, ${primeiroNome}`),
+      el("p", {}, "Antes do caminhão sair, confira a carga com a nota. Leva uns 2 minutos."),
+      nova,
+      el("h2", { class: "secao-titulo" }, "Minhas conferências de hoje", el("small", {}, new Date().toLocaleDateString("pt-BR"))),
+      lista, detalhe));
+    try {
+      const minhas = await NE.dados.conferencias({ dia: NE.hojeISO(), somenteMinhas: !NE.modoDemo, idPerfil: perfil.id });
+      lista.replaceChildren(...(minhas.length
+        ? minhas.map((c) => NE.cartaoConferencia(c, (x) => { detalhe.hidden = false; detalhe.replaceChildren(NE.renderDetalhe(x)); detalhe.scrollIntoView({ behavior: "smooth" }); }))
+        : [el("p", { class: "vazio" }, "Nenhuma conferência hoje. Toque em \"Nova conferência\" para começar.")]));
+    } catch (e) { lista.replaceChildren(); NE.aviso(NE.mensagemErro(e), "erro", lista); }
+  }
+
+  function conferir() {
+    $("main").className = "";
+    NE.iniciarConferencia(perfil, raiz(), () => (visao === "painel" ? painel() : inicioConferente()));
+    window.scrollTo({ top: 0 });
+  }
+
+  function painel() {
+    $("main").className = "largo";
+    NE.iniciarPainel(perfil, raiz(), conferir);
+  }
+
+  iniciar();
+})();
