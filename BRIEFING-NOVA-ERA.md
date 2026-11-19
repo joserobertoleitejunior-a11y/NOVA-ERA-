@@ -54,7 +54,7 @@ Avaliações de clientes citam atraso em entrega de concreto (pedreiros esperand
 
 ## 7. Reunião de 19/11 — anotações do caderno (José)
 - **Suellen:** diretora, responsável geral por esse processo (quem decide e aprova).
-- **Eduardo:** cuida da expedição (quem confere e despacha as cargas no dia a dia).
+- **Eduardo:** cuida da expedição (quem confere e despacha as cargas no dia a dia). **É o único contato direto do José** e quem leva a proposta para a Suellen.
 - **Frota de entrega:** 7 caminhões + 2 trucks com munck.
 - **Entregas/dia:** de 4 a 7.
 - **Maior problema:** **bater a nota fiscal com a carga**. Sai produto a mais que não está na nota (precisam de "contraprova" das notas).
