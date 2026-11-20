@@ -14,8 +14,7 @@
   NE.rotas.equipe = async (raiz, params, app) => {
     const lista = el("div", { class: "lista-simples" }, el("div", { class: "esqueleto" }));
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Equipe"), el("p", {}, "Toque numa pessoa para mudar algo."))),
-      el("div", { style: "display:grid;gap:10px" }, el("button", { type: "button", class: "btn btn-principal btn-bloco", id: "btn-cadastrar", onclick: () => app.ir("guia", { fluxo: "novaPessoa" }) }, ic("mais"), "Cadastrar uma pessoa"),
-        el("button", { type: "button", class: "btn btn-secundario btn-bloco", id: "btn-cadastrar-varias", onclick: () => app.ir("guia", { fluxo: "lote" }) }, ic("pessoas"), "Cadastrar várias de uma vez")), el("div", { style: "height:10px" }), lista);
+      el("button", { type: "button", class: "btn btn-principal btn-bloco", id: "btn-cadastrar", onclick: () => app.ir("guia", { fluxo: "novaPessoa" }) }, ic("mais"), "Cadastrar uma pessoa"), el("div", { style: "height:10px" }), lista);
     const pessoas = await NE.dados.funcionarios(); const hoje = Date.now();
     lista.replaceChildren(...pessoas.map((p) => {
       const cnh = p.cnh_validade ? Math.floor((new Date(p.cnh_validade).getTime() - hoje) / D.DIA) : null;

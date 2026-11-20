@@ -135,25 +135,33 @@
         el("button", { type: "button", class: "btn btn-secundario btn-bloco", onclick: () => app.voltar() }, "Decidir depois"))));
   };
 
-  // ───────────────────────── 6. Cadastrar várias pessoas ─────────────────────────
-  G.lote = async (raiz, app) => {
-    const U = NE.equipeUtil; const d = { funcao: "conferente", texto: "" };
-    const lerNomes = () => d.texto.split(/\n|;/).map((x) => x.trim()).filter((x) => x.length > 1).map((linha) => { const m = linha.match(/^(.*?)[\s,\-–]*((?:\(?\d{2}\)?[\s.-]*)?9?\d{4}[\s.-]?\d{4})\s*$/); return m && NE.soDigitos(m[2]).length >= 10 ? { nome: m[1].trim(), telefone: NE.soDigitos(m[2]) } : { nome: linha, telefone: null }; }).filter((x) => x.nome.length > 1);
+  // ───────────────────────── 6. Cadastrar uma pessoa (uma pergunta por tela) ─────────────────────────
+  G.novaPessoa = async (raiz, app, params = {}) => {
+    const U = NE.equipeUtil; const existentes = new Set((await NE.dados.funcionarios()).map((p) => p.usuario));
+    const d = { nome: "", funcao: params.funcao || "", telefone: "", fotos: [], senha: U.senhaNova() };
+    const usuario = () => { let u = U.usuarioDe(d.nome) || "usuario"; let k = 2; const base = u; while (existentes.has(u)) u = `${base}${k++}`; return u; };
+    const DESCR = { conferente: "Confere a carga antes de sair", motorista: "Dirige o caminhão", ajudante: "Ajuda a carregar", expedicao: "Organiza as saídas · vê tudo", vendedor: "Comercial · vê notas e cargas", administrativo: "Escritório · vê tudo", diretoria: "Gestão · vê tudo" };
     NE.assistente({
       raiz, rotuloFinal: "Cadastrar", aoCancelar: () => app.voltar(),
       passos: [
-        { titulo: "Qual é a função?", icone: "usuario", ajuda: "Vale para todos que você cadastrar agora.", tela: (r) => el("div", { class: "chips" }, U.FUNCOES.map(([v, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(d.funcao === v), onclick: () => { d.funcao = v; r(); } }, nome))) },
-        { titulo: "Quem vai ser cadastrado?", icone: "pessoas", ajuda: "Escreva um nome por linha. O WhatsApp é opcional, no fim da linha.",
-          tela: () => { const a = el("textarea", { class: "entrada lote-area", id: "lote-nomes", placeholder: "Carlos Souza 15 99999-0001\nMarcos Lima\nJoão Pedro 15 98888-0002" }, d.texto); a.addEventListener("input", () => { d.texto = a.value; }); return el("div", {}, a, dica("Usuário e senha são criados sozinhos.")); },
-          validar: () => (!lerNomes().length ? "Escreva pelo menos um nome." : null) },
-        { titulo: "Confira a lista", icone: "check", ajuda: "Ao cadastrar, você recebe um cartão de acesso de cada pessoa.", tela: () => el("div", { class: "resumo" }, lerNomes().map((p) => NE.linhaResumo(p.nome, p.telefone ? NE.mascaraTelefone(p.telefone) : "sem WhatsApp"))) },
+        { titulo: "Qual é o nome?", icone: "usuario", ajuda: "Como a pessoa é chamada no dia a dia.", tela: () => NE.campoTexto("Nome", { id: "cad-nome", value: d.nome, placeholder: "Ex.: Carlos Souza", autocapitalize: "words" }, (v) => { d.nome = v; }), validar: () => (d.nome.trim().length < 2 ? "Digite o nome da pessoa." : null) },
+        { get titulo() { return `O que ${d.nome.trim().split(" ")[0] || "a pessoa"} faz?`; }, icone: "caixas", ajuda: "Toque na função. Ela define o que a pessoa vê no app.", tela: (r) => NE.escolhaUnica(U.FUNCOES.map(([v, nome]) => ({ valor: v, rotulo: nome, dica: DESCR[v] })), d.funcao, (v) => { d.funcao = v; r(); }), validar: () => (!d.funcao ? "Toque na função da pessoa." : null) },
+        { titulo: "Qual é o WhatsApp?", icone: "whatsapp", ajuda: "Opcional. Aparece como botão verde na lista da equipe.",
+          tela: () => { const teste = el("a", { class: "btn btn-verde btn-bloco", id: "cad-zap", target: "_blank", rel: "noopener", style: "margin-top:6px" }, ic("whatsapp"), "Testar no WhatsApp"); const atualizar = () => { const l = NE.linkWhatsApp(d.telefone); teste.hidden = !l; if (l) teste.href = l; }; atualizar();
+            return el("div", {}, NE.campoTexto("Celular com DDD", { id: "cad-tel", value: d.telefone, inputmode: "tel", placeholder: "(15) 99999-9999" }, (v, i) => { d.telefone = NE.mascaraTelefone(v); if (i.value !== d.telefone) i.value = d.telefone; atualizar(); }), teste, dica("Não sabe agora? Deixe em branco e toque em Continuar.")); },
+          validar: () => (d.telefone && NE.soDigitos(d.telefone).length < 10 ? "O celular precisa ter DDD e número (10 ou 11 dígitos), ou deixe em branco." : null) },
+        { titulo: "Quer colocar uma foto?", icone: "camera", ajuda: "Opcional. Aparece ao lado do nome na equipe.", tela: (r) => el("div", {}, NE.seletorFoto({ titulo: "Foto de perfil", dica: "Rosto de frente, com boa luz.", lista: d.fotos, varias: false, frontal: true, aoMudar: r }), dica("Pode pular: toque em Continuar.")) },
+        { titulo: "Confirme o cadastro", icone: "check", ajuda: "Usuário e senha foram criados sozinhos. Você recebe o cartão de acesso no fim.",
+          tela: (r) => el("div", {}, el("div", { class: "resumo" }, NE.linhaResumo("Nome", d.nome.trim()), NE.linhaResumo("Função", NE.funcoes[d.funcao]), NE.linhaResumo("Vê no app", U.papelDe(d.funcao) === "admin" ? "Painel da administração" : "Só a conferência"), NE.linhaResumo("WhatsApp", d.telefone || "—"), NE.linhaResumo("Foto", d.fotos.length ? "Sim" : "Sem foto"), NE.linhaResumo("Usuário", usuario()), NE.linhaResumo("Senha", d.senha)),
+            U.papelDe(d.funcao) === "admin" && el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, "Esta função vê fotos e dados de todas as cargas. Confirme que é a pessoa certa.")),
+            el("button", { type: "button", class: "link-acao", onclick: () => { d.senha = U.senhaNova(); r(); } }, ic("chave"), "Gerar outra senha")) },
       ],
       async aoConcluir() {
-        const ns = lerNomes(); const existentes = new Set((await NE.dados.funcionarios()).map((p) => p.usuario)); const usados = new Set(existentes);
-        const lote = ns.map(({ nome, telefone }) => { let u = U.usuarioDe(nome) || "usuario"; let k = 2; const base = u; while (usados.has(u)) u = `${base}${k++}`; usados.add(u); return { nome, telefone, usuario: u, senha: U.senhaNova(), funcao: d.funcao, papel: U.papelDe(d.funcao) }; });
-        const r = await NE.dados.criarFuncionarios(lote); const falhas = r.filter((x) => !x.ok); if (falhas.length) NE.aviso(`${falhas.length} não foi cadastrado: ${falhas[0].erro}`, "alerta");
-        const criados = r.filter((x) => x.ok).map((x) => { const l = lote.find((y) => y.nome === x.nome || y.usuario === x.usuario) || {}; return { nome: x.nome || l.nome, usuario: x.usuario || l.usuario, senha: x.senha || l.senha, funcao: d.funcao, telefone: l.telefone }; });
-        if (criados.length) U.cartoes(criados, "Cartões de acesso", () => app.ir("equipe", {}, { substituir: true })); else app.ir("equipe", {}, { substituir: true });
+        const foto = d.fotos[0] ? await NE.dados.enviarFoto(d.fotos[0].blob, app.perfil.id) : null; const u = usuario();
+        await NE.dados.criarFuncionario({ nome: d.nome.trim(), usuario: u, senha: d.senha, funcao: d.funcao, papel: U.papelDe(d.funcao), telefone: NE.soDigitos(d.telefone) || null, foto });
+        const cartao = { nome: d.nome.trim(), usuario: u, senha: d.senha, funcao: d.funcao, telefone: NE.soDigitos(d.telefone) };
+        NE.telaFim(raiz, { titulo: "Pessoa cadastrada", texto: `${d.nome.trim().split(" ")[0]} já pode entrar no app. Entregue o cartão de acesso agora: a senha não aparece de novo.`,
+          botoes: [{ rotulo: "Mostrar o cartão de acesso", icone: "qr", acao: () => U.cartoes([cartao], "Cartão de acesso") }, { rotulo: "Cadastrar outra pessoa", icone: "mais", acao: () => G.novaPessoa(raiz, app, { funcao: d.funcao }) }, { rotulo: "Voltar à equipe", acao: () => app.ir("equipe", {}, { substituir: true }) }] });
       },
     });
   };
@@ -221,7 +229,6 @@
   };
 
   // Cadastros completos (um por vez) — o passo a passo já existe em cadastros.js; aqui só entram na rota "guia" (sem a barra de baixo)
-  G.novaPessoa = (raiz, app) => NE.cadastros.funcionario(raiz, () => app.ir("equipe", {}, { substituir: true }));
   G.novoVeiculo = (raiz, app) => NE.cadastros.caminhao(raiz, () => app.ir("cadastros", { aba: "caminhoes" }, { substituir: true }));
   G.novoProduto = (raiz, app) => NE.cadastros.produto(raiz, () => app.ir("cadastros", { aba: "produtos" }, { substituir: true }));
 

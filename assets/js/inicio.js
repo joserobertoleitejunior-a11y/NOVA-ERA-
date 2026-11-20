@@ -86,7 +86,6 @@
       ["caminhao", "Ver as cargas", "O que já saiu", () => app.ir("cargas", {})],
       ["caixas", "Ver o estoque", "Quanto tem de cada peça", () => app.ir("estoque", {})],
       ["usuario", "Cadastrar uma pessoa", "Funcionário novo", () => app.ir("guia", { fluxo: "novaPessoa" })],
-      ["pessoas", "Cadastrar várias pessoas", "Só os nomes", () => app.ir("guia", { fluxo: "lote" })],
       ["caminhao", "Cadastrar um caminhão", "Placa, fotos e dados", () => app.ir("guia", { fluxo: "novoVeiculo" })],
     ].filter((t, i) => !limitado || i === 0 || i === 2);
     const tiles = el("div", { class: "tiles" }, T.map(([icone, nome, sub, acao], i) => el("button", { type: "button", class: "tile", id: i === 0 ? "tile-nota" : null, onclick: acao }, el("span", { class: "tile-icone", html: NE.icone[icone] }), el("strong", {}, nome), el("small", {}, sub))));

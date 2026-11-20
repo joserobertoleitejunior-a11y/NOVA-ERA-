@@ -409,36 +409,58 @@
     },
     {
       "id": "12-equipe",
-      "titulo": "Cadastrar a equipe",
+      "titulo": "Cadastrar a equipe, passo a passo",
       "pontos": [
-        "Só os nomes: usuário e senha saem sozinhos",
-        "Cartão de acesso com QR",
-        "Botão do WhatsApp de cada pessoa"
+        "Uma pergunta por tela: nome, função, WhatsApp e foto",
+        "Usuário e senha saem sozinhos",
+        "Cartão de acesso com QR e botão do WhatsApp"
       ],
-      "fala": "Cadastrar a equipe é rápido. Basta escrever os nomes, e o aplicativo cria o usuário e a senha de cada um, com um cartão de acesso para imprimir ou mandar no WhatsApp. Cada pessoa tem foto, contato e um botão para chamar direto no WhatsApp.",
+      "fala": "Cadastrar uma pessoa é passo a passo, uma pergunta por tela: o nome, a função, o WhatsApp e, se quiser, a foto. O aplicativo cria o usuário e a senha sozinho, e entrega um cartão de acesso para imprimir ou mandar no WhatsApp. Cada pessoa tem um botão para ser chamada direto no WhatsApp.",
       "pre": {
         "perfil": "admin",
         "rota": "equipe"
       },
       "acoes": [
         {
-          "at": 0.15,
+          "at": 0.12,
           "destacar": ".pessoa-linha"
         },
         {
-          "at": 0.35,
-          "clicar": "#btn-cadastrar-varias"
+          "at": 0.26,
+          "clicar": "#btn-cadastrar"
         },
         {
-          "at": 0.55,
+          "at": 0.4,
+          "digitar": [
+            "#cad-nome",
+            "Carlos Souza"
+          ]
+        },
+        {
+          "at": 0.5,
           "clicar": "#btn-seguir"
         },
         {
-          "at": 0.72,
-          "digitar": [
-            "#lote-nomes",
-            "Carlos Souza 15 99999-0001\nMarcos Lima"
+          "at": 0.58,
+          "clicarTexto": [
+            ".escolha",
+            "Conferente"
           ]
+        },
+        {
+          "at": 0.66,
+          "clicar": "#btn-seguir"
+        },
+        {
+          "at": 0.74,
+          "digitar": [
+            "#cad-tel",
+            "15999990001"
+          ]
+        },
+        {
+          "at": 0.84,
+          "clicar": "#btn-seguir"
         }
       ]
     },
