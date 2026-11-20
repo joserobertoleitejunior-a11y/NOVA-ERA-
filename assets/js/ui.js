@@ -68,6 +68,20 @@
     } catch { return arquivo; }
   };
 
+  // PDF -> imagem (primeira página): assim a nota em PDF segue o mesmo caminho da foto. O leitor de PDF só carrega quando alguém escolhe um PDF.
+  NE.arquivoImagem = async (arq) => {
+    if (!(arq.type === "application/pdf" || /\.pdf$/i.test(arq.name || ""))) return arq;
+    try {
+      await NE.carregarScript("assets/vendor/pdf.min.js"); window.pdfjsLib.GlobalWorkerOptions.workerSrc = "assets/vendor/pdf.worker.min.js";
+      const pdf = await window.pdfjsLib.getDocument({ data: await arq.arrayBuffer() }).promise; const pg = await pdf.getPage(1); const v0 = pg.getViewport({ scale: 1 });
+      const vp = pg.getViewport({ scale: Math.min(3, 1800 / Math.max(v0.width, v0.height)) });
+      const cv = Object.assign(document.createElement("canvas"), { width: Math.round(vp.width), height: Math.round(vp.height) }); const c2 = cv.getContext("2d"); c2.fillStyle = "#fff"; c2.fillRect(0, 0, cv.width, cv.height);
+      await pg.render({ canvasContext: c2, viewport: vp }).promise;
+      const blob = await new Promise((ok) => cv.toBlob(ok, "image/jpeg", 0.88));
+      return new File([blob], "nota.jpg", { type: "image/jpeg" });
+    } catch { throw new Error("Não consegui abrir esse PDF. Tente a foto da nota ou o arquivo XML."); }
+  };
+
   // Carrega uma biblioteca só quando ela é necessária (o app abre leve e rápido)
   const scripts = new Map();
   NE.carregarScript = (url) => {
@@ -141,10 +155,10 @@
   // Bloco para tirar/escolher foto: lista = array de { blob, url } alterado no lugar; aoMudar() redesenha
   NE.seletorFoto = ({ titulo, dica, lista, varias = false, frontal = false, aoMudar }) => {
     const adicionar = async (arquivos) => {
-      for (const arq of arquivos) { const blob = await NE.reduzirFoto(arq); if (!varias) lista.splice(0).forEach((f) => URL.revokeObjectURL(f.url)); lista.push({ blob, url: URL.createObjectURL(blob) }); }
+      for (const bruto of arquivos) { let arq; try { arq = await NE.arquivoImagem(bruto); } catch (e) { NE.aviso(e.message, "erro"); continue; } const blob = await NE.reduzirFoto(arq); if (!varias) lista.splice(0).forEach((f) => URL.revokeObjectURL(f.url)); lista.push({ blob, url: URL.createObjectURL(blob) }); }
       aoMudar();
     };
-    const entrada = (camera, rotulo) => { const i = NE.el("input", { type: "file", accept: "image/*", capture: camera ? (frontal ? "user" : "environment") : false, multiple: varias || false, "aria-label": `${rotulo}: ${titulo}` }); i.addEventListener("change", () => { if (i.files?.length) adicionar([...i.files]); }); return i; };
+    const pdfOk = /nota/i.test(titulo); const entrada = (camera, rotulo) => { const i = NE.el("input", { type: "file", accept: !camera && pdfOk ? "image/*,application/pdf" : "image/*", capture: camera ? (frontal ? "user" : "environment") : false, multiple: varias || false, "aria-label": `${rotulo}: ${titulo}` }); i.addEventListener("change", () => { if (i.files?.length) adicionar([...i.files]); }); return i; };
     const feita = lista.length > 0;
     return NE.el("div", { class: `foto-bloco${feita ? " feita" : ""}` },
       NE.el("div", { class: "foto-bloco-topo" }, NE.el("strong", {}, titulo), NE.el("span", { class: `etiqueta ${feita ? "ok" : ""}` }, feita ? `${lista.length} foto${lista.length > 1 ? "s" : ""}` : "Opcional")),
@@ -153,7 +167,7 @@
         NE.el("button", { type: "button", class: "remover", "aria-label": "Apagar esta foto", html: NE.icone.fechar, onclick: () => { URL.revokeObjectURL(f.url); lista.splice(i, 1); aoMudar(); } })))),
       NE.el("div", { class: "foto-acoes" },
         NE.el("label", { class: "btn btn-secundario botao-camera" }, NE.ic("camera"), feita ? (varias ? "Mais uma" : "Trocar") : "Tirar foto", entrada(true, "Tirar foto")),
-        NE.el("label", { class: "btn btn-secundario botao-camera" }, NE.ic("galeria"), "Galeria", entrada(false, "Escolher da galeria"))));
+        NE.el("label", { class: "btn btn-secundario botao-camera" }, NE.ic("galeria"), pdfOk ? "Galeria ou PDF" : "Galeria", entrada(false, "Escolher da galeria"))));
   };
 
   NE.memoria = {

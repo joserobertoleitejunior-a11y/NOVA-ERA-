@@ -4,3 +4,5 @@ Bibliotecas de terceiros guardadas dentro do projeto (o app não depende de inte
 - qrcode.js    : qrcode-generator 1.4.4 (MIT)               — geração de QR Code das etiquetas e cartões
 Para atualizar: baixar a nova versão do npm, copiar o arquivo e trocar o ?v= nos HTMLs.
 - jsbarcode.js : jsbarcode 3.12.1 (MIT) — só para gerar nota de teste
+
+pdf.min.js / pdf.worker.min.js: PDF.js 3.11.174 (Mozilla, licença Apache-2.0). Só carrega quando alguém escolhe um PDF de nota; transforma a 1a página em imagem.

@@ -233,8 +233,9 @@
   function blocoFoto(tipo, titulo, exigencia, dica, varias, redesenhar, aoNovaFoto) {
     const lista = estado.fotos[tipo];
     const adicionar = async (arquivos) => {
-      for (const arq of arquivos) {
-        const blob = await NE.reduzirFoto(arq);
+      for (let k = 0; k < arquivos.length; k++) {
+        try { arquivos[k] = await NE.arquivoImagem(arquivos[k]); } catch (e) { NE.aviso(e.message, "erro"); continue; }
+        const blob = await NE.reduzirFoto(arquivos[k]);
         if (!varias) lista.splice(0).forEach((f) => URL.revokeObjectURL(f.url));
         lista.push({ blob, url: URL.createObjectURL(blob) });
       }
@@ -245,7 +246,7 @@
     };
     // Duas entradas: câmera direta e galeria (se o aparelho bloquear a câmera, a galeria ainda funciona)
     const entrada = (comCamera, rotulo) => {
-      const inp = el("input", { type: "file", accept: "image/*", capture: comCamera ? "environment" : false, multiple: varias || false, "aria-label": `${rotulo}: ${titulo}` });
+      const inp = el("input", { type: "file", accept: !comCamera && /nota/i.test(titulo) ? "image/*,application/pdf" : "image/*", capture: comCamera ? "environment" : false, multiple: varias || false, "aria-label": `${rotulo}: ${titulo}` });
       inp.addEventListener("change", () => { if (inp.files?.length) adicionar([...inp.files]); });
       return inp;
     };
@@ -264,7 +265,7 @@
           onclick: () => { URL.revokeObjectURL(f.url); lista.splice(i, 1); redesenhar(); } })))),
       el("div", { class: "foto-acoes" },
         el("label", { class: `btn ${!feita && obrig ? "btn-azul" : "btn-secundario"} botao-camera` }, ic("camera"), rotuloCamera, entrada(true, "Tirar foto")),
-        el("label", { class: "btn btn-secundario botao-camera" }, ic("galeria"), "Galeria", entrada(false, "Escolher da galeria"))),
+        el("label", { class: "btn btn-secundario botao-camera" }, ic("galeria"), /nota/i.test(titulo) ? "Galeria ou PDF" : "Galeria", entrada(false, "Escolher da galeria"))),
       exemplo);
   }
 
