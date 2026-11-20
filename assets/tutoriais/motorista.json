@@ -28,21 +28,21 @@
    },
    "acoes": [
     {
-     "at": 0.35,
+     "at": 0.182,
      "digitar": [
       "#login-usuario",
       "motorista"
      ]
     },
     {
-     "at": 0.55,
+     "at": 0.286,
      "digitar": [
       "#login-senha",
       "admin"
      ]
     },
     {
-     "at": 0.75,
+     "at": 0.39,
      "clicar": "#btn-entrar"
     }
    ]

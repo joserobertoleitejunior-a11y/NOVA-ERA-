@@ -78,34 +78,34 @@
     "Tudo confere? Toque no botão verde",
     "Foto da carga e foto da placa"
    ],
-   "fala": "Escolha o caminhão. Se cada peça confere, toque em tudo confere. Tire a foto da carga e da placa, e confirme.",
+   "fala": "Toque na nota e escolha o caminhão. Olhe a carga: se cada peça confere, toque em tudo confere. Depois, tire a foto do caminhão carregado e a foto da placa, e confirme. Pronto: fica registrado, com hora e foto. Passo a passo, sem pressa. Rápido e fácil.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
    },
    "acoes": [
     {
-     "at": 0.08,
+     "at": 0.024,
      "clicar": ".linha-cartao"
     },
     {
-     "at": 0.2,
+     "at": 0.06,
      "clicar": ".grade-escolha .escolha"
     },
     {
-     "at": 0.27,
+     "at": 0.081,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.38,
+     "at": 0.114,
      "clicar": "#btn-tudo-confere"
     },
     {
-     "at": 0.46,
+     "at": 0.138,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.58,
+     "at": 0.174,
      "clicarTexto": [
       "button.link-acao",
       "Usar foto de teste",
@@ -113,7 +113,7 @@
      ]
     },
     {
-     "at": 0.65,
+     "at": 0.195,
      "clicarTexto": [
       "button.link-acao",
       "Usar foto de teste",
@@ -121,15 +121,15 @@
      ]
     },
     {
-     "at": 0.74,
+     "at": 0.222,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.84,
+     "at": 0.252,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.92,
+     "at": 0.276,
      "clicar": "#btn-seguir"
     }
    ]
@@ -142,7 +142,7 @@
     "Diga quantas peças subiram",
     "Informe o motivo no fim"
    ],
-   "fala": "Se uma peça não confere, toque em diferente e diga quantas subiram. A administração é avisada na hora.",
+   "fala": "Se uma peça não confere, toque em diferente e diga quantas subiram. O aplicativo mostra se foi a mais ou a menos. A administração é avisada na hora.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
@@ -191,19 +191,19 @@
    },
    "acoes": [
     {
-     "at": 0.1,
+     "at": 0.066,
      "clicar": ".linha-cartao"
     },
     {
-     "at": 0.2,
+     "at": 0.132,
      "clicar": ".grade-escolha .escolha"
     },
     {
-     "at": 0.27,
+     "at": 0.178,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.55,
+     "at": 0.363,
      "destacar": "#btn-ler-etiquetas"
     }
    ]
@@ -223,26 +223,26 @@
    },
    "acoes": [
     {
-     "at": 0.1,
+     "at": 0.06,
      "clicar": "#btn-contagem"
     },
     {
-     "at": 0.3,
+     "at": 0.18,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.5,
+     "at": 0.3,
      "destacar": ".contar-card"
     },
     {
-     "at": 0.65,
+     "at": 0.39,
      "digitar": [
       "#ct-pilhas",
       "3"
      ]
     },
     {
-     "at": 0.82,
+     "at": 0.492,
      "destacar": ".total-grande"
     }
    ]

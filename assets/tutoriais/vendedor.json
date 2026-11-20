@@ -28,21 +28,21 @@
    },
    "acoes": [
     {
-     "at": 0.35,
+     "at": 0.161,
      "digitar": [
       "#login-usuario",
       "adminvendas"
      ]
     },
     {
-     "at": 0.55,
+     "at": 0.253,
      "digitar": [
       "#login-senha",
       "admin"
      ]
     },
     {
-     "at": 0.75,
+     "at": 0.345,
      "clicar": "#btn-entrar"
     }
    ]
@@ -71,55 +71,55 @@
    "id": "03-nota",
    "titulo": "Lançar uma nota",
    "pontos": [],
-   "fala": "Pra lançar uma nota: como chegou, número e cliente, produtos, e confirmar. Os conferentes são avisados.",
+   "fala": "Pra lançar uma nota: escolha como ela chegou, digite o número e o cliente, escolha os produtos, e confirme. Ela entra na fila, e os conferentes são avisados na hora, no celular. Sem papel, tudo no celular. Simples assim.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "inicio"
    },
    "acoes": [
     {
-     "at": 0.08,
+     "at": 0.024,
      "clicar": "#tile-nota"
     },
     {
-     "at": 0.22,
+     "at": 0.066,
      "clicarTexto": [
       ".escolha",
       "Vou digitar"
      ]
     },
     {
-     "at": 0.3,
+     "at": 0.09,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.4,
+     "at": 0.12,
      "digitar": [
       "#nn-numero",
       "48600"
      ]
     },
     {
-     "at": 0.5,
+     "at": 0.15,
      "digitar": [
       "#nn-cliente",
       "Prefeitura de Tatuí"
      ]
     },
     {
-     "at": 0.58,
+     "at": 0.174,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.68,
+     "at": 0.204,
      "clicar": ".grade-escolha .escolha"
     },
     {
-     "at": 0.76,
+     "at": 0.228,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.9,
+     "at": 0.27,
      "clicar": "#btn-seguir"
     }
    ]
@@ -182,11 +182,11 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.104,
      "destacar": ".alerta-item"
     },
     {
-     "at": 0.55,
+     "at": 0.286,
      "destacar": "#btn-sino"
     }
    ]

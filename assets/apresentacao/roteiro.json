@@ -51,21 +51,21 @@
    },
    "acoes": [
     {
-     "at": 0.22,
+     "at": 0.172,
      "digitar": [
       "#login-usuario",
       "admin"
      ]
     },
     {
-     "at": 0.42,
+     "at": 0.328,
      "digitar": [
       "#login-senha",
       "admin"
      ]
     },
     {
-     "at": 0.62,
+     "at": 0.484,
      "clicar": "#btn-entrar"
     }
    ]
@@ -107,59 +107,59 @@
     "Itens e quantidades",
     "Confirmar: entra na fila"
    ],
-   "fala": "Uma nota nova entra na fila em quatro passos, e os conferentes são avisados no celular.",
+   "fala": "Uma nota nova entra na fila em quatro passos. Primeiro, como a nota chegou. Depois, o número e o cliente. Em seguida, os produtos e as quantidades. E por fim, confirmar. Pronto! Rápido e sem papel. Os conferentes são avisados na hora, no celular.",
    "pre": {
     "perfil": "admin",
     "rota": "inicio"
    },
    "acoes": [
     {
-     "at": 0.06,
+     "at": 0.043,
      "clicar": "#tile-nota"
     },
     {
-     "at": 0.2,
+     "at": 0.144,
      "clicarTexto": [
       ".escolha",
       "Vou digitar"
      ]
     },
     {
-     "at": 0.28,
+     "at": 0.202,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.37,
+     "at": 0.266,
      "digitar": [
       "#nn-numero",
       "48500"
      ]
     },
     {
-     "at": 0.46,
+     "at": 0.331,
      "digitar": [
       "#nn-cliente",
       "Construtora Alfa"
      ]
     },
     {
-     "at": 0.54,
+     "at": 0.389,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.62,
+     "at": 0.446,
      "clicar": ".grade-escolha .escolha"
     },
     {
-     "at": 0.7,
+     "at": 0.504,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.8,
+     "at": 0.576,
      "destacar": ".resumo"
     },
     {
-     "at": 0.9,
+     "at": 0.648,
      "clicar": "#btn-seguir"
     }
    ]
@@ -172,7 +172,7 @@
     "Premium: a IA lê a foto da nota",
     "Número, cliente e itens saem sozinhos"
    ],
-   "fala": "Com o arquivo XML, o aplicativo lê a nota sozinho. E na versão premium, até a foto da nota.",
+   "fala": "Com o arquivo XML, o aplicativo lê a nota sozinho: número, cliente e todos os itens. E na versão premium, até a foto da nota.",
    "pre": {
     "perfil": "admin",
     "rota": "guia",
@@ -182,11 +182,11 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.136,
      "destacar": "#btn-escolher-xml"
     },
     {
-     "at": 0.55,
+     "at": 0.374,
      "ir": [
       "guia",
       {
@@ -195,18 +195,18 @@
      ]
     },
     {
-     "at": 0.68,
+     "at": 0.462,
      "clicarTexto": [
       ".escolha",
       "Tenho a foto da nota"
      ]
     },
     {
-     "at": 0.78,
+     "at": 0.53,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.88,
+     "at": 0.598,
      "destacar": ".foto-bloco"
     }
    ]
@@ -220,42 +220,42 @@
     "Tudo confere ou informa a diferença",
     "Fotos da carga e da placa"
    ],
-   "fala": "O conferente toca na nota, escolhe o caminhão e confere. Tira a foto da carga e da placa. Fica tudo registrado, e ninguém apaga.",
+   "fala": "O conferente toca na nota e escolhe o caminhão. Se a carga está certa, toca em tudo confere. Se tem diferença, informa quantas peças subiram. Depois, tira a foto da carga e da placa. Fica tudo registrado, com hora e nome, e ninguém apaga. Tudo em poucos toques.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
    },
    "acoes": [
     {
-     "at": 0.08,
+     "at": 0.059,
      "destacar": "#lista-minhas"
     },
     {
-     "at": 0.17,
+     "at": 0.126,
      "clicar": ".linha-cartao"
     },
     {
-     "at": 0.27,
+     "at": 0.2,
      "clicar": ".grade-escolha .escolha"
     },
     {
-     "at": 0.33,
+     "at": 0.244,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.44,
+     "at": 0.326,
      "clicar": "#btn-tudo-confere"
     },
     {
-     "at": 0.52,
+     "at": 0.385,
      "destacar": ".item"
     },
     {
-     "at": 0.58,
+     "at": 0.429,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.66,
+     "at": 0.488,
      "clicarTexto": [
       "button.link-acao",
       "Usar foto de teste",
@@ -263,7 +263,7 @@
      ]
     },
     {
-     "at": 0.72,
+     "at": 0.533,
      "clicarTexto": [
       "button.link-acao",
       "Usar foto de teste",
@@ -271,11 +271,11 @@
      ]
     },
     {
-     "at": 0.79,
+     "at": 0.585,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.87,
+     "at": 0.644,
      "clicar": "#btn-seguir"
     }
    ]
@@ -383,26 +383,26 @@
    },
    "acoes": [
     {
-     "at": 0.08,
+     "at": 0.069,
      "clicar": "#btn-contagem"
     },
     {
-     "at": 0.28,
+     "at": 0.241,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.46,
+     "at": 0.396,
      "destacar": ".contar-card"
     },
     {
-     "at": 0.58,
+     "at": 0.499,
      "digitar": [
       "#ct-pilhas",
       "3"
      ]
     },
     {
-     "at": 0.78,
+     "at": 0.671,
      "destacar": ".total-grande"
     }
    ]
@@ -415,51 +415,51 @@
     "Usuário e senha saem sozinhos",
     "Cartão de acesso com QR e botão do WhatsApp"
    ],
-   "fala": "Cadastrar uma pessoa é uma pergunta por tela. O aplicativo cria o acesso e manda no WhatsApp, com um vídeo ensinando a função.",
+   "fala": "Cadastrar uma pessoa é uma pergunta por tela: nome, função, WhatsApp e foto. O aplicativo cria o acesso e manda no WhatsApp, com um vídeo ensinando a função. E registra quem cadastrou. Leva um minuto.",
    "pre": {
     "perfil": "admin",
     "rota": "equipe"
    },
    "acoes": [
     {
-     "at": 0.12,
+     "at": 0.058,
      "destacar": ".pessoa-linha"
     },
     {
-     "at": 0.26,
+     "at": 0.125,
      "clicar": "#btn-cadastrar"
     },
     {
-     "at": 0.4,
+     "at": 0.192,
      "digitar": [
       "#cad-nome",
       "Carlos Souza"
      ]
     },
     {
-     "at": 0.5,
+     "at": 0.24,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.58,
+     "at": 0.278,
      "clicarTexto": [
       ".escolha",
       "Conferente"
      ]
     },
     {
-     "at": 0.66,
+     "at": 0.317,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.74,
+     "at": 0.355,
      "digitar": [
       "#cad-tel",
       "15999990001"
      ]
     },
     {
-     "at": 0.84,
+     "at": 0.403,
      "clicar": "#btn-seguir"
     }
    ]
@@ -482,15 +482,15 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.18,
      "destacar": ".veiculo-miniatura"
     },
     {
-     "at": 0.5,
+     "at": 0.45,
      "clicar": ".pessoa-linha"
     },
     {
-     "at": 0.78,
+     "at": 0.702,
      "clicarTexto": [
       ".escolha",
       "Fotos"

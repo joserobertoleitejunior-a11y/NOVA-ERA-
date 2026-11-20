@@ -28,21 +28,21 @@
    },
    "acoes": [
     {
-     "at": 0.35,
+     "at": 0.322,
      "digitar": [
       "#login-usuario",
       "adminexpedicao"
      ]
     },
     {
-     "at": 0.55,
+     "at": 0.506,
      "digitar": [
       "#login-senha",
       "admin"
      ]
     },
     {
-     "at": 0.75,
+     "at": 0.69,
      "clicar": "#btn-entrar"
     }
    ]
@@ -82,22 +82,22 @@
    },
    "acoes": [
     {
-     "at": 0.08,
+     "at": 0.075,
      "clicar": "#tile-nota"
     },
     {
-     "at": 0.3,
+     "at": 0.282,
      "destacar": ".grade-escolha"
     },
     {
-     "at": 0.6,
+     "at": 0.564,
      "clicarTexto": [
       ".escolha",
       "arquivo XML"
      ]
     },
     {
-     "at": 0.85,
+     "at": 0.799,
      "destacar": "#btn-escolher-xml"
     }
    ]

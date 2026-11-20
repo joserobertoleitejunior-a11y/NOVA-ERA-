@@ -28,21 +28,21 @@
    },
    "acoes": [
     {
-     "at": 0.35,
+     "at": 0.294,
      "digitar": [
       "#login-usuario",
       "adminadministrativo"
      ]
     },
     {
-     "at": 0.55,
+     "at": 0.462,
      "digitar": [
       "#login-senha",
       "admin"
      ]
     },
     {
-     "at": 0.75,
+     "at": 0.63,
      "clicar": "#btn-entrar"
     }
    ]
@@ -58,15 +58,15 @@
    },
    "acoes": [
     {
-     "at": 0.25,
+     "at": 0.215,
      "destacar": ".status-simples"
     },
     {
-     "at": 0.6,
+     "at": 0.516,
      "destacar": ".tiles"
     },
     {
-     "at": 0.85,
+     "at": 0.731,
      "destacar": "#btn-resumo"
     }
    ]
@@ -101,15 +101,15 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.172,
      "destacar": ".pessoa-linha"
     },
     {
-     "at": 0.5,
+     "at": 0.43,
      "clicar": ".pessoa-linha"
     },
     {
-     "at": 0.75,
+     "at": 0.645,
      "destacar": ".grade-escolha"
     }
    ]
@@ -128,18 +128,18 @@
    },
    "acoes": [
     {
-     "at": 0.25,
+     "at": 0.125,
      "destacar": ".veiculo-miniatura"
     },
     {
-     "at": 0.55,
+     "at": 0.275,
      "clicarTexto": [
       ".aba",
       "Produtos"
      ]
     },
     {
-     "at": 0.85,
+     "at": 0.425,
      "destacar": ".lista-simples"
     }
    ]

@@ -22,11 +22,11 @@ Coloque os 3 mp3 na pasta **gravacoes/** do repositório (GitHub → Add file �
 Eu confiro, corto por cena e ligo na apresentação e nos tutoriais.
 
 > Custo: o ElevenLabs cobra por caractere. O total abaixo é a soma dos 3 blocos; refazer um bloco gasta de novo aquele bloco.
-> **Total dos 3 blocos: 6365 caracteres.**
+> **Total dos 3 blocos: 7091 caracteres.**
 
 ---
 
-## BLOCO 01 — Apresentação  (17 cenas · 2167 caracteres)
+## BLOCO 01 — Apresentação  (17 cenas · 2587 caracteres)
 
 Cenas, em ordem: apresentacao/01-abertura · apresentacao/02-problema · apresentacao/03-entrar · apresentacao/04-inicio · apresentacao/05-nota · apresentacao/06-xml-ia · apresentacao/07-conferencia · apresentacao/08-etiquetas · apresentacao/09-avisos · apresentacao/10-estoque · apresentacao/11-contagem · apresentacao/12-equipe · apresentacao/13-frota · apresentacao/14-assistente · apresentacao/15-rastreio · apresentacao/16-site · apresentacao/17-fechamento
 
@@ -39,11 +39,11 @@ Cada pessoa entra com o seu usuário e senha, e vê só o que precisa pra trabal
 <break time="3.0s" />
 A tela inicial diz, numa frase, se está tudo certo. Se tiver problema, é só tocar em resolver agora.
 <break time="3.0s" />
-Uma nota nova entra na fila em quatro passos, e os conferentes são avisados no celular.
+Uma nota nova entra na fila em quatro passos. Primeiro, como a nota chegou. Depois, o número e o cliente. Em seguida, os produtos e as quantidades. E por fim, confirmar. Pronto! <break time="0.4s" /> Rápido e sem papel. Os conferentes são avisados na hora, no celular.
 <break time="3.0s" />
-Com o arquivo xis ême éle, o aplicativo lê a nota sozinho. E na versão premium, até a foto da nota.
+Com o arquivo xis ême éle, o aplicativo lê a nota sozinho: número, cliente e todos os itens. E na versão premium, até a foto da nota.
 <break time="3.0s" />
-O conferente toca na nota, escolhe o caminhão e confere. Tira a foto da carga e da placa. Fica tudo registrado, e ninguém apaga.
+O conferente toca na nota e escolhe o caminhão. Se a carga está certa, toca em tudo confere. Se tem diferença, informa quantas peças subiram. Depois, tira a foto da carga e da placa. Fica tudo registrado, com hora e nome, e ninguém apaga. Tudo em poucos toques.
 <break time="3.0s" />
 As etiquetas com quiú érre côde fazem a contagem peça por peça, só apontando a câmera.
 <break time="3.0s" />
@@ -53,7 +53,7 @@ O estoque se atualiza sozinho a cada carga conferida, e mostra em uma palavra se
 <break time="3.0s" />
 A contagem rápida leva uns três minutos. Se não bater, a administração decide: corrigir, ou contar de novo.
 <break time="3.0s" />
-Cadastrar uma pessoa é uma pergunta por tela. O aplicativo cria o acesso e manda no Uótsap, com um vídeo ensinando a função.
+Cadastrar uma pessoa é uma pergunta por tela: nome, função, Uótsap e foto. O aplicativo cria o acesso e manda no Uótsap, com um vídeo ensinando a função. E registra quem cadastrou. Leva um minuto.
 <break time="3.0s" />
 A frota fica cadastrada, com placa, dados e fotos. Na conferência, é só escolher o caminhão.
 <break time="3.0s" />
@@ -68,7 +68,7 @@ Confere Carga: menos erro, menos prejuízo, mais controle. Obrigado.
 
 ---
 
-## BLOCO 02 — Tutoriais · conferente, motorista e vendedor  (18 cenas · 1996 caracteres)
+## BLOCO 02 — Tutoriais · conferente, motorista e vendedor  (18 cenas · 2302 caracteres)
 
 Cenas, em ordem: conferente/01-entrar · conferente/02-fila · conferente/03-conferir · conferente/04-diferenca · conferente/05-etiquetas · conferente/06-contagem · conferente/07-avisos · conferente/08-ajuda · motorista/01-entrar · motorista/02-fila · motorista/03-avisos · motorista/04-cliente · vendedor/01-entrar · vendedor/02-inicio · vendedor/03-nota · vendedor/04-cargas · vendedor/05-rastreio · vendedor/06-avisos
 
@@ -77,9 +77,9 @@ Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em
 <break time="3.0s" />
 Aqui ficam as notas esperando conferência. Com o caminhão carregado, toque na nota.
 <break time="3.0s" />
-Escolha o caminhão. Se cada peça confere, toque em tudo confere. Tire a foto da carga e da placa, e confirme.
+Toque na nota e escolha o caminhão. Olhe a carga: se cada peça confere, toque em tudo confere. Depois, tire a foto do caminhão carregado e a foto da placa, e confirme. Pronto: fica registrado, com hora e foto. Passo a passo, sem pressa. Rápido e fácil.
 <break time="3.0s" />
-Se uma peça não confere, toque em diferente e diga quantas subiram. A administração é avisada na hora.
+Se uma peça não confere, toque em diferente e diga quantas subiram. O aplicativo mostra se foi a mais ou a menos. A administração é avisada na hora.
 <break time="3.0s" />
 Pra conferir mais rápido, aponte a câmera para o quiú érre de cada peça. O aplicativo conta sozinho.
 <break time="3.0s" />
@@ -101,7 +101,7 @@ Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em
 <break time="3.0s" />
 A tela inicial mostra se está tudo certo, e os botões do que você faz: lançar nota e ver as cargas.
 <break time="3.0s" />
-Pra lançar uma nota: como chegou, número e cliente, produtos, e confirmar. Os conferentes são avisados.
+Pra lançar uma nota: escolha como ela chegou, digite o número e o cliente, escolha os produtos, e confirme. Ela entra na fila, e os conferentes são avisados na hora, no celular. Sem papel, tudo no celular. Simples assim.
 <break time="3.0s" />
 Na aba cargas, toque numa carga pra ver itens, fotos e diferenças.
 <break time="3.0s" />
