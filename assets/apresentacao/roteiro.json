@@ -1,600 +1,600 @@
 {
-  "titulo": "Confere Carga · Como funciona",
-  "voz": {
-    "modelo": "eleven_multilingual_v2",
-    "estabilidade": 0.55,
-    "similaridade": 0.8,
-    "estilo": 0.25
+ "titulo": "Confere Carga · Como funciona",
+ "voz": {
+  "modelo": "eleven_multilingual_v2",
+  "estabilidade": 0.55,
+  "similaridade": 0.8,
+  "estilo": 0.25
+ },
+ "cenas": [
+  {
+   "id": "01-abertura",
+   "titulo": "Confere Carga",
+   "subtitulo": "O aplicativo sob medida da Nova Era",
+   "pontos": [
+    "Confere cada carga com a nota fiscal antes de o caminhão sair",
+    "Cuida do estoque sozinho",
+    "Avisa o responsável na hora, sem ninguém abrir o app"
+   ],
+   "fala": "Olá, e obrigado pelo tempo de vocês. Eu vou mostrar o Confere Carga: o aplicativo feito sob medida pra Nova Era conferir cada carga, antes do caminhão sair do pátio. Em poucos minutos, vocês vão ver cada função funcionando de verdade, direto no aplicativo.",
+   "pre": {
+    "perfil": null
+   },
+   "acoes": []
   },
-  "cenas": [
+  {
+   "id": "02-problema",
+   "titulo": "O problema que ele resolve",
+   "pontos": [
+    "Peça que sai a mais do que a nota não é cobrada",
+    "Peça que falta vira reclamação do cliente",
+    "Estoque que ninguém confere fica errado"
+   ],
+   "fala": "Primeiro, o problema. E ele é simples. Peça que sai a mais do que está na nota, ninguém cobra. Peça que falta, vira reclamação do cliente. E sem conferência, o estoque vai ficando errado, sem ninguém perceber. O Confere Carga resolve isso: ele confere a carga com a nota, avisa na hora, e ainda cuida do estoque.",
+   "pre": {
+    "perfil": null
+   },
+   "acoes": []
+  },
+  {
+   "id": "03-entrar",
+   "titulo": "Cada um entra com o seu acesso",
+   "pontos": [
+    "Administração vê tudo",
+    "Conferente vê só o que precisa",
+    "Motorista só acompanha a fila e os avisos"
+   ],
+   "fala": "Cada pessoa entra com o seu próprio usuário e senha. A administração enxerga tudo. O conferente vê só o que precisa pra conferir. E o motorista só acompanha a fila e os avisos. Assim, cada um faz a sua parte, sem confusão.",
+   "pre": {
+    "perfil": null,
+    "reiniciar": true
+   },
+   "acoes": [
     {
-      "id": "01-abertura",
-      "titulo": "Confere Carga",
-      "subtitulo": "O aplicativo sob medida da Nova Era",
-      "pontos": [
-        "Confere cada carga com a nota fiscal antes de o caminhão sair",
-        "Cuida do estoque sozinho",
-        "Avisa o responsável na hora, sem ninguém abrir o app"
-      ],
-      "fala": "Esta é a apresentação do Confere Carga, o aplicativo sob medida da Nova Era para conferir cada carga antes do caminhão sair. Em poucos minutos, você vai ver como cada função funciona, direto no aplicativo.",
-      "pre": {
-        "perfil": null
-      },
-      "acoes": []
+     "at": 0.22,
+     "digitar": [
+      "#login-usuario",
+      "admin"
+     ]
     },
     {
-      "id": "02-problema",
-      "titulo": "O problema que ele resolve",
-      "pontos": [
-        "Peça que sai a mais do que a nota não é cobrada",
-        "Peça que falta vira reclamação do cliente",
-        "Estoque que ninguém confere fica errado"
-      ],
-      "fala": "O problema é simples. Peça que sai a mais do que está na nota não é cobrada. Peça que falta vira reclamação do cliente. E, sem conferência, o estoque fica errado. O aplicativo confere a carga com a nota, avisa na hora e ainda cuida do estoque.",
-      "pre": {
-        "perfil": null
-      },
-      "acoes": []
+     "at": 0.42,
+     "digitar": [
+      "#login-senha",
+      "admin"
+     ]
     },
     {
-      "id": "03-entrar",
-      "titulo": "Cada um entra com o seu acesso",
-      "pontos": [
-        "Administração vê tudo",
-        "Conferente vê só o que precisa",
-        "Motorista só acompanha a fila e os avisos"
-      ],
-      "fala": "Cada pessoa entra com o seu usuário e a sua senha. A administração vê tudo. O conferente vê só o que precisa para conferir. E o motorista apenas acompanha a fila e os avisos.",
-      "pre": {
-        "perfil": null,
-        "reiniciar": true
-      },
-      "acoes": [
-        {
-          "at": 0.22,
-          "digitar": [
-            "#login-usuario",
-            "admin"
-          ]
-        },
-        {
-          "at": 0.42,
-          "digitar": [
-            "#login-senha",
-            "admin"
-          ]
-        },
-        {
-          "at": 0.62,
-          "clicar": "#btn-entrar"
-        }
-      ]
-    },
-    {
-      "id": "04-inicio",
-      "titulo": "A tela inicial é uma frase",
-      "pontos": [
-        "Verde: tudo certo",
-        "Amarelo ou vermelho: toque em Resolver agora",
-        "Abaixo, botões do que você quer fazer"
-      ],
-      "fala": "A tela inicial diz, em uma frase, se está tudo certo ou o que precisa de atenção. Se tiver problema, basta tocar em resolver agora. E logo abaixo, botões simples: o que você quer fazer?",
-      "pre": {
-        "perfil": "admin",
-        "rota": "inicio"
-      },
-      "acoes": [
-        {
-          "at": 0.2,
-          "destacar": ".status-simples"
-        },
-        {
-          "at": 0.5,
-          "destacar": ".numeros-simples"
-        },
-        {
-          "at": 0.68,
-          "destacar": ".tiles"
-        }
-      ]
-    },
-    {
-      "id": "05-nota",
-      "titulo": "Lançar uma nota em 4 passos",
-      "pontos": [
-        "Como a nota chegou",
-        "Número e cliente",
-        "Itens e quantidades",
-        "Confirmar: entra na fila"
-      ],
-      "fala": "Chegou uma nota? Ela entra na fila em quatro passos. Primeiro, escolhe como a nota chegou. Depois, número e cliente. Em seguida, os itens. E por fim, confirma. Os conferentes são avisados no celular.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "inicio"
-      },
-      "acoes": [
-        {
-          "at": 0.06,
-          "clicar": "#tile-nota"
-        },
-        {
-          "at": 0.2,
-          "clicarTexto": [
-            ".escolha",
-            "Vou digitar"
-          ]
-        },
-        {
-          "at": 0.28,
-          "clicar": "#btn-seguir"
-        },
-        {
-          "at": 0.37,
-          "digitar": [
-            "#nn-numero",
-            "48500"
-          ]
-        },
-        {
-          "at": 0.46,
-          "digitar": [
-            "#nn-cliente",
-            "Construtora Alfa"
-          ]
-        },
-        {
-          "at": 0.54,
-          "clicar": "#btn-seguir"
-        },
-        {
-          "at": 0.62,
-          "clicar": ".grade-escolha .escolha"
-        },
-        {
-          "at": 0.7,
-          "clicar": "#btn-seguir"
-        },
-        {
-          "at": 0.8,
-          "destacar": ".resumo"
-        },
-        {
-          "at": 0.9,
-          "clicar": "#btn-seguir"
-        }
-      ]
-    },
-    {
-      "id": "06-xml-ia",
-      "titulo": "XML e inteligência artificial",
-      "pontos": [
-        "XML: lê várias notas de uma vez",
-        "Premium: a IA lê a foto da nota",
-        "Número, cliente e itens saem sozinhos"
-      ],
-      "fala": "Se o escritório já tem o arquivo XML da nota, o aplicativo lê sozinho o número, o cliente e os itens, de várias notas de uma vez. E na versão premium, até a foto da nota é lida pela inteligência artificial, que preenche tudo para você.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "guia",
-        "params": {
-          "fluxo": "xml"
-        }
-      },
-      "acoes": [
-        {
-          "at": 0.2,
-          "destacar": "#btn-escolher-xml"
-        },
-        {
-          "at": 0.55,
-          "ir": [
-            "guia",
-            {
-              "fluxo": "nota"
-            }
-          ]
-        },
-        {
-          "at": 0.68,
-          "clicarTexto": [
-            ".escolha",
-            "Tenho a foto da nota"
-          ]
-        },
-        {
-          "at": 0.78,
-          "clicar": "#btn-seguir"
-        },
-        {
-          "at": 0.88,
-          "destacar": ".foto-bloco"
-        }
-      ]
-    },
-    {
-      "id": "07-conferencia",
-      "titulo": "O conferente confere a carga",
-      "pontos": [
-        "Abre a fila e toca na nota",
-        "Escolhe o caminhão",
-        "Tudo confere ou informa a diferença",
-        "Fotos da carga e da placa"
-      ],
-      "fala": "O conferente abre a fila e toca na nota. Escolhe o caminhão. Se a carga estiver certa, toca em tudo confere. Se algo estiver diferente, informa quantas peças subiram. Depois, tira as fotos da carga e da placa. Pronto: a conferência fica registrada, com hora, fotos e quem conferiu. E ninguém consegue apagar.",
-      "pre": {
-        "perfil": "conferente",
-        "rota": "notas"
-      },
-      "acoes": [
-        {
-          "at": 0.08,
-          "destacar": "#lista-minhas"
-        },
-        {
-          "at": 0.17,
-          "clicar": ".linha-cartao"
-        },
-        {
-          "at": 0.27,
-          "clicar": ".grade-escolha .escolha"
-        },
-        {
-          "at": 0.33,
-          "clicar": "#btn-seguir"
-        },
-        {
-          "at": 0.44,
-          "clicar": "#btn-tudo-confere"
-        },
-        {
-          "at": 0.52,
-          "destacar": ".item"
-        },
-        {
-          "at": 0.58,
-          "clicar": "#btn-seguir"
-        },
-        {
-          "at": 0.66,
-          "clicarTexto": [
-            "button.link-acao",
-            "Usar foto de teste",
-            0
-          ]
-        },
-        {
-          "at": 0.72,
-          "clicarTexto": [
-            "button.link-acao",
-            "Usar foto de teste",
-            1
-          ]
-        },
-        {
-          "at": 0.79,
-          "clicar": "#btn-seguir"
-        },
-        {
-          "at": 0.87,
-          "clicar": "#btn-seguir"
-        }
-      ]
-    },
-    {
-      "id": "08-etiquetas",
-      "titulo": "Etiquetas com QR code",
-      "pontos": [
-        "A nota gera as etiquetas",
-        "A câmera lê o QR de cada peça",
-        "O app conta sozinho e avisa se for de outra nota"
-      ],
-      "fala": "Para conferir mais rápido, a nota gera etiquetas com QR code, uma para cada peça. Na conferência, o conferente aponta a câmera, e o aplicativo conta peça por peça, sozinho. Se a etiqueta for de outra nota, ele avisa.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "notas"
-      },
-      "acoes": [
-        {
-          "at": 0.15,
-          "clicar": ".linha-cartao"
-        },
-        {
-          "at": 0.4,
-          "clicarTexto": [
-            ".janela-rodape .btn",
-            "Etiquetas"
-          ]
-        },
-        {
-          "at": 0.7,
-          "destacar": ".etiquetas-previa"
-        }
-      ]
-    },
-    {
-      "id": "09-avisos",
-      "titulo": "O app avisa na hora",
-      "pontos": [
-        "Saiu peça a mais ou faltou",
-        "Estoque negativo ou baixo",
-        "Conferência fora do horário",
-        "Sino, celular e WhatsApp"
-      ],
-      "fala": "Se saiu peça a mais, se faltou peça, se o estoque ficou negativo ou se algo foi conferido fora do horário, a administração é avisada na hora. No sino do aplicativo, no celular, e com um botão para mandar a mensagem direto no WhatsApp. Ninguém precisa ficar abrindo o app para procurar problema.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "alertas"
-      },
-      "acoes": [
-        {
-          "at": 0.15,
-          "destacar": ".alerta-item"
-        },
-        {
-          "at": 0.45,
-          "destacar": "#btn-sino"
-        },
-        {
-          "at": 0.7,
-          "destacar": ".link-acao.verde"
-        }
-      ]
-    },
-    {
-      "id": "10-estoque",
-      "titulo": "Estoque que se atualiza sozinho",
-      "pontos": [
-        "Cada carga conferida baixa o estoque",
-        "Ok, baixo ou negativo, em uma palavra",
-        "Lançar entrada ou perda em 4 passos"
-      ],
-      "fala": "O estoque se atualiza sozinho a cada carga conferida. Cada produto mostra, em uma palavra, se está ok, baixo ou negativo. E quando a fábrica produz, a entrada é lançada em quatro passos.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "estoque"
-      },
-      "acoes": [
-        {
-          "at": 0.2,
-          "destacar": ".linha-cartao"
-        },
-        {
-          "at": 0.5,
-          "destacar": ".chips"
-        },
-        {
-          "at": 0.72,
-          "destacar": "#btn-lancar"
-        }
-      ]
-    },
-    {
-      "id": "11-contagem",
-      "titulo": "Contagem rápida de estoque",
-      "pontos": [
-        "O app escolhe o que mais vale contar",
-        "Conta por pilhas, sem ver o saldo",
-        "Se não bater, a administração decide"
-      ],
-      "fala": "A contagem do dia escolhe os produtos que mais valem a pena contar, e leva uns três minutos. A pessoa conta por pilhas, sem ver o número do sistema, para ninguém chutar. Se a contagem não bater, a administração decide: corrigir o estoque ou pedir para contar de novo.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "estoque"
-      },
-      "acoes": [
-        {
-          "at": 0.08,
-          "clicar": "#btn-contagem"
-        },
-        {
-          "at": 0.28,
-          "clicar": "#btn-seguir"
-        },
-        {
-          "at": 0.46,
-          "destacar": ".contar-card"
-        },
-        {
-          "at": 0.58,
-          "digitar": [
-            "#ct-pilhas",
-            "3"
-          ]
-        },
-        {
-          "at": 0.78,
-          "destacar": ".total-grande"
-        }
-      ]
-    },
-    {
-      "id": "12-equipe",
-      "titulo": "Cadastrar a equipe, passo a passo",
-      "pontos": [
-        "Uma pergunta por tela: nome, função, WhatsApp e foto",
-        "Usuário e senha saem sozinhos",
-        "Cartão de acesso com QR e botão do WhatsApp"
-      ],
-      "fala": "Cadastrar uma pessoa é passo a passo, uma pergunta por tela: o nome, a função, o WhatsApp e, se quiser, a foto. O aplicativo cria o usuário e a senha sozinho, e entrega um cartão de acesso para imprimir ou mandar no WhatsApp. Cada pessoa tem um botão para ser chamada direto no WhatsApp.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "equipe"
-      },
-      "acoes": [
-        {
-          "at": 0.12,
-          "destacar": ".pessoa-linha"
-        },
-        {
-          "at": 0.26,
-          "clicar": "#btn-cadastrar"
-        },
-        {
-          "at": 0.4,
-          "digitar": [
-            "#cad-nome",
-            "Carlos Souza"
-          ]
-        },
-        {
-          "at": 0.5,
-          "clicar": "#btn-seguir"
-        },
-        {
-          "at": 0.58,
-          "clicarTexto": [
-            ".escolha",
-            "Conferente"
-          ]
-        },
-        {
-          "at": 0.66,
-          "clicar": "#btn-seguir"
-        },
-        {
-          "at": 0.74,
-          "digitar": [
-            "#cad-tel",
-            "15999990001"
-          ]
-        },
-        {
-          "at": 0.84,
-          "clicar": "#btn-seguir"
-        }
-      ]
-    },
-    {
-      "id": "13-frota",
-      "titulo": "A frota, com fotos",
-      "pontos": [
-        "Placa, tipo, marca, modelo e capacidade",
-        "Fotos de frente, lateral e traseira",
-        "Aparece na hora de escolher o caminhão"
-      ],
-      "fala": "A frota também fica cadastrada. Cada caminhão tem placa, tipo, marca, modelo, capacidade e fotos de frente, lateral e traseira. Na hora de conferir, o conferente escolhe o caminhão certo na lista.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "cadastros",
-        "params": {
-          "aba": "caminhoes"
-        }
-      },
-      "acoes": [
-        {
-          "at": 0.2,
-          "destacar": ".veiculo-miniatura"
-        },
-        {
-          "at": 0.5,
-          "clicar": ".pessoa-linha"
-        },
-        {
-          "at": 0.78,
-          "clicarTexto": [
-            ".escolha",
-            "Fotos"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "14-assistente",
-      "titulo": "Assistente de inteligência artificial",
-      "pontos": [
-        "Só para a administração",
-        "Responde com os dados reais da empresa",
-        "Explica o painel e recusa outros assuntos"
-      ],
-      "fala": "A administração conta com um assistente de inteligência artificial. Ele responde com os dados reais da empresa: o resumo do dia, o que saiu a mais, o que está faltando no estoque, e até explica o painel. E só fala sobre a Nova Era. Qualquer outro assunto, ele recusa. Funcionários não têm acesso a ele.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "inicio"
-      },
-      "acoes": [
-        {
-          "at": 0.15,
-          "clicar": "#fab-ia"
-        },
-        {
-          "at": 0.45,
-          "clicar": ".chat-sugestoes .chip"
-        },
-        {
-          "at": 0.75,
-          "destacar": ".chat"
-        }
-      ]
-    },
-    {
-      "id": "15-rastreio",
-      "titulo": "O cliente acompanha a entrega",
-      "pontos": [
-        "Link no WhatsApp do cliente",
-        "Horário de saída e o que foi carregado",
-        "Foto da carga"
-      ],
-      "fala": "O cliente recebe um link no WhatsApp e acompanha a entrega: o horário em que o caminhão saiu, o que foi carregado e a foto da carga. Menos ligação, menos dúvida, mais confiança na Nova Era.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "inicio"
-      },
-      "acoes": [
-        {
-          "at": 0.12,
-          "rastreio": true
-        },
-        {
-          "at": 0.55,
-          "rolar": ".resumo"
-        }
-      ]
-    },
-    {
-      "id": "16-site",
-      "titulo": "E o site da Nova Era",
-      "pontos": [
-        "Fotos reais e maquetes 3D dos produtos",
-        "Orçamento sem compromisso",
-        "Faixa de contatos e menu com acesso da equipe"
-      ],
-      "fala": "E o site da Nova Era mostra os produtos com fotos reais e maquetes em três D, que montam enquanto a página rola. O cliente monta a lista de orçamento e fala com a equipe, tudo em um lugar só.",
-      "pre": {},
-      "acoes": [
-        {
-          "at": 0.05,
-          "site": true
-        },
-        {
-          "at": 0.4,
-          "siteRolar": "#produtos"
-        },
-        {
-          "at": 0.75,
-          "siteRolar": ".produto:nth-child(3)"
-        }
-      ]
-    },
-    {
-      "id": "17-fechamento",
-      "titulo": "Menos erro. Mais controle.",
-      "subtitulo": "Confere Carga · Nova Era",
-      "pontos": [
-        "Cada carga conferida com a nota",
-        "Estoque sempre certo",
-        "Avisos na hora para quem decide"
-      ],
-      "fala": "O Confere Carga é isso: menos erro, menos prejuízo e mais controle sobre tudo que sai da Nova Era. Obrigado.",
-      "pre": {
-        "perfil": "admin",
-        "rota": "inicio"
-      },
-      "acoes": [
-        {
-          "at": 0.3,
-          "destacar": ".tiles"
-        }
-      ]
+     "at": 0.62,
+     "clicar": "#btn-entrar"
     }
-  ]
+   ]
+  },
+  {
+   "id": "04-inicio",
+   "titulo": "A tela inicial é uma frase",
+   "pontos": [
+    "Verde: tudo certo",
+    "Amarelo ou vermelho: toque em Resolver agora",
+    "Abaixo, botões do que você quer fazer"
+   ],
+   "fala": "Quando alguém abre o aplicativo, a primeira coisa que vê é uma frase: está tudo certo, ou tem algo precisando de atenção. Se tiver problema, é só tocar em resolver agora. E logo abaixo, botões grandes e simples: o que você quer fazer?",
+   "pre": {
+    "perfil": "admin",
+    "rota": "inicio"
+   },
+   "acoes": [
+    {
+     "at": 0.2,
+     "destacar": ".status-simples"
+    },
+    {
+     "at": 0.5,
+     "destacar": ".numeros-simples"
+    },
+    {
+     "at": 0.68,
+     "destacar": ".tiles"
+    }
+   ]
+  },
+  {
+   "id": "05-nota",
+   "titulo": "Lançar uma nota em 4 passos",
+   "pontos": [
+    "Como a nota chegou",
+    "Número e cliente",
+    "Itens e quantidades",
+    "Confirmar: entra na fila"
+   ],
+   "fala": "Chegou uma nota nova? Ela entra na fila em quatro passos. Primeiro, como a nota chegou. Depois, o número e o cliente. Em seguida, os itens. E, por fim, confirmar. Pronto! Os conferentes recebem o aviso no próprio celular.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "inicio"
+   },
+   "acoes": [
+    {
+     "at": 0.06,
+     "clicar": "#tile-nota"
+    },
+    {
+     "at": 0.2,
+     "clicarTexto": [
+      ".escolha",
+      "Vou digitar"
+     ]
+    },
+    {
+     "at": 0.28,
+     "clicar": "#btn-seguir"
+    },
+    {
+     "at": 0.37,
+     "digitar": [
+      "#nn-numero",
+      "48500"
+     ]
+    },
+    {
+     "at": 0.46,
+     "digitar": [
+      "#nn-cliente",
+      "Construtora Alfa"
+     ]
+    },
+    {
+     "at": 0.54,
+     "clicar": "#btn-seguir"
+    },
+    {
+     "at": 0.62,
+     "clicar": ".grade-escolha .escolha"
+    },
+    {
+     "at": 0.7,
+     "clicar": "#btn-seguir"
+    },
+    {
+     "at": 0.8,
+     "destacar": ".resumo"
+    },
+    {
+     "at": 0.9,
+     "clicar": "#btn-seguir"
+    }
+   ]
+  },
+  {
+   "id": "06-xml-ia",
+   "titulo": "XML e inteligência artificial",
+   "pontos": [
+    "XML: lê várias notas de uma vez",
+    "Premium: a IA lê a foto da nota",
+    "Número, cliente e itens saem sozinhos"
+   ],
+   "fala": "Se o escritório já tem o arquivo XML da nota, melhor ainda. O aplicativo lê sozinho o número, o cliente e todos os itens, e dá pra mandar várias notas de uma só vez. E na versão premium, até a foto da nota é lida pela inteligência artificial, que preenche tudo pra você.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "guia",
+    "params": {
+     "fluxo": "xml"
+    }
+   },
+   "acoes": [
+    {
+     "at": 0.2,
+     "destacar": "#btn-escolher-xml"
+    },
+    {
+     "at": 0.55,
+     "ir": [
+      "guia",
+      {
+       "fluxo": "nota"
+      }
+     ]
+    },
+    {
+     "at": 0.68,
+     "clicarTexto": [
+      ".escolha",
+      "Tenho a foto da nota"
+     ]
+    },
+    {
+     "at": 0.78,
+     "clicar": "#btn-seguir"
+    },
+    {
+     "at": 0.88,
+     "destacar": ".foto-bloco"
+    }
+   ]
+  },
+  {
+   "id": "07-conferencia",
+   "titulo": "O conferente confere a carga",
+   "pontos": [
+    "Abre a fila e toca na nota",
+    "Escolhe o caminhão",
+    "Tudo confere ou informa a diferença",
+    "Fotos da carga e da placa"
+   ],
+   "fala": "Agora, o coração do aplicativo: a conferência. O conferente abre a fila, toca na nota e escolhe o caminhão. Se a carga está certa, toca em tudo confere. Se tem alguma coisa diferente, ele informa quantas peças subiram. Depois, tira a foto da carga e a foto da placa. E pronto: a conferência fica registrada, com a hora, as fotos, e o nome de quem conferiu. E ninguém consegue apagar.",
+   "pre": {
+    "perfil": "conferente",
+    "rota": "notas"
+   },
+   "acoes": [
+    {
+     "at": 0.08,
+     "destacar": "#lista-minhas"
+    },
+    {
+     "at": 0.17,
+     "clicar": ".linha-cartao"
+    },
+    {
+     "at": 0.27,
+     "clicar": ".grade-escolha .escolha"
+    },
+    {
+     "at": 0.33,
+     "clicar": "#btn-seguir"
+    },
+    {
+     "at": 0.44,
+     "clicar": "#btn-tudo-confere"
+    },
+    {
+     "at": 0.52,
+     "destacar": ".item"
+    },
+    {
+     "at": 0.58,
+     "clicar": "#btn-seguir"
+    },
+    {
+     "at": 0.66,
+     "clicarTexto": [
+      "button.link-acao",
+      "Usar foto de teste",
+      0
+     ]
+    },
+    {
+     "at": 0.72,
+     "clicarTexto": [
+      "button.link-acao",
+      "Usar foto de teste",
+      1
+     ]
+    },
+    {
+     "at": 0.79,
+     "clicar": "#btn-seguir"
+    },
+    {
+     "at": 0.87,
+     "clicar": "#btn-seguir"
+    }
+   ]
+  },
+  {
+   "id": "08-etiquetas",
+   "titulo": "Etiquetas com QR code",
+   "pontos": [
+    "A nota gera as etiquetas",
+    "A câmera lê o QR de cada peça",
+    "O app conta sozinho e avisa se for de outra nota"
+   ],
+   "fala": "Pra conferir ainda mais rápido, a nota gera etiquetas com QR code, uma pra cada peça. Na hora de conferir, o conferente aponta a câmera, e o aplicativo conta peça por peça, sozinho. E se a etiqueta for de outra nota, ele avisa na hora.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "notas"
+   },
+   "acoes": [
+    {
+     "at": 0.15,
+     "clicar": ".linha-cartao"
+    },
+    {
+     "at": 0.4,
+     "clicarTexto": [
+      ".janela-rodape .btn",
+      "Etiquetas"
+     ]
+    },
+    {
+     "at": 0.7,
+     "destacar": ".etiquetas-previa"
+    }
+   ]
+  },
+  {
+   "id": "09-avisos",
+   "titulo": "O app avisa na hora",
+   "pontos": [
+    "Saiu peça a mais ou faltou",
+    "Estoque negativo ou baixo",
+    "Conferência fora do horário",
+    "Sino, celular e WhatsApp"
+   ],
+   "fala": "Se saiu peça a mais, se faltou peça, se o estoque ficou negativo, ou se alguma coisa foi conferida fora do horário, a administração é avisada na hora. No sino do aplicativo, no celular, e com um botão pra mandar a mensagem direto no WhatsApp. Ninguém precisa ficar abrindo o aplicativo pra procurar problema. O problema é que vem até você.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "alertas"
+   },
+   "acoes": [
+    {
+     "at": 0.15,
+     "destacar": ".alerta-item"
+    },
+    {
+     "at": 0.45,
+     "destacar": "#btn-sino"
+    },
+    {
+     "at": 0.7,
+     "destacar": ".link-acao.verde"
+    }
+   ]
+  },
+  {
+   "id": "10-estoque",
+   "titulo": "Estoque que se atualiza sozinho",
+   "pontos": [
+    "Cada carga conferida baixa o estoque",
+    "Ok, baixo ou negativo, em uma palavra",
+    "Lançar entrada ou perda em 4 passos"
+   ],
+   "fala": "O estoque se atualiza sozinho, a cada carga conferida. Cada produto mostra, em uma só palavra, se está ok, baixo, ou negativo. E quando a fábrica produz, a entrada é lançada em quatro passos.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "estoque"
+   },
+   "acoes": [
+    {
+     "at": 0.2,
+     "destacar": ".linha-cartao"
+    },
+    {
+     "at": 0.5,
+     "destacar": ".chips"
+    },
+    {
+     "at": 0.72,
+     "destacar": "#btn-lancar"
+    }
+   ]
+  },
+  {
+   "id": "11-contagem",
+   "titulo": "Contagem rápida de estoque",
+   "pontos": [
+    "O app escolhe o que mais vale contar",
+    "Conta por pilhas, sem ver o saldo",
+    "Se não bater, a administração decide"
+   ],
+   "fala": "Tem também a contagem rápida do dia. O aplicativo escolhe os produtos que mais valem a pena contar, e leva uns três minutos. A pessoa conta por pilhas, sem ver o número do sistema, pra ninguém chutar. E se a contagem não bater, quem decide é a administração: corrigir o estoque, ou pedir pra contar de novo.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "estoque"
+   },
+   "acoes": [
+    {
+     "at": 0.08,
+     "clicar": "#btn-contagem"
+    },
+    {
+     "at": 0.28,
+     "clicar": "#btn-seguir"
+    },
+    {
+     "at": 0.46,
+     "destacar": ".contar-card"
+    },
+    {
+     "at": 0.58,
+     "digitar": [
+      "#ct-pilhas",
+      "3"
+     ]
+    },
+    {
+     "at": 0.78,
+     "destacar": ".total-grande"
+    }
+   ]
+  },
+  {
+   "id": "12-equipe",
+   "titulo": "Cadastrar a equipe, passo a passo",
+   "pontos": [
+    "Uma pergunta por tela: nome, função, WhatsApp e foto",
+    "Usuário e senha saem sozinhos",
+    "Cartão de acesso com QR e botão do WhatsApp"
+   ],
+   "fala": "Cadastrar uma pessoa também é passo a passo: uma pergunta por tela. O nome, a função, o WhatsApp e, se quiser, a foto. O aplicativo cria o usuário e a senha sozinho, e manda no WhatsApp da pessoa um link com o acesso e um vídeo ensinando a função dela. E fica registrado qual administrador fez o cadastro.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "equipe"
+   },
+   "acoes": [
+    {
+     "at": 0.12,
+     "destacar": ".pessoa-linha"
+    },
+    {
+     "at": 0.26,
+     "clicar": "#btn-cadastrar"
+    },
+    {
+     "at": 0.4,
+     "digitar": [
+      "#cad-nome",
+      "Carlos Souza"
+     ]
+    },
+    {
+     "at": 0.5,
+     "clicar": "#btn-seguir"
+    },
+    {
+     "at": 0.58,
+     "clicarTexto": [
+      ".escolha",
+      "Conferente"
+     ]
+    },
+    {
+     "at": 0.66,
+     "clicar": "#btn-seguir"
+    },
+    {
+     "at": 0.74,
+     "digitar": [
+      "#cad-tel",
+      "15999990001"
+     ]
+    },
+    {
+     "at": 0.84,
+     "clicar": "#btn-seguir"
+    }
+   ]
+  },
+  {
+   "id": "13-frota",
+   "titulo": "A frota, com fotos",
+   "pontos": [
+    "Placa, tipo, marca, modelo e capacidade",
+    "Fotos de frente, lateral e traseira",
+    "Aparece na hora de escolher o caminhão"
+   ],
+   "fala": "A frota também fica cadastrada. Cada caminhão tem placa, tipo, marca, modelo, capacidade, e fotos de frente, de lado e de trás. Na hora de conferir, o conferente só escolhe o caminhão certo na lista.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "cadastros",
+    "params": {
+     "aba": "caminhoes"
+    }
+   },
+   "acoes": [
+    {
+     "at": 0.2,
+     "destacar": ".veiculo-miniatura"
+    },
+    {
+     "at": 0.5,
+     "clicar": ".pessoa-linha"
+    },
+    {
+     "at": 0.78,
+     "clicarTexto": [
+      ".escolha",
+      "Fotos"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "14-assistente",
+   "titulo": "Assistente de inteligência artificial",
+   "pontos": [
+    "Só para a administração",
+    "Responde com os dados reais da empresa",
+    "Explica o painel e recusa outros assuntos"
+   ],
+   "fala": "E, na versão completa, a administração conta com um assistente de inteligência artificial. Ele responde com os dados reais da empresa: o resumo do dia, o que saiu a mais, o que está faltando no estoque… e até explica o painel. Ele só fala sobre a Nova Era. Qualquer outro assunto, ele recusa. E os funcionários não têm acesso a ele.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "inicio"
+   },
+   "acoes": [
+    {
+     "at": 0.15,
+     "clicar": "#fab-ia"
+    },
+    {
+     "at": 0.45,
+     "clicar": ".chat-sugestoes .chip"
+    },
+    {
+     "at": 0.75,
+     "destacar": ".chat"
+    }
+   ]
+  },
+  {
+   "id": "15-rastreio",
+   "titulo": "O cliente acompanha a entrega",
+   "pontos": [
+    "Link no WhatsApp do cliente",
+    "Horário de saída e o que foi carregado",
+    "Foto da carga"
+   ],
+   "fala": "E o cliente? Ele recebe um link no WhatsApp e acompanha a entrega: o horário em que o caminhão saiu, o que foi carregado, e a foto da carga. Menos ligação, menos dúvida, e muito mais confiança na Nova Era.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "inicio"
+   },
+   "acoes": [
+    {
+     "at": 0.12,
+     "rastreio": true
+    },
+    {
+     "at": 0.55,
+     "rolar": ".resumo"
+    }
+   ]
+  },
+  {
+   "id": "16-site",
+   "titulo": "E o site da Nova Era",
+   "pontos": [
+    "Fotos reais e maquetes 3D dos produtos",
+    "Orçamento sem compromisso",
+    "Faixa de contatos e menu com acesso da equipe"
+   ],
+   "fala": "E o site da Nova Era mostra os produtos com fotos reais, e maquetes em três D que se montam enquanto a página rola. O cliente monta a lista de orçamento, e fala com a equipe, tudo num lugar só.",
+   "pre": {},
+   "acoes": [
+    {
+     "at": 0.05,
+     "site": true
+    },
+    {
+     "at": 0.4,
+     "siteRolar": "#produtos"
+    },
+    {
+     "at": 0.75,
+     "siteRolar": ".produto:nth-child(3)"
+    }
+   ]
+  },
+  {
+   "id": "17-fechamento",
+   "titulo": "Menos erro. Mais controle.",
+   "subtitulo": "Confere Carga · Nova Era",
+   "pontos": [
+    "Cada carga conferida com a nota",
+    "Estoque sempre certo",
+    "Avisos na hora para quem decide"
+   ],
+   "fala": "O Confere Carga é isso: menos erro, menos prejuízo, e mais controle sobre tudo que sai da Nova Era. Muito obrigado.",
+   "pre": {
+    "perfil": "admin",
+    "rota": "inicio"
+   },
+   "acoes": [
+    {
+     "at": 0.3,
+     "destacar": ".tiles"
+    }
+   ]
+  }
+ ]
 }

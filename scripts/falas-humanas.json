@@ -1,0 +1,70 @@
+{
+  "apresentacao": {
+    "01-abertura": "Olá, e obrigado pelo tempo de vocês. Eu vou mostrar o Confere Carga: o aplicativo feito sob medida pra Nova Era conferir cada carga, antes do caminhão sair do pátio. Em poucos minutos, vocês vão ver cada função funcionando de verdade, direto no aplicativo.",
+    "02-problema": "Primeiro, o problema. E ele é simples. Peça que sai a mais do que está na nota, ninguém cobra. Peça que falta, vira reclamação do cliente. E sem conferência, o estoque vai ficando errado, sem ninguém perceber. O Confere Carga resolve isso: ele confere a carga com a nota, avisa na hora, e ainda cuida do estoque.",
+    "03-entrar": "Cada pessoa entra com o seu próprio usuário e senha. A administração enxerga tudo. O conferente vê só o que precisa pra conferir. E o motorista só acompanha a fila e os avisos. Assim, cada um faz a sua parte, sem confusão.",
+    "04-inicio": "Quando alguém abre o aplicativo, a primeira coisa que vê é uma frase: está tudo certo, ou tem algo precisando de atenção. Se tiver problema, é só tocar em resolver agora. E logo abaixo, botões grandes e simples: o que você quer fazer?",
+    "05-nota": "Chegou uma nota nova? Ela entra na fila em quatro passos. Primeiro, como a nota chegou. Depois, o número e o cliente. Em seguida, os itens. E, por fim, confirmar. Pronto! Os conferentes recebem o aviso no próprio celular.",
+    "06-xml-ia": "Se o escritório já tem o arquivo XML da nota, melhor ainda. O aplicativo lê sozinho o número, o cliente e todos os itens, e dá pra mandar várias notas de uma só vez. E na versão premium, até a foto da nota é lida pela inteligência artificial, que preenche tudo pra você.",
+    "07-conferencia": "Agora, o coração do aplicativo: a conferência. O conferente abre a fila, toca na nota e escolhe o caminhão. Se a carga está certa, toca em tudo confere. Se tem alguma coisa diferente, ele informa quantas peças subiram. Depois, tira a foto da carga e a foto da placa. E pronto: a conferência fica registrada, com a hora, as fotos, e o nome de quem conferiu. E ninguém consegue apagar.",
+    "08-etiquetas": "Pra conferir ainda mais rápido, a nota gera etiquetas com QR code, uma pra cada peça. Na hora de conferir, o conferente aponta a câmera, e o aplicativo conta peça por peça, sozinho. E se a etiqueta for de outra nota, ele avisa na hora.",
+    "09-avisos": "Se saiu peça a mais, se faltou peça, se o estoque ficou negativo, ou se alguma coisa foi conferida fora do horário, a administração é avisada na hora. No sino do aplicativo, no celular, e com um botão pra mandar a mensagem direto no WhatsApp. Ninguém precisa ficar abrindo o aplicativo pra procurar problema. O problema é que vem até você.",
+    "10-estoque": "O estoque se atualiza sozinho, a cada carga conferida. Cada produto mostra, em uma só palavra, se está ok, baixo, ou negativo. E quando a fábrica produz, a entrada é lançada em quatro passos.",
+    "11-contagem": "Tem também a contagem rápida do dia. O aplicativo escolhe os produtos que mais valem a pena contar, e leva uns três minutos. A pessoa conta por pilhas, sem ver o número do sistema, pra ninguém chutar. E se a contagem não bater, quem decide é a administração: corrigir o estoque, ou pedir pra contar de novo.",
+    "12-equipe": "Cadastrar uma pessoa também é passo a passo: uma pergunta por tela. O nome, a função, o WhatsApp e, se quiser, a foto. O aplicativo cria o usuário e a senha sozinho, e manda no WhatsApp da pessoa um link com o acesso e um vídeo ensinando a função dela. E fica registrado qual administrador fez o cadastro.",
+    "13-frota": "A frota também fica cadastrada. Cada caminhão tem placa, tipo, marca, modelo, capacidade, e fotos de frente, de lado e de trás. Na hora de conferir, o conferente só escolhe o caminhão certo na lista.",
+    "14-assistente": "E, na versão completa, a administração conta com um assistente de inteligência artificial. Ele responde com os dados reais da empresa: o resumo do dia, o que saiu a mais, o que está faltando no estoque… e até explica o painel. Ele só fala sobre a Nova Era. Qualquer outro assunto, ele recusa. E os funcionários não têm acesso a ele.",
+    "15-rastreio": "E o cliente? Ele recebe um link no WhatsApp e acompanha a entrega: o horário em que o caminhão saiu, o que foi carregado, e a foto da carga. Menos ligação, menos dúvida, e muito mais confiança na Nova Era.",
+    "16-site": "E o site da Nova Era mostra os produtos com fotos reais, e maquetes em três D que se montam enquanto a página rola. O cliente monta a lista de orçamento, e fala com a equipe, tudo num lugar só.",
+    "17-fechamento": "O Confere Carga é isso: menos erro, menos prejuízo, e mais controle sobre tudo que sai da Nova Era. Muito obrigado."
+  },
+  "conferente": {
+    "01-entrar": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. A primeira tela que você vê é a fila de notas.",
+    "02-fila": "Essa é a fila: as notas que estão esperando conferência. Quando o caminhão for carregado, é só tocar na nota. E se chegou carga sem nota na fila, use o botão grande: conferir uma carga.",
+    "03-conferir": "Vamos conferir uma carga, passo a passo. Toque na nota. Escolha o caminhão que vai sair. Agora olhe a carga: se cada peça confere com a nota, toque em tudo confere. Depois, tire a foto do caminhão carregado, e a foto da placa. E confirme. Pronto! A conferência fica registrada, com a hora e as fotos.",
+    "04-diferenca": "E se alguma peça não confere? Sem problema. Toque em diferente, naquele item, e diga quantas peças subiram no caminhão. O aplicativo mostra se foi a mais, ou a menos. No fim, você escolhe o motivo. E a administração é avisada na hora.",
+    "05-etiquetas": "Quer conferir mais rápido? Use contar lendo as etiquetas. Aponte a câmera pro QR de cada peça, e o aplicativo conta sozinho. Se a etiqueta for de outra nota, ele avisa.",
+    "06-contagem": "Quando pedirem, ou quando você tiver um tempinho, faça a contagem do dia. O aplicativo escolhe os produtos mais importantes. Conte as pilhas e as peças soltas, sem olhar o número do sistema. Leva uns três minutos.",
+    "07-avisos": "O sino mostra os seus avisos: nota nova na fila, e pedido de contagem. Ligue os avisos do celular, e você recebe tudo sem precisar abrir o aplicativo.",
+    "08-ajuda": "Ficou com dúvida? Em qualquer tela, toque em ajuda, lá no alto. O aplicativo mostra o que fazer ali. E se travar, chame a expedição. Bom trabalho!"
+  },
+  "motorista": {
+    "01-entrar": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você vai acompanhar a fila e os avisos.",
+    "02-fila": "A sua tela mostra as notas que estão esperando conferência. Você não precisa conferir nada: quem confere a carga é o conferente. Quando a conferência termina, o caminhão está liberado pra sair.",
+    "03-avisos": "Fique de olho no sino. Quando tiver algum aviso pra você, ele aparece ali. E também no celular, se você ligar os avisos.",
+    "04-cliente": "Depois da conferência, o vendedor manda um link pro cliente. Ele vê a hora em que você saiu, o que foi carregado, e a foto da carga. Por isso: só saia do pátio depois que a carga for conferida."
+  },
+  "vendedor": {
+    "01-entrar": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Aqui você vê as notas e as cargas, e manda o rastreio pro cliente.",
+    "02-inicio": "Na tela inicial, uma frase mostra se está tudo certo. E embaixo ficam os botões do que você faz: lançar uma nota, e ver as cargas.",
+    "03-nota": "Pra lançar uma nota: escolha como ela chegou, digite o número e o cliente, escolha os produtos, e confirme. Ela entra na fila, e os conferentes são avisados.",
+    "04-cargas": "Na aba cargas, você vê tudo que já saiu. Toque numa carga pra ver os itens, as fotos, e se teve diferença.",
+    "05-rastreio": "Agora, o melhor pro seu cliente. Dentro da carga, toque em enviar ao cliente, e escolha o WhatsApp dele. Ele recebe um link com o horário de saída, o que foi carregado, e a foto da carga. Menos ligação, mais confiança.",
+    "06-avisos": "Os avisos chegam no sino e no celular: nota conferida, diferença na carga, e outros recados da operação."
+  },
+  "expedicao": {
+    "01-entrar": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você comanda a operação: notas, cargas, estoque e equipe.",
+    "02-inicio": "Na tela inicial, uma frase diz se está tudo certo. Se tiver problema, toque em resolver agora. E embaixo, os botões do que você quer fazer.",
+    "03-nota": "Pra lançar uma nota, escolha como ela chegou: arquivo XML, foto, ou digitando. Depois, número, cliente, itens, e confirmar. Se você tiver o XML, o aplicativo lê tudo sozinho.",
+    "04-cargas": "Na aba cargas, você vê tudo que saiu. Dá pra filtrar só as que tiveram diferença. Toque numa carga pra ver as fotos, os itens, e imprimir as etiquetas.",
+    "05-estoque": "O estoque se atualiza sozinho, a cada carga conferida. Pra corrigir, a equipe faz a contagem do dia, e você decide: corrigir o estoque, ou contar de novo.",
+    "06-equipe": "Pra cadastrar uma pessoa: nome, função, WhatsApp e foto, um passo de cada vez. O aplicativo cria o usuário e a senha, e manda no WhatsApp dela um link com o acesso, e o vídeo tutorial da função.",
+    "07-avisos": "O aplicativo avisa você na hora: peça a mais na carga, estoque baixo, nota parada na fila, conferência fora do horário, e pedido de ajuda de senha. Tudo no sino, e no celular."
+  },
+  "administrativo": {
+    "01-entrar": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você cuida dos cadastros: notas, equipe, frota e produtos.",
+    "02-inicio": "Na tela inicial, uma frase mostra se está tudo certo, e botões simples levam a cada tarefa. Tem também o botão pra ver o resumo completo.",
+    "03-xml": "Pra lançar várias notas de uma vez, use o arquivo XML. Escolha os arquivos, confira o que foi lido, e envie. Os produtos que ainda não existem são cadastrados sozinhos.",
+    "04-equipe": "Na aba mais, equipe: cadastre pessoas, mude o WhatsApp, a foto ou a função, e gere uma senha nova pra quem esqueceu.",
+    "05-frota": "Cadastre os caminhões com placa, dados e fotos. E os produtos, com estoque mínimo e peças por pilha. Isso deixa o aplicativo bem mais esperto.",
+    "06-avisos": "Os avisos mostram o que precisa de atenção. Quem esquece a senha manda um pedido, e ele aparece aqui, pra você."
+  },
+  "diretoria": {
+    "01-entrar": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você vê a empresa inteira em uma tela.",
+    "02-inicio": "A tela inicial mostra, em uma frase, como está a empresa agora. Verde: tudo certo. Amarelo ou vermelho: toque em resolver agora.",
+    "03-resumo": "O resumo completo traz os números do dia, da semana e do mês: quantas cargas, quantas com diferença, onde mais erra, e como está a equipe. E cada recado leva direto à tela pra resolver.",
+    "04-ia": "Na versão completa, você pergunta pro assistente de inteligência artificial: resumo do dia, o que saiu a mais, estoque baixo, notas paradas. Ele responde com os dados reais, explica o painel, e só fala da Nova Era.",
+    "05-equipe": "Na equipe, cada pessoa mostra qual administrador a cadastrou, e quando. É o registro de quem deu acesso.",
+    "06-avisos": "Os avisos críticos chegam no sino e no seu celular, com um botão pra chamar no WhatsApp quem precisa resolver."
+  }
+}

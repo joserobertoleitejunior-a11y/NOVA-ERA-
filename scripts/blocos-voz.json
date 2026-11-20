@@ -1,0 +1,248 @@
+[
+ {
+  "bloco": 1,
+  "arquivo": "bloco-01.mp3",
+  "cenas": [
+   {
+    "alvo": "apresentacao",
+    "id": "01-abertura"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "02-problema"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "03-entrar"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "04-inicio"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "05-nota"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "06-xml-ia"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "07-conferencia"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "08-etiquetas"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "09-avisos"
+   }
+  ]
+ },
+ {
+  "bloco": 2,
+  "arquivo": "bloco-02.mp3",
+  "cenas": [
+   {
+    "alvo": "apresentacao",
+    "id": "10-estoque"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "11-contagem"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "12-equipe"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "13-frota"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "14-assistente"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "15-rastreio"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "16-site"
+   },
+   {
+    "alvo": "apresentacao",
+    "id": "17-fechamento"
+   }
+  ]
+ },
+ {
+  "bloco": 3,
+  "arquivo": "bloco-03.mp3",
+  "cenas": [
+   {
+    "alvo": "conferente",
+    "id": "01-entrar"
+   },
+   {
+    "alvo": "conferente",
+    "id": "02-fila"
+   },
+   {
+    "alvo": "conferente",
+    "id": "03-conferir"
+   },
+   {
+    "alvo": "conferente",
+    "id": "04-diferenca"
+   },
+   {
+    "alvo": "conferente",
+    "id": "05-etiquetas"
+   },
+   {
+    "alvo": "conferente",
+    "id": "06-contagem"
+   },
+   {
+    "alvo": "conferente",
+    "id": "07-avisos"
+   },
+   {
+    "alvo": "conferente",
+    "id": "08-ajuda"
+   },
+   {
+    "alvo": "motorista",
+    "id": "01-entrar"
+   },
+   {
+    "alvo": "motorista",
+    "id": "02-fila"
+   },
+   {
+    "alvo": "motorista",
+    "id": "03-avisos"
+   },
+   {
+    "alvo": "motorista",
+    "id": "04-cliente"
+   }
+  ]
+ },
+ {
+  "bloco": 4,
+  "arquivo": "bloco-04.mp3",
+  "cenas": [
+   {
+    "alvo": "vendedor",
+    "id": "01-entrar"
+   },
+   {
+    "alvo": "vendedor",
+    "id": "02-inicio"
+   },
+   {
+    "alvo": "vendedor",
+    "id": "03-nota"
+   },
+   {
+    "alvo": "vendedor",
+    "id": "04-cargas"
+   },
+   {
+    "alvo": "vendedor",
+    "id": "05-rastreio"
+   },
+   {
+    "alvo": "vendedor",
+    "id": "06-avisos"
+   },
+   {
+    "alvo": "expedicao",
+    "id": "01-entrar"
+   },
+   {
+    "alvo": "expedicao",
+    "id": "02-inicio"
+   },
+   {
+    "alvo": "expedicao",
+    "id": "03-nota"
+   },
+   {
+    "alvo": "expedicao",
+    "id": "04-cargas"
+   },
+   {
+    "alvo": "expedicao",
+    "id": "05-estoque"
+   },
+   {
+    "alvo": "expedicao",
+    "id": "06-equipe"
+   },
+   {
+    "alvo": "expedicao",
+    "id": "07-avisos"
+   }
+  ]
+ },
+ {
+  "bloco": 5,
+  "arquivo": "bloco-05.mp3",
+  "cenas": [
+   {
+    "alvo": "administrativo",
+    "id": "01-entrar"
+   },
+   {
+    "alvo": "administrativo",
+    "id": "02-inicio"
+   },
+   {
+    "alvo": "administrativo",
+    "id": "03-xml"
+   },
+   {
+    "alvo": "administrativo",
+    "id": "04-equipe"
+   },
+   {
+    "alvo": "administrativo",
+    "id": "05-frota"
+   },
+   {
+    "alvo": "administrativo",
+    "id": "06-avisos"
+   },
+   {
+    "alvo": "diretoria",
+    "id": "01-entrar"
+   },
+   {
+    "alvo": "diretoria",
+    "id": "02-inicio"
+   },
+   {
+    "alvo": "diretoria",
+    "id": "03-resumo"
+   },
+   {
+    "alvo": "diretoria",
+    "id": "04-ia"
+   },
+   {
+    "alvo": "diretoria",
+    "id": "05-equipe"
+   },
+   {
+    "alvo": "diretoria",
+    "id": "06-avisos"
+   }
+  ]
+ }
+]

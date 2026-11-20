@@ -1,0 +1,1 @@
+Coloque aqui os mp3 do ElevenLabs: bloco-01.mp3 ... bloco-05.mp3 (veja assets/apresentacao/ROTEIRO-VOZ.md).
