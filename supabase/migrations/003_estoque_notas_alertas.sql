@@ -1,0 +1,378 @@
+-- 003 — Fila de notas, estoque (razão), contagens, avisos, configuração e varredura automática.
+-- Regras: toda tabela com RLS; ESCRITA só por funções SECURITY DEFINER que validam quem chama;
+-- movimentos e conferências são imutáveis (prova). Nada aqui apaga dados.
+
+create extension if not exists pg_net with schema extensions;
+create extension if not exists pg_cron with schema pg_catalog;
+
+-- ───────── Configuração (linha única) e segredos ─────────
+create table public.configuracoes (
+  id int primary key default 1 check (id = 1),
+  valor jsonb not null default '{"limiteNotaParadaMin":120,"diasContagem":14,"expediente":{"dias":[1,2,3,4,5,6],"inicio":"06:00","fim":"19:00"},"resumoDiarioHora":"18:00"}'::jsonb
+);
+insert into public.configuracoes (id) values (1) on conflict do nothing;
+alter table public.configuracoes enable row level security;
+create policy cfg_ler on public.configuracoes for select to authenticated using (true);
+create policy cfg_admin on public.configuracoes for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+-- segredos do servidor (chaves VAPID do push, segredo interno): sem política = ninguém lê pelo app
+create table public.config_segredos (nome text primary key, valor text not null);
+alter table public.config_segredos enable row level security;
+
+-- ───────── Notas (fila de conferência) ─────────
+create table public.notas (
+  id uuid primary key default gen_random_uuid(),
+  numero text not null,
+  cliente text,
+  vendedor text,
+  chave_nfe text check (chave_nfe is null or chave_nfe ~ '^[0-9]{44}$'),
+  status text not null default 'pendente' check (status in ('pendente','em_conferencia','conferida','cancelada')),
+  conferencia_id uuid,
+  token_publico uuid not null default gen_random_uuid() unique,
+  criado_em timestamptz not null default now(),
+  criado_por uuid default auth.uid() references public.perfis(id)
+);
+create unique index notas_numero_ativa on public.notas (numero) where status <> 'cancelada';
+create index on public.notas (status, criado_em);
+create table public.nota_itens (
+  id uuid primary key default gen_random_uuid(),
+  nota_id uuid not null references public.notas(id) on delete cascade,
+  produto_id uuid references public.produtos(id),
+  descricao text not null,
+  codigo text,
+  quantidade numeric not null check (quantidade > 0)
+);
+create index on public.nota_itens (nota_id);
+alter table public.conferencias add constraint conferencias_nota_fk foreign key (nota_id) references public.notas(id);
+alter table public.notas add constraint notas_conferencia_fk foreign key (conferencia_id) references public.conferencias(id);
+
+-- ───────── Estoque: razão imutável + saldos ─────────
+create table public.estoque_movimentos (
+  id uuid primary key default gen_random_uuid(),
+  produto_id uuid not null references public.produtos(id),
+  tipo text not null check (tipo in ('entrada','saida','ajuste','perda')),
+  quantidade numeric not null check (quantidade <> 0),
+  motivo text,
+  ref_tipo text,
+  ref_id uuid,
+  usuario_id uuid default auth.uid() references public.perfis(id),
+  criado_em timestamptz not null default now()
+);
+create index on public.estoque_movimentos (produto_id, criado_em desc);
+create index on public.estoque_movimentos (criado_em desc);
+
+create table public.contagens (
+  id uuid primary key default gen_random_uuid(),
+  escopo text,
+  status text not null check (status in ('solicitada','aguardando_aprovacao','aplicada','descartada')),
+  criado_por uuid default auth.uid() references public.perfis(id),
+  criado_em timestamptz not null default now()
+);
+create table public.contagem_itens (
+  id uuid primary key default gen_random_uuid(),
+  contagem_id uuid not null references public.contagens(id) on delete cascade,
+  produto_id uuid not null references public.produtos(id),
+  esperado numeric, contado numeric, diferenca numeric
+);
+create index on public.contagem_itens (contagem_id);
+create index on public.contagem_itens (produto_id);
+
+create view public.estoque_saldos with (security_invoker = true) as
+select p.id as produto_id, p.nome, p.unidade, p.minimo, p.por_pilha, p.ativo,
+       coalesce((select sum(m.quantidade) from public.estoque_movimentos m where m.produto_id = p.id), 0) as saldo,
+       (select max(c.criado_em) from public.contagem_itens ci join public.contagens c on c.id = ci.contagem_id
+         where ci.produto_id = p.id and ci.contado is not null and c.status in ('aplicada','aguardando_aprovacao')) as ultima_contagem
+from public.produtos p;
+
+-- ───────── Avisos e push ─────────
+create table public.alertas (
+  id uuid primary key default gen_random_uuid(),
+  destinatario_id uuid not null references public.perfis(id) on delete cascade,
+  tipo text not null,
+  severidade text not null check (severidade in ('critico','atencao','info')),
+  titulo text not null,
+  texto text not null,
+  ref_tipo text, ref_id uuid,
+  chave_dedupe text not null default gen_random_uuid()::text,
+  criado_em timestamptz not null default now(),
+  lido_em timestamptz, resolvido_em timestamptz,
+  unique (destinatario_id, chave_dedupe)
+);
+create index on public.alertas (destinatario_id, criado_em desc);
+create table public.push_assinaturas (
+  endpoint text primary key,
+  usuario_id uuid not null references public.perfis(id) on delete cascade,
+  chaves jsonb not null,
+  aparelho text,
+  criado_em timestamptz not null default now()
+);
+create index on public.push_assinaturas (usuario_id);
+
+-- ───────── RLS ─────────
+alter table public.notas enable row level security;
+alter table public.nota_itens enable row level security;
+alter table public.estoque_movimentos enable row level security;
+alter table public.contagens enable row level security;
+alter table public.contagem_itens enable row level security;
+alter table public.alertas enable row level security;
+alter table public.push_assinaturas enable row level security;
+
+create policy notas_ler on public.notas for select to authenticated using (true);
+create policy notas_itens_ler on public.nota_itens for select to authenticated using (true);
+create policy notas_admin_cancelar on public.notas for update to authenticated using (public.is_admin() and status in ('pendente','em_conferencia')) with check (public.is_admin() and status = 'cancelada');
+create policy mov_ler on public.estoque_movimentos for select to authenticated using (true);
+create policy cont_ler on public.contagens for select to authenticated using (true);
+create policy contitens_ler on public.contagem_itens for select to authenticated using (true);
+create policy alertas_ler on public.alertas for select to authenticated using (destinatario_id = (select auth.uid()));
+create policy push_ler on public.push_assinaturas for select to authenticated using (usuario_id = (select auth.uid()));
+-- (sem INSERT/UPDATE/DELETE: tudo passa pelas funções abaixo ou pela função "push")
+
+-- ───────── Funções auxiliares ─────────
+create or replace function public.cfg() returns jsonb language sql stable security definer set search_path = public, pg_temp as
+$$ select valor from public.configuracoes where id = 1 $$;
+revoke execute on function public.cfg() from public, anon; grant execute on function public.cfg() to authenticated;
+
+create or replace function public.fora_expediente(p_ts timestamptz) returns boolean
+language plpgsql stable security definer set search_path = public, pg_temp as $$
+declare c jsonb := public.cfg(); l timestamp := p_ts at time zone 'America/Sao_Paulo'; m int := extract(hour from l)::int * 60 + extract(minute from l)::int;
+begin
+  if not ((extract(dow from l)::int) in (select jsonb_array_elements_text(c->'expediente'->'dias')::int)) then return true; end if;
+  return m < (split_part(c->'expediente'->>'inicio', ':', 1)::int * 60 + split_part(c->'expediente'->>'inicio', ':', 2)::int)
+      or m >= (split_part(c->'expediente'->>'fim', ':', 1)::int * 60 + split_part(c->'expediente'->>'fim', ':', 2)::int);
+end $$;
+revoke execute on function public.fora_expediente(timestamptz) from public, anon; grant execute on function public.fora_expediente(timestamptz) to authenticated;
+
+-- Quem quer receber cada tipo de aviso (padrão por papel quando a pessoa não escolheu)
+create or replace function public.emitir_alerta(p_tipo text, p_sev text, p_titulo text, p_texto text, p_ref_tipo text, p_ref_id uuid, p_dedupe text)
+returns void language plpgsql security definer set search_path = public, pg_temp as $$
+declare r record; v_admin text[] := array['saida_sem_nota','divergencia_carga','estoque_negativo','estoque_baixo','contagem_divergente','nota_parada','fora_horario','resumo_dia','sistema'];
+        v_func text[] := array['nota_nova','contagem_solicitada']; v_url text; v_seg text; v_novo uuid;
+begin
+  for r in select id from public.perfis where ativo and p_tipo = any(coalesce(alertas, case when papel = 'admin' then v_admin else v_func end)) loop
+    insert into public.alertas (destinatario_id, tipo, severidade, titulo, texto, ref_tipo, ref_id, chave_dedupe)
+    values (r.id, p_tipo, p_sev, p_titulo, p_texto, p_ref_tipo, p_ref_id, coalesce(p_dedupe, gen_random_uuid()::text))
+    on conflict (destinatario_id, chave_dedupe) do nothing returning id into v_novo;
+    if v_novo is not null then
+      begin -- empurra para o celular (Web Push) sem nunca travar a operação principal
+        select valor into v_url from public.config_segredos where nome = 'push_url';
+        select valor into v_seg from public.config_segredos where nome = 'push_segredo';
+        if v_url is not null and v_seg is not null then
+          perform net.http_post(url := v_url, headers := jsonb_build_object('Content-Type','application/json','x-push-segredo', v_seg),
+            body := jsonb_build_object('acao','enviar','usuario_id', r.id,'titulo', p_titulo,'texto', p_texto,'severidade', p_sev,'tag', coalesce(p_dedupe, v_novo::text)));
+        end if;
+      exception when others then null; end;
+    end if;
+    v_novo := null;
+  end loop;
+end $$;
+revoke execute on function public.emitir_alerta(text,text,text,text,text,uuid,text) from public, anon, authenticated;
+
+create or replace function public.exigir_ativo() returns uuid language plpgsql stable security definer set search_path = public, pg_temp as $$
+declare u uuid := auth.uid();
+begin
+  if u is null or not exists (select 1 from public.perfis where id = u and ativo) then raise exception 'Faça login novamente.'; end if;
+  return u;
+end $$;
+revoke execute on function public.exigir_ativo() from public, anon; grant execute on function public.exigir_ativo() to authenticated;
+
+-- ───────── Nota nova (administração) ─────────
+create or replace function public.criar_nota(p jsonb) returns uuid
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_uid uuid := public.exigir_ativo(); v_id uuid; v_num text := trim(coalesce(p->>'numero','')); v_n int;
+begin
+  if not public.is_admin() then raise exception 'Só a administração cadastra notas.'; end if;
+  if v_num = '' then raise exception 'Digite o número da nota.'; end if;
+  if exists (select 1 from public.notas where numero = v_num and status <> 'cancelada') then raise exception 'A nota % já está no sistema.', v_num; end if;
+  select count(*) into v_n from jsonb_array_elements(coalesce(p->'itens','[]'::jsonb)) i where coalesce((i->>'quantidade')::numeric, 0) > 0;
+  if v_n = 0 then raise exception 'A nota precisa de pelo menos um item com quantidade.'; end if;
+  insert into public.notas (numero, cliente, vendedor, chave_nfe, criado_por)
+  values (v_num, nullif(trim(p->>'cliente'),''), nullif(trim(p->>'vendedor'),''), nullif(p->>'chave_nfe',''), v_uid) returning id into v_id;
+  insert into public.nota_itens (nota_id, produto_id, descricao, codigo, quantidade)
+  select v_id, nullif(i->>'produto_id','')::uuid, trim(i->>'descricao'), nullif(i->>'codigo',''), (i->>'quantidade')::numeric
+  from jsonb_array_elements(p->'itens') i where coalesce((i->>'quantidade')::numeric, 0) > 0;
+  perform public.emitir_alerta('nota_nova','info','Nota ' || v_num || ' na fila', coalesce(nullif(trim(p->>'cliente'),'') || '. ', '') || v_n || ' item(ns) para conferir.', 'nota', v_id, 'nota_nova:' || v_id);
+  return v_id;
+end $$;
+revoke execute on function public.criar_nota(jsonb) from public, anon; grant execute on function public.criar_nota(jsonb) to authenticated;
+
+-- ───────── Conferência (atômica, idempotente, com estoque e avisos) ─────────
+create or replace function public.registrar_conferencia(p jsonb) returns uuid
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare
+  v_uid uuid := public.exigir_ativo(); v_id uuid; v_cid uuid := nullif(p->>'client_id','')::uuid; v_nota public.notas%rowtype;
+  v_div boolean; v_mais numeric; v_menos numeric; v_placa text := upper(trim(coalesce(p->>'placa',''))); v_txt text; v_agora timestamptz := now();
+  r record; v_saldo numeric; v_dia text := to_char(v_agora at time zone 'America/Sao_Paulo', 'YYYY-MM-DD');
+begin
+  if v_cid is not null then select id into v_id from public.conferencias where client_id = v_cid; if found then return v_id; end if; end if;
+  if coalesce(trim(p->>'numero_nota'),'') = '' then raise exception 'Informe o número da nota.'; end if;
+  if v_placa = '' then raise exception 'Informe a placa.'; end if;
+  if jsonb_array_length(coalesce(p->'itens','[]'::jsonb)) = 0 then raise exception 'Informe ao menos um item.'; end if;
+  if not exists (select 1 from jsonb_array_elements(coalesce(p->'fotos','[]'::jsonb)) f where f->>'tipo' = 'carga')
+     or not exists (select 1 from jsonb_array_elements(coalesce(p->'fotos','[]'::jsonb)) f where f->>'tipo' = 'placa') then
+    raise exception 'As fotos da carga e da placa são obrigatórias.';
+  end if;
+  if exists (select 1 from jsonb_array_elements(p->'fotos') f where split_part(f->>'caminho','/',1) <> v_uid::text) then raise exception 'Foto inválida.'; end if;
+  select coalesce(sum(greatest((i->>'qtd_carregada')::numeric - (i->>'qtd_nota')::numeric, 0)),0), coalesce(sum(greatest((i->>'qtd_nota')::numeric - (i->>'qtd_carregada')::numeric, 0)),0)
+    into v_mais, v_menos from jsonb_array_elements(p->'itens') i;
+  v_div := (v_mais + v_menos) > 0;
+  if v_div and coalesce(trim(p->>'motivo_divergencia'),'') = '' then raise exception 'Explique o motivo da diferença.'; end if;
+
+  if nullif(p->>'nota_id','') is not null then
+    select * into v_nota from public.notas where id = (p->>'nota_id')::uuid for update;
+    if not found then raise exception 'Nota não encontrada.'; end if;
+    if v_nota.status = 'conferida' then raise exception 'A nota % já foi conferida.', v_nota.numero; end if;
+    if v_nota.status = 'cancelada' then raise exception 'A nota % foi cancelada.', v_nota.numero; end if;
+  else
+    select * into v_nota from public.notas where numero = trim(p->>'numero_nota') and status in ('pendente','em_conferencia') for update;
+    if not found then
+      insert into public.notas (numero, cliente, chave_nfe, criado_por) values (trim(p->>'numero_nota'), nullif(trim(p->>'cliente'),''), nullif(p->>'chave_nfe',''), v_uid) returning * into v_nota;
+    end if;
+  end if;
+
+  insert into public.conferencias (numero_nota, chave_nfe, veiculo_id, placa, motorista, conferente_id, status, motivo_divergencia, observacao, latitude, longitude, token_publico, nota_id, client_id, cliente, duracao_s, metodo)
+  values (v_nota.numero, coalesce(nullif(p->>'chave_nfe',''), v_nota.chave_nfe), nullif(p->>'veiculo_id','')::uuid, v_placa, nullif(trim(p->>'motorista'),''), v_uid, case when v_div then 'divergencia' else 'ok' end,
+          nullif(trim(p->>'motivo_divergencia'),''), nullif(trim(p->>'observacao'),''), (p->>'latitude')::double precision, (p->>'longitude')::double precision,
+          v_nota.token_publico, v_nota.id, v_cid, v_nota.cliente, nullif(p->>'duracao_s','')::int, case when p->>'metodo' = 'scanner' then 'scanner' else 'passo_a_passo' end)
+  returning id into v_id;
+  insert into public.conferencia_itens (conferencia_id, produto_id, descricao, qtd_nota, qtd_carregada)
+  select v_id, nullif(i->>'produto_id','')::uuid, trim(i->>'descricao'), (i->>'qtd_nota')::numeric, (i->>'qtd_carregada')::numeric from jsonb_array_elements(p->'itens') i;
+  insert into public.conferencia_fotos (conferencia_id, tipo, caminho) select v_id, f->>'tipo', f->>'caminho' from jsonb_array_elements(p->'fotos') f;
+  update public.notas set status = 'conferida', conferencia_id = v_id where id = v_nota.id;
+
+  insert into public.estoque_movimentos (produto_id, tipo, quantidade, motivo, ref_tipo, ref_id, usuario_id)
+  select (i->>'produto_id')::uuid, 'saida', -sum((i->>'qtd_carregada')::numeric), 'Nota ' || v_nota.numero, 'conferencia', v_id, v_uid
+  from jsonb_array_elements(p->'itens') i where nullif(i->>'produto_id','') is not null and (i->>'qtd_carregada')::numeric > 0 group by (i->>'produto_id')::uuid;
+
+  -- avisos
+  if v_div then
+    select string_agg(trim(i->>'descricao') || ' ' || case when (i->>'qtd_carregada')::numeric > (i->>'qtd_nota')::numeric then '+' else '−' end || abs((i->>'qtd_carregada')::numeric - (i->>'qtd_nota')::numeric)::text, ', ')
+      into v_txt from jsonb_array_elements(p->'itens') i where (i->>'qtd_carregada')::numeric <> (i->>'qtd_nota')::numeric;
+    perform public.emitir_alerta(case when v_mais > 0 then 'saida_sem_nota' else 'divergencia_carga' end, case when v_mais > 0 then 'critico' else 'atencao' end,
+      case when v_mais > 0 then 'Nota ' || v_nota.numero || ': saiu mais do que a nota' else 'Nota ' || v_nota.numero || ': faltou peça na carga' end,
+      v_txt || '. Caminhão ' || v_placa || '.' || coalesce(' Motivo informado: ' || nullif(trim(p->>'motivo_divergencia'),'') || '.', ''), 'conferencia', v_id, 'conf:' || v_id || ':dif');
+  end if;
+  for r in select pr.id, pr.nome, pr.unidade, pr.minimo from public.produtos pr where pr.id in (select (i->>'produto_id')::uuid from jsonb_array_elements(p->'itens') i where nullif(i->>'produto_id','') is not null) loop
+    select coalesce(sum(quantidade),0) into v_saldo from public.estoque_movimentos where produto_id = r.id;
+    if v_saldo < 0 then perform public.emitir_alerta('estoque_negativo','critico','Estoque negativo: ' || r.nome, 'Depois da nota ' || v_nota.numero || ', o sistema mostra ' || v_saldo || ' ' || r.unidade || ' de ' || r.nome || '. Saiu mais do que foi lançado de entrada. Faça uma contagem.', 'produto', r.id, 'estoque_negativo:' || r.id || ':' || v_dia);
+    elsif r.minimo > 0 and v_saldo < r.minimo then perform public.emitir_alerta('estoque_baixo','atencao','Estoque baixo: ' || r.nome, 'Restam ' || v_saldo || ' ' || r.unidade || ' (mínimo ' || r.minimo || '). Hora de programar a produção.', 'produto', r.id, 'estoque_baixo:' || r.id || ':' || v_dia); end if;
+  end loop;
+  if public.fora_expediente(v_agora) then
+    perform public.emitir_alerta('fora_horario','atencao','Conferência fora do expediente (nota ' || v_nota.numero || ')', 'A carga do caminhão ' || v_placa || ' foi conferida às ' || to_char(v_agora at time zone 'America/Sao_Paulo','HH24:MI') || ', fora do horário de trabalho.', 'conferencia', v_id, 'conf:' || v_id || ':horario');
+  end if;
+  return v_id;
+end $$;
+revoke execute on function public.registrar_conferencia(jsonb) from public, anon; grant execute on function public.registrar_conferencia(jsonb) to authenticated;
+
+-- ───────── Estoque: lançamentos, contagens, ajustes ─────────
+create or replace function public.registrar_movimento_manual(p jsonb) returns void
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_uid uuid := public.exigir_ativo(); q numeric := coalesce((p->>'quantidade')::numeric, 0); t text := p->>'tipo';
+begin
+  if not public.is_admin() then raise exception 'Só a administração lança movimentos.'; end if;
+  if q <= 0 then raise exception 'A quantidade precisa ser maior que zero.'; end if;
+  if t not in ('entrada','perda') then raise exception 'Tipo de lançamento inválido.'; end if;
+  insert into public.estoque_movimentos (produto_id, tipo, quantidade, motivo, usuario_id)
+  values ((p->>'produto_id')::uuid, t, case when t = 'perda' then -q else q end, coalesce(nullif(trim(p->>'motivo'),''), case when t = 'entrada' then 'Produção' else 'Perda' end), v_uid);
+end $$;
+revoke execute on function public.registrar_movimento_manual(jsonb) from public, anon; grant execute on function public.registrar_movimento_manual(jsonb) to authenticated;
+
+create or replace function public.pedir_contagem(p_produtos uuid[], p_escopo text default 'Pedido da expedição') returns uuid
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_id uuid; v_nomes text;
+begin
+  perform public.exigir_ativo(); if not public.is_admin() then raise exception 'Só a administração pede contagem.'; end if;
+  if coalesce(array_length(p_produtos,1),0) = 0 then raise exception 'Escolha pelo menos um produto.'; end if;
+  insert into public.contagens (escopo, status) values (p_escopo, 'solicitada') returning id into v_id;
+  insert into public.contagem_itens (contagem_id, produto_id) select v_id, unnest(p_produtos);
+  select string_agg(nome, ', ') into v_nomes from public.produtos where id = any(p_produtos);
+  perform public.emitir_alerta('contagem_solicitada','info','Contagem de estoque pedida','Contar: ' || v_nomes || '.','contagem', v_id, 'contagem_pedida:' || v_id);
+  return v_id;
+end $$;
+revoke execute on function public.pedir_contagem(uuid[], text) from public, anon; grant execute on function public.pedir_contagem(uuid[], text) to authenticated;
+
+create or replace function public.concluir_contagem(p jsonb) returns jsonb
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_uid uuid := public.exigir_ativo(); v_id uuid := nullif(p->>'solicitacao_id','')::uuid; i jsonb; v_esp numeric; v_dif boolean := false; v_itens jsonb := '[]'::jsonb; v_c numeric; v_status text; v_nome text; v_part text := '';
+begin
+  if jsonb_array_length(coalesce(p->'itens','[]'::jsonb)) = 0 then raise exception 'Conte pelo menos um produto.'; end if;
+  if v_id is not null then
+    perform 1 from public.contagens where id = v_id and status = 'solicitada' for update; if not found then raise exception 'Este pedido de contagem já foi respondido.'; end if;
+    delete from public.contagem_itens where contagem_id = v_id;
+  else insert into public.contagens (escopo, status) values (coalesce(nullif(p->>'escopo',''),'Contagem rápida'), 'solicitada') returning id into v_id; end if;
+  for i in select * from jsonb_array_elements(p->'itens') loop
+    v_c := (i->>'contado')::numeric; if v_c < 0 then raise exception 'Quantidade contada inválida.'; end if;
+    select coalesce(sum(quantidade),0) into v_esp from public.estoque_movimentos where produto_id = (i->>'produto_id')::uuid;
+    insert into public.contagem_itens (contagem_id, produto_id, esperado, contado, diferenca) values (v_id, (i->>'produto_id')::uuid, v_esp, v_c, v_c - v_esp);
+    v_itens := v_itens || jsonb_build_object('produto_id', i->>'produto_id', 'esperado', v_esp, 'contado', v_c, 'diferenca', v_c - v_esp);
+    if v_c <> v_esp then v_dif := true; select nome into v_nome from public.produtos where id = (i->>'produto_id')::uuid; v_part := v_part || case when v_part = '' then '' else ', ' end || v_nome || ' ' || case when v_c > v_esp then '+' else '−' end || abs(v_c - v_esp); end if;
+  end loop;
+  v_status := case when v_dif then 'aguardando_aprovacao' else 'aplicada' end;
+  update public.contagens set status = v_status, criado_por = v_uid, criado_em = now() where id = v_id;
+  if v_dif then perform public.emitir_alerta('contagem_divergente','atencao','Contagem com diferença', v_part || '. Aprove o ajuste ou peça nova contagem.','contagem', v_id, 'contagem:' || v_id); end if;
+  return jsonb_build_object('id', v_id, 'status', v_status, 'itens', v_itens);
+end $$;
+revoke execute on function public.concluir_contagem(jsonb) from public, anon; grant execute on function public.concluir_contagem(jsonb) to authenticated;
+
+create or replace function public.aplicar_ajuste_contagem(p_id uuid) returns void
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_uid uuid := public.exigir_ativo();
+begin
+  if not public.is_admin() then raise exception 'Só a administração aprova ajustes.'; end if;
+  perform 1 from public.contagens where id = p_id and status = 'aguardando_aprovacao' for update; if not found then raise exception 'Esta contagem já foi resolvida.'; end if;
+  insert into public.estoque_movimentos (produto_id, tipo, quantidade, motivo, ref_tipo, ref_id, usuario_id)
+  select produto_id, 'ajuste', diferenca, 'Ajuste da contagem', 'contagem', p_id, v_uid from public.contagem_itens where contagem_id = p_id and coalesce(diferenca,0) <> 0;
+  update public.contagens set status = 'aplicada' where id = p_id;
+  update public.alertas set resolvido_em = now() where ref_tipo = 'contagem' and ref_id = p_id and resolvido_em is null;
+end $$;
+revoke execute on function public.aplicar_ajuste_contagem(uuid) from public, anon; grant execute on function public.aplicar_ajuste_contagem(uuid) to authenticated;
+
+create or replace function public.descartar_contagem(p_id uuid) returns void
+language plpgsql security definer set search_path = public, pg_temp as $$
+begin
+  perform public.exigir_ativo(); if not public.is_admin() then raise exception 'Só a administração descarta contagens.'; end if;
+  update public.contagens set status = 'descartada' where id = p_id and status in ('aguardando_aprovacao','solicitada');
+  update public.alertas set resolvido_em = now() where ref_tipo = 'contagem' and ref_id = p_id and resolvido_em is null;
+end $$;
+revoke execute on function public.descartar_contagem(uuid) from public, anon; grant execute on function public.descartar_contagem(uuid) to authenticated;
+
+-- ───────── Avisos: ler, resolver, preferências ─────────
+create or replace function public.marcar_alertas_lidos(p_ids uuid[]) returns void
+language plpgsql security definer set search_path = public, pg_temp as $$
+begin
+  update public.alertas set lido_em = now() where destinatario_id = public.exigir_ativo() and lido_em is null and (p_ids is null or id = any(p_ids));
+end $$;
+create or replace function public.resolver_alerta(p_id uuid) returns void
+language plpgsql security definer set search_path = public, pg_temp as $$
+begin
+  update public.alertas set resolvido_em = now(), lido_em = coalesce(lido_em, now()) where id = p_id and destinatario_id = public.exigir_ativo();
+end $$;
+create or replace function public.salvar_preferencias(p_alertas text[]) returns void
+language plpgsql security definer set search_path = public, pg_temp as $$
+begin
+  update public.perfis set alertas = p_alertas where id = public.exigir_ativo();
+end $$;
+revoke execute on function public.marcar_alertas_lidos(uuid[]), public.resolver_alerta(uuid), public.salvar_preferencias(text[]) from public, anon;
+grant execute on function public.marcar_alertas_lidos(uuid[]), public.resolver_alerta(uuid), public.salvar_preferencias(text[]) to authenticated;
+
+-- ───────── Varredura automática (a cada 5 min) ─────────
+create or replace function public.varredura() returns void
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare c jsonb := public.cfg(); r record; v_lim int := coalesce((c->>'limiteNotaParadaMin')::int, 120); v_dia text := to_char(now() at time zone 'America/Sao_Paulo','YYYY-MM-DD');
+        v_h text := c->>'resumoDiarioHora'; v_min int; v_loc timestamp := now() at time zone 'America/Sao_Paulo'; v_t int; v_d int; v_f int;
+begin
+  for r in select id, numero, cliente, criado_em from public.notas where status in ('pendente','em_conferencia') and criado_em <= now() - make_interval(mins => v_lim) loop
+    perform public.emitir_alerta('nota_parada','atencao','Nota ' || r.numero || ' esperando há ' || (extract(epoch from now() - r.criado_em)/60)::int || ' min', coalesce(r.cliente || '. ', '') || 'Está na fila sem conferência. Limite configurado: ' || v_lim || ' min.','nota', r.id, 'nota_parada:' || r.id);
+  end loop;
+  for r in select * from public.estoque_saldos where ativo loop
+    if r.saldo < 0 then perform public.emitir_alerta('estoque_negativo','critico','Estoque negativo: ' || r.nome, 'O sistema mostra ' || r.saldo || ' ' || r.unidade || '. Faça uma contagem para corrigir.','produto', r.produto_id, 'estoque_negativo:' || r.produto_id || ':' || v_dia);
+    elsif r.minimo > 0 and r.saldo < r.minimo then perform public.emitir_alerta('estoque_baixo','atencao','Estoque baixo: ' || r.nome, 'Restam ' || r.saldo || ' ' || r.unidade || ' (mínimo ' || r.minimo || ').','produto', r.produto_id, 'estoque_baixo:' || r.produto_id || ':' || v_dia); end if;
+  end loop;
+  v_min := split_part(v_h,':',1)::int * 60 + split_part(v_h,':',2)::int;
+  if (extract(hour from v_loc)::int * 60 + extract(minute from v_loc)::int) >= v_min then
+    select count(*), count(*) filter (where status = 'divergencia') into v_t, v_d from public.conferencias where criado_em >= date_trunc('day', v_loc) at time zone 'America/Sao_Paulo';
+    select count(*) into v_f from public.notas where status in ('pendente','em_conferencia');
+    perform public.emitir_alerta('resumo_dia','info','Resumo do dia', 'Conferências: ' || v_t || ' (' || v_d || ' com diferença). Fila: ' || v_f || ' nota(s).','painel', null, 'resumo:' || v_dia);
+  end if;
+end $$;
+revoke execute on function public.varredura() from public, anon, authenticated;
+select cron.schedule('confere-carga-varredura', '*/5 * * * *', $$select public.varredura()$$);

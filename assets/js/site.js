@@ -118,21 +118,28 @@
   contar();
 
   // ── Produtos ────────────────────────────────────────
-  const des = (d) => `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
   const PRODUTOS = [
-    { nome: "Boca de lobo", texto: "Captação de água da chuva na sarjeta.", d: des('<path d="M8 22h48v26H8z"/><path d="M14 30h36M14 36h36M14 42h36"/><path d="M8 22l6-8h36l6 8"/>') },
-    { nome: "Meio-fio e guias", texto: "Acabamento de rua e calçada.", d: des('<path d="M6 40h52v10H6z"/><path d="M6 40l8-12h44v12"/><path d="M22 28v12M38 28v12"/>') },
-    { nome: "Caixa para galeria", texto: "Canalização de grandes vazões.", d: des('<rect x="10" y="14" width="44" height="36" rx="3"/><rect x="18" y="22" width="28" height="20" rx="2"/>') },
-    { nome: "Caixa de inspeção", texto: "Inspeção e passagem da rede.", d: des('<path d="M14 18h36v32H14z"/><path d="M20 12h24v6H20z"/><circle cx="32" cy="34" r="7"/>') },
-    { nome: "Tubos e aduelas", texto: "Concreto armado para drenagem.", d: des('<ellipse cx="18" cy="32" rx="8" ry="14"/><path d="M18 18h28M18 46h28"/><ellipse cx="46" cy="32" rx="8" ry="14"/>') },
-    { nome: "Muros pré-moldados", texto: "Muros e fechamentos para ferrovias, indústrias e loteamentos.", d: des('<path d="M4 20h56v30H4z"/><path d="M18 20v30M32 20v30M46 20v30"/><path d="M4 50h56"/>') },
-    { nome: "Dissipadores e alas", texto: "Saída de bueiros e proteção.", d: des('<path d="M8 48l14-28h20l14 28z"/><path d="M22 48l6-12h8l6 12"/>') },
+    { slug: "boca-de-lobo", nome: "Boca de lobo", texto: "Captação de água da chuva na sarjeta.", alt: "Pátio da Nova Era com caixas de concreto pré-moldadas" },
+    { slug: "meio-fio", nome: "Meio-fio e guias", texto: "Acabamento de rua e calçada.", alt: "Peças pré-moldadas e pátio de produção da Nova Era" },
+    { slug: "caixa-galeria", nome: "Caixa para galeria", texto: "Canalização de grandes vazões.", alt: "Caixas para galeria empilhadas na fábrica da Nova Era" },
+    { slug: "caixa-inspecao", nome: "Caixa de inspeção", texto: "Inspeção e passagem da rede.", alt: "Caixas de inspeção em concreto armado no pátio" },
+    { slug: "tubos-aduelas", nome: "Tubos e aduelas", texto: "Concreto armado para drenagem.", alt: "Aduelas de concreto carregadas na carreta da Nova Era" },
+    { slug: "muros", nome: "Muros pré-moldados", texto: "Muros e fechamentos para ferrovias, indústrias e loteamentos.", alt: "Muro pré-moldado instalado ao lado da ferrovia" },
+    { slug: "dissipadores-alas", nome: "Dissipadores e alas", texto: "Saída de bueiros e proteção.", alt: "Estrutura pré-moldada de concreto com ala e abertura em arco" },
   ];
-  $("#grade-produtos").append(...PRODUTOS.map((p) => el("article", { class: "produto" },
-    el("span", { class: "produto-desenho", html: p.d }),
-    el("div", { class: "produto-texto" }, el("h3", {}, p.nome), el("p", {}, p.texto)),
-    el("button", { type: "button", class: "produto-add", "aria-label": `Adicionar ${p.nome} à lista de orçamento`, onclick: () => adicionar(p.nome, 1, "peças") },
-      ic("mais"), el("span", {}, "Adicionar")))));
+  const cartoes = PRODUTOS.map((p) => {
+    const host = el("div", { class: "produto-maquete", "data-slug": p.slug });
+    return el("article", { class: "produto" },
+      el("img", { class: "produto-foto", src: `assets/img/produtos/${p.slug}-720.webp`, alt: p.alt, width: 720, height: 540, loading: "lazy", decoding: "async" }),
+      el("div", { class: "produto-texto" }, el("h3", {}, p.nome), el("p", {}, p.texto)), host,
+      el("button", { type: "button", class: "produto-add", "aria-label": `Adicionar ${p.nome} à lista de orçamento`, onclick: () => adicionar(p.nome, 1, "peças") }, ic("mais"), el("span", {}, "Adicionar")));
+  });
+  $("#grade-produtos").append(...cartoes);
+  // A maquete 3D só é montada quando o cartão chega perto da tela (a página abre leve)
+  if (window.NE && NE.maquete) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { io.unobserve(e.target); NE.maquete(e.target, e.target.dataset.slug); } }), { rootMargin: "300px" });
+    document.querySelectorAll(".produto-maquete").forEach((h) => io.observe(h));
+  }
 
   // ── Calculadora de concreto (Humberto) ───────────────
   const num = (id) => Number(String($(id).value).replace(",", ".")) || 0;
