@@ -93,8 +93,15 @@
         else estado.leitura = { status: "falhou" };
         if (document.getElementById("numero-nota")) redesenhar(); // só redesenha se ainda estiver neste passo
       };
+      const ia = (window.NOVA_ERA || {}).premiumIA && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ia-nota", style: "margin-top:10px", onclick: (ev) => NE.comCarregando(ev.currentTarget, async () => {
+        const f = estado.fotos.nota[0]; if (!f) return NE.aviso("Tire a foto da nota primeiro.", "alerta");
+        const r = await NE.dados.iaLerNota(f.blob); const prods = catalogo.produtos;
+        estado.numero_nota = r.numero || estado.numero_nota; estado.cliente = r.cliente || estado.cliente;
+        estado.itens = (r.itens || []).map((i) => { const m = window.NEDominio.casarProduto({ descricao: i.descricao, codigo: i.codigo }, prods); const q = Number(i.quantidade) || 1; return { produto_id: m.produto ? m.produto.id : null, descricao: m.produto ? m.produto.nome : i.descricao, qtd_nota: q, qtd_carregada: q, situacao: null }; });
+        NE.aviso(`Nota ${estado.numero_nota}: ${estado.itens.length} ${estado.itens.length === 1 ? "item lido" : "itens lidos"}. Confira no próximo passo.`, "ok"); redesenhar();
+      }) }, ic("faisca"), "Ler a nota inteira com IA · Premium");
       return el("div", {},
-        blocoFoto("nota", "Foto da nota fiscal", "Obrigatória", "Enquadre a nota inteira, com o código de barras aparecendo. O número é lido sozinho.", false, redesenhar, aoNovaFoto),
+        blocoFoto("nota", "Foto da nota fiscal", "Obrigatória", "Enquadre a nota inteira, com o código de barras aparecendo. O número é lido sozinho.", false, redesenhar, aoNovaFoto), ia,
         el("div", { class: "campo", style: "margin-top:16px" }, el("label", { for: "numero-nota" }, "Número da nota"),
           el("span", { class: "dica" }, "Preenchido pela foto. Se não der, digite: fica no alto da nota, ao lado de \"Nº\"."), num, status));
     },

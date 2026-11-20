@@ -99,12 +99,41 @@
     const lista = el("div", { class: "lista-simples" }, el("div", { class: "esqueleto" }));
     if (aba === "caminhoes") {
       conteudo.replaceChildren(cabecalhoAba("Caminhões", "Aparecem na hora de escolher o caminhão.", "Cadastrar caminhão", () => abrir("caminhao")), lista);
-      NE.dados.veiculos(true).then((vs) => lista.replaceChildren(...(vs.length ? vs.map((v) => el("div", {}, el("div", {}, el("span", { class: "placa-br" }, v.placa), el("div", { class: "meta" }, `${NE.tiposVeiculo[v.tipo] || v.tipo}${v.descricao ? " · " + v.descricao : ""}`)), NE.chave(v.ativo, "Em uso", (x) => NE.dados.alterarVeiculo(v.id, { ativo: x })))) : [vazio("Nenhum caminhão ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
+      NE.dados.veiculos(true).then((vs) => lista.replaceChildren(...(vs.length ? vs.map((v) => {
+        const detalhes = [[v.marca, v.modelo, v.ano].filter(Boolean).join(" "), v.cor, v.capacidade_t ? `${D.fmt(v.capacidade_t)} t` : ""].filter(Boolean).join(" · ");
+        const miniatura = el("span", { class: "veiculo-miniatura", html: NE.icone.caminhao }); const f0 = (v.fotos || [])[0]; if (f0) NE.dados.urlFoto(f0.caminho).then((u) => { if (u) miniatura.replaceChildren(el("img", { src: u, alt: "" })); }).catch(() => {});
+        return el("div", {}, el("button", { type: "button", class: "pessoa-linha link-acao", style: "text-align:left;font-weight:inherit", onclick: () => fichaVeiculo(v, app) }, miniatura,
+          el("div", {}, el("span", { class: "placa-br" }, v.placa), el("div", { class: "meta" }, `${NE.tiposVeiculo[v.tipo] || v.tipo}${detalhes ? " · " + detalhes : ""}`), (v.fotos || []).length ? el("div", { class: "meta" }, `${D.plural(v.fotos.length, "foto", "fotos")}`) : null)),
+          NE.chave(v.ativo, "Em uso", (x) => NE.dados.alterarVeiculo(v.id, { ativo: x })));
+      }) : [vazio("Nenhum caminhão ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
     } else {
       conteudo.replaceChildren(cabecalhoAba("Produtos", "Mínimo e peças por pilha deixam o estoque e a contagem mais inteligentes.", "Cadastrar produto", () => abrir("produto")), lista);
       NE.dados.produtos(true).then((ps) => lista.replaceChildren(...(ps.length ? ps.map((p) => el("div", {}, el("button", { type: "button", class: "link-acao", style: "text-align:left;display:block", onclick: () => editarProduto(p, app) }, el("strong", {}, p.nome), el("div", { class: "meta" }, `mínimo ${D.fmt(p.minimo || 0)}${p.por_pilha ? ` · ${p.por_pilha} por pilha` : ""} · toque para ajustar`)), NE.chave(p.ativo, "Em uso", (x) => NE.dados.alterarProduto(p.id, { ativo: x })))) : [vazio("Nenhum produto ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
     }
   };
+  // Ficha do caminhão: dados, galeria de fotos (toque para ampliar) e fotos novas
+  function fichaVeiculo(v, app) {
+    const d = { marca: v.marca || "", modelo: v.modelo || "", ano: v.ano ? String(v.ano) : "", cor: v.cor || "", capacidade_t: v.capacidade_t ? String(v.capacidade_t) : "", descricao: v.descricao || "", novas: { frente: [], lateral: [], traseira: [], placa: [], outras: [] } };
+    const NOMES = { frente: "Frente", lateral: "Lateral", traseira: "Traseira", placa: "Placa", outras: "Outras" }; const corpo = el("div", {}); let j;
+    const galeria = el("div", { class: "galeria-frota" });
+    (v.fotos || []).forEach((f) => { const b = el("button", { type: "button", "aria-label": `Ver foto: ${NOMES[f.tipo] || f.tipo}` }, el("span", {}, NOMES[f.tipo] || f.tipo)); b.addEventListener("click", async () => { const u = await NE.dados.urlFoto(f.caminho); if (u) window.open(u, "_blank", "noopener"); }); NE.dados.urlFoto(f.caminho).then((u) => { if (u) b.prepend(el("img", { src: u, alt: "", loading: "lazy" })); }).catch(() => {}); galeria.append(b); });
+    const desenhar = () => corpo.replaceChildren(el("div", { class: "resumo" }, NE.linhaResumo("Tipo", NE.tiposVeiculo[v.tipo] || v.tipo)),
+      (v.fotos || []).length ? el("div", {}, el("h3", {}, `Fotos (${v.fotos.length})`), galeria) : el("p", { class: "vazio" }, "Sem fotos ainda. Adicione abaixo."),
+      el("div", { class: "form-linha", style: "margin-top:14px" }, NE.campoTexto("Marca", { id: "fv-marca", value: d.marca }, (x) => { d.marca = x; }), NE.campoTexto("Modelo", { id: "fv-modelo", value: d.modelo }, (x) => { d.modelo = x; })),
+      el("div", { class: "form-linha" }, NE.campoTexto("Ano", { id: "fv-ano", value: d.ano, inputmode: "numeric", maxlength: "4" }, (x, i) => { d.ano = x.replace(/\D/g, "").slice(0, 4); if (i.value !== d.ano) i.value = d.ano; }), NE.campoTexto("Cor", { id: "fv-cor", value: d.cor }, (x) => { d.cor = x; })),
+      NE.campoTexto("Capacidade (toneladas)", { id: "fv-cap", value: d.capacidade_t, inputmode: "decimal" }, (x, i) => { d.capacidade_t = x.replace(",", ".").replace(/[^0-9.]/g, ""); if (i.value !== d.capacidade_t) i.value = d.capacidade_t; }),
+      NE.campoTexto("Observação", { id: "fv-obs", value: d.descricao }, (x) => { d.descricao = x; }),
+      el("h3", {}, "Adicionar fotos"), ...Object.keys(NOMES).map((k) => NE.seletorFoto({ titulo: NOMES[k], lista: d.novas[k], varias: k === "outras", aoMudar: desenhar })));
+    desenhar();
+    const salvar = el("button", { type: "button", class: "btn btn-principal", id: "btn-salvar-veiculo" }, ic("check"), "Salvar");
+    salvar.addEventListener("click", () => NE.comCarregando(salvar, async () => {
+      const fotos = [...(v.fotos || [])]; for (const [tipo, lista] of Object.entries(d.novas)) for (const f of lista) fotos.push({ tipo, caminho: await NE.dados.enviarFoto(f.blob, app.perfil.id) });
+      await NE.dados.alterarVeiculo(v.id, { marca: d.marca.trim() || null, modelo: d.modelo.trim() || null, ano: d.ano ? Number(d.ano) : null, cor: d.cor.trim() || null, capacidade_t: d.capacidade_t ? Number(d.capacidade_t) : null, descricao: d.descricao.trim() || null, fotos });
+      j.fechar(); NE.aviso("Caminhão atualizado.", "ok"); app.recarregar();
+    }));
+    j = NE.janelaSimples({ etiqueta: NE.tiposVeiculo[v.tipo] || "Frota", titulo: v.placa, corpo, rodape: [salvar] });
+  }
+
   function editarProduto(p, app) {
     const e = { minimo: Number(p.minimo || 0), por_pilha: Number(p.por_pilha || 0) }; let j;
     const ok = el("button", { type: "button", class: "btn btn-principal", onclick: () => NE.comCarregando(ok, async () => { await NE.dados.alterarProduto(p.id, { minimo: e.minimo, por_pilha: e.por_pilha || null }); j.fechar(); NE.aviso("Produto atualizado.", "ok"); app.recarregar(); }) }, ic("check"), "Salvar");

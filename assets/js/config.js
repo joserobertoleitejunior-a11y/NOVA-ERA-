@@ -7,6 +7,9 @@ window.NOVA_ERA = {
   // ★ MODO TESTE: com `true`, o login admin / admin abre um ambiente de TESTE, só neste aparelho, com dados de exemplo.
   // Nada é gravado no banco de verdade. Antes de entregar ao cliente, troque para `false`.
   modoTeste: true,
+  // ★ PREMIUM IA: liga a leitura da nota por IA (foto → número, cliente e itens) e o assistente com Claude.
+  // A IA só responde sobre a empresa e só para a administração (chat) e para quem confere cargas (leitura da nota).
+  premiumIA: true,
   urlPublica: "", // endereço do site quando for hospedado (ex.: "https://www.novaera.com.br/") — usado nos links de rastreio
 
   // Contato (aparece no site inteiro)

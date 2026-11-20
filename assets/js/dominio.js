@@ -371,6 +371,11 @@
     const p = normalizar(pergunta); const agora = ctx.agora; const nada = { texto: "Não entendi essa pergunta. Tente: \"resumo do dia\", \"o que saiu a mais esta semana\", \"estoque baixo\", \"notas paradas\" ou o nome de um produto.", acoes: [] };
     if (!p) return nada;
     const tem = (...ws) => ws.some((w) => p.includes(w));
+    const FORA = { texto: "Eu só ajudo com a Nova Era: cargas, notas, estoque, equipe e o painel. Pergunte, por exemplo, \"resumo do dia\", \"o que saiu a mais esta semana\" ou \"o que significa o semáforo?\".", acoes: [] };
+    const ASSUNTOS = ["nota", "carga", "estoque", "produto", "caminh", "conferen", "funcionar", "equipe", "painel", "dashboard", "nova era", "expedi", "contag", "aviso", "alerta", "cliente", "entrega", "peca", "saldo", "semaforo", "pilha", "fila", "vendedor", "motorista", "frota", "relatorio", "resumo", "hoje", "ontem", "semana", "kpi", "indicador"];
+    const EXPLICA = tem("significa", "explica", "explique", "como funciona", "o que e ", "para que serve", "entender", "como ler");
+    if (EXPLICA && tem("semaforo", "painel", "dashboard", "inicio", "indicador", "numero", "kpi", "cor ")) return { texto: "Como ler o painel:\n• Semáforo: verde = tudo certo; amarelo = atenção (algo pede olhar hoje); vermelho = precisa de você agora (ex.: estoque negativo ou peça que saiu a mais).\n• Conferências / % corretas: quantas cargas foram conferidas e quantas bateram com a nota. Abaixo de 90% merece atenção.\n• Com diferença: cargas em que saiu peça a mais (não cobrada!) ou a menos (cliente reclama).\n• Notas na fila: notas esperando conferência; \"parada\" passou do limite de espera.\n• Produtos que pedem atenção: saldo negativo ou abaixo do mínimo.\n• \"O que precisa de você\": cada recado tem um botão que leva direto à tela para resolver.", acoes: [{ rotulo: "Abrir o painel", rota: "inicio" }] };
+    if (EXPLICA && tem("estoque", "saldo", "minimo", "contagem", "pilha")) return { texto: "Como funciona o estoque:\n• O saldo é a soma de tudo que entrou (produção) menos o que saiu (cada conferência baixa as peças carregadas).\n• Mínimo: abaixo dele o app avisa a expedição.\n• Contagem do dia: o app escolhe o que mais vale contar (negativos, diferenças recentes, tempo sem contar). A pessoa conta às cegas, por pilhas, e o sistema compara.\n• Se a contagem difere, a administração aprova o ajuste e o saldo é corrigido.", acoes: [{ rotulo: "Ir para o estoque", rota: "estoque" }] };
     const chave = tem("30 dias", "mes") ? "30d" : tem("semana", "7 dias") ? "7d" : tem("ontem") ? "ontem" : "hoje";
     const r = resumoDoPeriodo(ctx, chave);
     if (tem("resumo", "como estamos", "como esta", "situacao", "panorama")) {
@@ -408,7 +413,7 @@
       const sit = situacaoEstoque(prod, ctx.config, agora); const cob = coberturaDias(prod.produto_id, ctx.movimentos, prod.saldo, agora);
       return { texto: `${prod.nome}: saldo ${fmt(prod.saldo)} ${prod.unidade} (mínimo ${fmt(prod.minimo)}). ${sit.estado === "baixo" ? "Está abaixo do mínimo. " : sit.estado === "negativo" ? "Saldo NEGATIVO. " : ""}${cob ? `No ritmo dos últimos 14 dias dura cerca de ${plural(cob, "dia", "dias")}. ` : ""}Última contagem: ${prod.ultima_contagem ? tempoRelativo(prod.ultima_contagem, agora) : "nunca"}.`, acoes: [{ rotulo: "Ir para o estoque", rota: "estoque" }] };
     }
-    return nada;
+    return ASSUNTOS.some((a) => p.includes(a)) ? nada : FORA;
   }
 
   const API = {

@@ -5,7 +5,7 @@
 (() => {
   const NE = window.NE;
   const D = window.NEDominio;
-  const CHAVE = "ne-teste-v2";
+  const CHAVE = "ne-teste-v3";
   const MIN = D.MIN, DIA = D.DIA;
   const uid = (p = "t") => `${p}-${(crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()).replace(/-/g, "").slice(0, 12)}`;
   const tokenUuid = () => (crypto.randomUUID ? crypto.randomUUID() : "00000000-0000-4000-8000-" + String(Date.now()).padStart(12, "0"));
@@ -19,14 +19,16 @@
     const r = prng(20261120); const agora = Date.now();
     const pick = (l) => l[Math.floor(r() * l.length)];
     const perfis = [
-      { id: "u-admin", nome: "Administrador (teste)", usuario: "admin", funcao: "diretoria", papel: "admin", ativo: true, telefone: "" },
-      { id: "u-eduardo", nome: "Eduardo", usuario: "eduardo", funcao: "expedicao", papel: "admin", ativo: true, telefone: "" },
-      { id: "u-carlos", nome: "Carlos Souza", usuario: "carlos", funcao: "conferente", papel: "funcionario", ativo: true, telefone: "" },
-      { id: "u-marcos", nome: "Marcos Lima", usuario: "marcos", funcao: "conferente", papel: "funcionario", ativo: true, telefone: "" },
-      { id: "u-paulo", nome: "Paulo Dias", usuario: "paulo", funcao: "motorista", papel: "funcionario", ativo: false, telefone: "" },
+      { id: "u-admin", nome: "Administrador (teste)", usuario: "admin", funcao: "diretoria", papel: "admin", ativo: true, telefone: "15999990000" },
+      { id: "u-eduardo", nome: "Eduardo", usuario: "eduardo", funcao: "expedicao", papel: "admin", ativo: true, telefone: "15999990001", observacao: "Responsável pela expedição" },
+      { id: "u-carlos", nome: "Carlos Souza", usuario: "carlos", funcao: "conferente", papel: "funcionario", ativo: true, telefone: "15999990002", admissao: "2022-03-14" },
+      { id: "u-marcos", nome: "Marcos Lima", usuario: "marcos", funcao: "conferente", papel: "funcionario", ativo: true, telefone: "15999990003", admissao: "2023-08-01" },
+      { id: "u-paulo", nome: "Paulo Dias", usuario: "paulo", funcao: "motorista", papel: "funcionario", ativo: true, telefone: "15999990004", cnh_validade: new Date(agora + 21 * DIA).toISOString().slice(0, 10), observacao: "Opera o truck com munck" },
     ];
     const veiculos = [["ABC1D23", "caminhao"], ["BRA2E19", "caminhao"], ["CDE3F45", "caminhao"], ["FGH4I67", "caminhao"], ["IJK5L89", "caminhao"],
-      ["LMN6O01", "caminhao"], ["OPQ7R23", "caminhao"], ["RST8U45", "truck_munck"], ["UVW9X67", "truck_munck"]].map(([placa, tipo], i) => ({ id: `v${i + 1}`, placa, tipo, descricao: "", ativo: true }));
+      ["LMN6O01", "caminhao"], ["OPQ7R23", "caminhao"], ["RST8U45", "truck_munck"], ["UVW9X67", "truck_munck"]].map(([placa, tipo], i) => ({ id: `v${i + 1}`, placa, tipo, descricao: "", ativo: true,
+      marca: ["Volkswagen", "Mercedes-Benz", "Volvo"][i % 3], modelo: tipo === "truck_munck" ? "Truck 6x2 + munck" : ["24.250", "Atego 2426", "VM 270"][i % 3], ano: 2016 + (i % 8), cor: i % 2 ? "Vermelho" : "Branco", capacidade_t: tipo === "truck_munck" ? 12 : 14 + (i % 3) * 2,
+      fotos: ["frente", "lateral", "traseira"].map((t) => ({ tipo: t, caminho: `teste/veiculo/${t}/v${i + 1}` })) }));
     const P = [["Boca de lobo", "BL", 20, 4, 6], ["Meio-fio", "MF", 150, 50, 340], ["Guia", "GU", 60, 40, 120], ["Caixa para galeria", "CG", 10, 4, 18], ["Caixa de inspeção", "CI", 10, 2, 40],
       ["Tubo de concreto", "TC", 30, 10, 85], ["Aduela", "AD", 5, 2, -4], ["Dissipador", "DI", 8, 4, 12], ["Ala", "AL", 10, 4, 30], ["Laje", "LJ", 8, 6, 22]];
     const produtos = P.map(([nome, codigo, minimo, por_pilha], i) => ({ id: `p${i + 1}`, nome, codigo, unidade: "un", minimo, por_pilha, ativo: true }));
@@ -87,7 +89,7 @@
       { id: uid("ct"), criado_em: new Date(agora - 26 * 3600000).toISOString(), criado_por: "u-marcos", status: "aguardando_aprovacao", escopo: "Contagem do dia", itens: [itemC("p3", 126, 120), itemC("p5", 40, 40)] },
     ];
     const cfg = { ...D.CONFIG_PADRAO };
-    const estado = { v: 2, criadoEm: agora, perfilId: "u-admin", perfis, veiculos, produtos, notas, conferencias, movimentos, contagens, alertas: [], config: cfg, vistoResumo: {} };
+    const estado = { v: 3, criadoEm: agora, perfilId: "u-admin", perfis, veiculos, produtos, notas, conferencias, movimentos, contagens, alertas: [], config: cfg, vistoResumo: {} };
     // alertas dos últimos dias (as cargas com diferença de hoje e ontem)
     const saldos = D.calcularSaldos(produtos, movimentos, contagens);
     const sd = Object.fromEntries(saldos.map((s) => [s.produto_id, s.saldo]));
@@ -126,7 +128,7 @@
   // ───────────────────────── a implementação ─────────────────────────
   NE.criarTeste = () => {
     let e = NE.memoria.ler(CHAVE);
-    if (!e || e.v !== 2) e = semear();
+    if (!e || e.v !== 3) e = semear();
     else { // mantém os dados "de hoje": desloca tudo em dias inteiros
       const dias = Math.floor((Date.now() - e.criadoEm) / DIA);
       if (dias > 0) { const mov = (o) => { if (Array.isArray(o)) o.forEach(mov); else if (o && typeof o === "object") for (const k of Object.keys(o)) { if (CAMPOS_TEMPO.includes(k) && typeof o[k] === "string") o[k] = new Date(D.aMs(o[k]) + dias * DIA).toISOString(); else mov(o[k]); } }; mov(e); e.criadoEm += dias * DIA; }
@@ -178,7 +180,7 @@
         await pausa(); const u = String(d.usuario || "").toLowerCase().trim();
         if (!u || String(d.senha || "").length < 6) throw new Error("Usuário e senha (6+ caracteres) são obrigatórios.");
         if (e.perfis.some((p) => p.usuario === u)) throw new Error(`O usuário "${u}" já existe.`);
-        const p = { id: uid("u"), nome: d.nome.trim(), usuario: u, funcao: d.funcao, papel: d.papel || "funcionario", ativo: true, telefone: d.telefone || "" }; e.perfis.push(p); salvar();
+        const p = { id: uid("u"), nome: d.nome.trim(), usuario: u, funcao: d.funcao, papel: d.papel || "funcionario", ativo: true, telefone: d.telefone || "", email_contato: d.email_contato || null, admissao: d.admissao || null, cnh_validade: d.cnh_validade || null, observacao: d.observacao || null, foto: d.foto || null }; e.perfis.push(p); salvar();
         return { id: p.id, usuario: u, senha: d.senha };
       },
       async criarFuncionarios(lista) { const out = []; for (const d of lista) { try { out.push({ ok: true, ...(await api.criarFuncionario(d)), nome: d.nome }); } catch (er) { out.push({ ok: false, nome: d.nome, erro: er.message }); } } return out; },
@@ -197,7 +199,7 @@
 
       // fotos
       async enviarFoto(blob) { await pausa(80); const c = `teste/foto/${uid("f")}`; fotos.set(c, URL.createObjectURL(blob)); return c; },
-      async urlFoto(c) { if (fotos.has(c)) return fotos.get(c); const tipo = (c.split("/")[1] || "foto"); const cor = tipo === "placa" ? "#d9141e" : tipo === "nota" ? "#e8e4df" : "#d9141e"; return fotoExemplo(tipo === "nota" ? "Nota fiscal" : tipo === "placa" ? "Placa" : "Carga", cor); },
+      async urlFoto(c) { if (fotos.has(c)) return fotos.get(c); if (c.startsWith("teste/veiculo/")) return fotoExemplo(`Caminhão · ${c.split("/")[2]}`); const tipo = (c.split("/")[1] || "foto"); const cor = tipo === "placa" ? "#d9141e" : tipo === "nota" ? "#e8e4df" : "#d9141e"; return fotoExemplo(tipo === "nota" ? "Nota fiscal" : tipo === "placa" ? "Placa" : "Carga", cor); },
       fotoExemplo: (rotulo) => new Promise((ok) => { const img = new Image(); img.onload = () => { const cv = Object.assign(document.createElement("canvas"), { width: img.width, height: img.height }); cv.getContext("2d").drawImage(img, 0, 0); cv.toBlob(ok, "image/jpeg", 0.8); }; img.src = fotoExemplo(rotulo); }),
 
       // conferência
@@ -274,8 +276,8 @@
       pushSuportado: () => false, async pushAssinar() { throw new Error("O aviso com o app fechado só funciona no app de verdade (com o banco ligado)."); }, async pushRemover() {}, async pushTestar() {},
 
       // assistente (no teste responde com cálculo local, sem chave do Claude)
-      iaDisponivel: async () => ({ ativo: true, modo: "local" }),
-      async iaPerguntar(texto) { await pausa(400); const r = D.responderLocal(texto, contextoDe(e)); return { ...r, origem: "local" }; },
+      iaDisponivel: async () => ({ ativo: eu().papel === "admin", modo: "local", leitura: true }),
+      async iaPerguntar(texto) { if (eu().papel !== "admin") throw new Error("O assistente é só da administração."); await pausa(400); const r = D.responderLocal(texto, contextoDe(e)); return { ...r, origem: "local" }; },
       async iaLerNota() {
         await pausa(900); const ps = e.produtos;
         return { numero: String(48300 + Math.floor(Math.random() * 90)), cliente: "Construtora Exemplo Ltda", itens: [{ descricao: ps[1].nome, quantidade: 60 }, { descricao: ps[0].nome, quantidade: 6 }], origem: "local" };

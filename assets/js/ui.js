@@ -125,6 +125,37 @@
     } catch { /* sem permissão ou sem suporte */ }
   };
 
+  // ── Contato e fotos (equipe e frota) ──
+  NE.soDigitos = (t) => String(t || "").replace(/\D/g, "");
+  NE.mascaraTelefone = (t) => { const d = NE.soDigitos(t).slice(0, 11); if (d.length <= 2) return d ? `(${d}` : ""; if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`; if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`; return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`; };
+  NE.linkWhatsApp = (tel, texto) => { const d = NE.soDigitos(tel); if (d.length < 10) return ""; return `https://wa.me/${d.startsWith("55") && d.length > 11 ? d : "55" + d}${texto ? `?text=${encodeURIComponent(texto)}` : ""}`; };
+
+  // Bolinha com a foto da pessoa (ou as iniciais, se não tiver foto)
+  NE.avatar = (nome, caminho, tamanho = 46) => {
+    const ini = String(nome || "?").trim().split(/\s+/).filter((x) => /^[A-Za-zÀ-ÿ]/.test(x)).slice(0, 2).map((x) => x[0]).join("").toUpperCase() || "?";
+    const b = NE.el("span", { class: "avatar", style: `width:${tamanho}px;height:${tamanho}px;font-size:${Math.round(tamanho * 0.38)}px`, "aria-hidden": "true" }, ini);
+    if (caminho) NE.dados.urlFoto(caminho).then((u) => { if (u) b.replaceChildren(NE.el("img", { src: u, alt: "", loading: "lazy" })); }).catch(() => {});
+    return b;
+  };
+
+  // Bloco para tirar/escolher foto: lista = array de { blob, url } alterado no lugar; aoMudar() redesenha
+  NE.seletorFoto = ({ titulo, dica, lista, varias = false, frontal = false, aoMudar }) => {
+    const adicionar = async (arquivos) => {
+      for (const arq of arquivos) { const blob = await NE.reduzirFoto(arq); if (!varias) lista.splice(0).forEach((f) => URL.revokeObjectURL(f.url)); lista.push({ blob, url: URL.createObjectURL(blob) }); }
+      aoMudar();
+    };
+    const entrada = (camera, rotulo) => { const i = NE.el("input", { type: "file", accept: "image/*", capture: camera ? (frontal ? "user" : "environment") : false, multiple: varias || false, "aria-label": `${rotulo}: ${titulo}` }); i.addEventListener("change", () => { if (i.files?.length) adicionar([...i.files]); }); return i; };
+    const feita = lista.length > 0;
+    return NE.el("div", { class: `foto-bloco${feita ? " feita" : ""}` },
+      NE.el("div", { class: "foto-bloco-topo" }, NE.el("strong", {}, titulo), NE.el("span", { class: `etiqueta ${feita ? "ok" : ""}` }, feita ? `${lista.length} foto${lista.length > 1 ? "s" : ""}` : "Opcional")),
+      dica && NE.el("span", { class: "dica" }, dica),
+      feita && NE.el("div", { class: "miniaturas" }, lista.map((f, i) => NE.el("figure", {}, NE.el("img", { src: f.url, alt: `${titulo} ${i + 1}` }),
+        NE.el("button", { type: "button", class: "remover", "aria-label": "Apagar esta foto", html: NE.icone.fechar, onclick: () => { URL.revokeObjectURL(f.url); lista.splice(i, 1); aoMudar(); } })))),
+      NE.el("div", { class: "foto-acoes" },
+        NE.el("label", { class: "btn btn-secundario botao-camera" }, NE.ic("camera"), feita ? (varias ? "Mais uma" : "Trocar") : "Tirar foto", entrada(true, "Tirar foto")),
+        NE.el("label", { class: "btn btn-secundario botao-camera" }, NE.ic("galeria"), "Galeria", entrada(false, "Escolher da galeria"))));
+  };
+
   NE.memoria = {
     ler: (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
     gravar: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sem armazenamento: segue sem rascunho */ } },

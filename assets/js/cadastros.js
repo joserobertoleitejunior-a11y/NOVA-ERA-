@@ -14,7 +14,7 @@
   NE.cadastros = {
     // ── Funcionário ──────────────────────────────────
     funcionario(raiz, voltar) {
-      const d = { nome: "", funcao: "", papel: "", usuario: "", senha: gerarSenha(), usuarioEditado: false };
+      const d = { nome: "", funcao: "", papel: "", usuario: "", senha: gerarSenha(), usuarioEditado: false, telefone: "", email_contato: "", admissao: "", cnh_validade: "", observacao: "", fotos: [] };
       NE.assistente({
         raiz, rotuloFinal: "Cadastrar funcionário", aoCancelar: voltar,
         passos: [
@@ -38,6 +38,25 @@
             validar: () => (!d.funcao ? "Toque na função do funcionário." : null),
           },
           {
+            titulo: "Contato", icone: "whatsapp", ajuda: "Opcional. O WhatsApp aparece como botão na lista da equipe.",
+            tela: () => {
+              const teste = el("a", { class: "btn btn-verde btn-bloco", id: "cad-zap", target: "_blank", rel: "noopener", style: "margin-top:6px" }, ic("whatsapp"), "Testar no WhatsApp");
+              const atualizar = () => { const l = NE.linkWhatsApp(d.telefone); teste.hidden = !l; if (l) teste.href = l; };
+              const tel = NE.campoTexto("WhatsApp / celular", { id: "cad-tel", value: d.telefone, inputmode: "tel", placeholder: "(15) 99999-9999" }, (v, inp) => { d.telefone = NE.mascaraTelefone(v); if (inp.value !== d.telefone) inp.value = d.telefone; atualizar(); }, "Com DDD. É por aqui que a expedição fala com a pessoa.");
+              atualizar();
+              return el("div", {}, tel, teste,
+                NE.campoTexto("E-mail (opcional)", { id: "cad-email", value: d.email_contato, type: "email", autocapitalize: "none", placeholder: "nome@empresa.com.br" }, (v) => { d.email_contato = v.trim(); }),
+                el("div", { class: "campo" }, el("label", { for: "cad-adm" }, "Data de admissão (opcional)"), el("input", { class: "entrada", id: "cad-adm", type: "date", value: d.admissao, oninput: (e) => { d.admissao = e.target.value; } })),
+                d.funcao === "motorista" && el("div", { class: "campo" }, el("label", { for: "cad-cnh" }, "Validade da CNH (opcional)"), el("span", { class: "dica" }, "O app avisa quando estiver perto de vencer."), el("input", { class: "entrada", id: "cad-cnh", type: "date", value: d.cnh_validade, oninput: (e) => { d.cnh_validade = e.target.value; } })),
+                NE.campoTexto("Observação (opcional)", { id: "cad-obs", value: d.observacao, placeholder: "Ex.: turno da manhã, opera o munck" }, (v) => { d.observacao = v; }));
+            },
+            validar: () => (d.telefone && NE.soDigitos(d.telefone).length < 10 ? "O telefone precisa ter DDD e número (10 ou 11 dígitos), ou deixe em branco." : null),
+          },
+          {
+            titulo: "Foto", icone: "camera", ajuda: "Opcional. Aparece ao lado do nome na equipe.",
+            tela: (r) => NE.seletorFoto({ titulo: "Foto de perfil", dica: "Rosto de frente, com boa luz.", lista: d.fotos, varias: false, frontal: true, aoMudar: r }),
+          },
+          {
             titulo: "Acesso", icone: "lista", ajuda: "O que essa pessoa pode ver no app.",
             tela: (r) => el("div", {},
               NE.escolhaUnica([
@@ -45,7 +64,7 @@
                 { valor: "admin", rotulo: "Painel completo", dica: "Vê todas as conferências e faz cadastros" },
               ], d.papel, (v) => { d.papel = v; r(); }),
               d.papel === "admin" && el("div", { class: "aviso alerta", style: "margin-top:14px" }, ic("alerta"),
-                el("span", {}, "Painel completo vê fotos e dados de todas as cargas. Dê só para quem é responsável."))),
+                el("span", {}, "Painel completo vê fotos e dados de todas as cargas e usa o assistente de IA. Dê só para quem é responsável."))),
             validar: () => (!d.papel ? "Escolha o tipo de acesso." : null),
           },
           {
@@ -66,26 +85,28 @@
           {
             titulo: "Revisar", icone: "check", ajuda: "Confira antes de cadastrar.",
             tela: () => el("div", { class: "resumo" },
-              NE.linhaResumo("Nome", d.nome.trim()), NE.linhaResumo("Função", NE.funcoes[d.funcao]),
+              NE.linhaResumo("Nome", d.nome.trim()), NE.linhaResumo("Função", NE.funcoes[d.funcao]), NE.linhaResumo("WhatsApp", d.telefone || "—"), NE.linhaResumo("Foto", d.fotos.length ? "Sim" : "Sem foto"),
               NE.linhaResumo("Acesso", d.papel === "admin" ? "Painel completo" : "Só conferência"),
               NE.linhaResumo("Usuário", d.usuario), NE.linhaResumo("Senha", d.senha)),
           },
         ],
         async aoConcluir() {
-          await NE.dados.criarFuncionario({ nome: d.nome.trim(), usuario: d.usuario, senha: d.senha, funcao: d.funcao, papel: d.papel });
+          const foto = d.fotos[0] ? await NE.dados.enviarFoto(d.fotos[0].blob, (NE.app.perfil || {}).id) : null;
+          await NE.dados.criarFuncionario({ nome: d.nome.trim(), usuario: d.usuario, senha: d.senha, funcao: d.funcao, papel: d.papel, telefone: NE.soDigitos(d.telefone) || null,
+            email_contato: d.email_contato || null, admissao: d.admissao || null, cnh_validade: d.cnh_validade || null, observacao: d.observacao.trim() || null, foto });
           NE.telaFim(raiz, {
             titulo: "Funcionário cadastrado",
             texto: `Passe estes dados para ${d.nome.trim().split(" ")[0]}. Ele vai usar para entrar no app.`,
-            extra: cartaoAcesso(d.usuario, d.senha),
+            extra: cartaoAcesso(d.usuario, d.senha, d.telefone, d.nome),
             botoes: [{ rotulo: "Cadastrar outro", icone: "mais", acao: () => NE.cadastros.funcionario(raiz, voltar) }, { rotulo: "Voltar ao painel", acao: voltar }],
           });
         },
       });
     },
 
-    // ── Caminhão ─────────────────────────────────────
+    // ── Caminhão (frota) ─────────────────────────────
     caminhao(raiz, voltar) {
-      const d = { placa: "", tipo: "", descricao: "" };
+      const d = { placa: "", tipo: "", marca: "", modelo: "", ano: "", cor: "", capacidade_t: "", observacao: "", fotos: { frente: [], lateral: [], traseira: [], placa: [], outras: [] } };
       NE.assistente({
         raiz, rotuloFinal: "Cadastrar caminhão", aoCancelar: voltar,
         passos: [
@@ -110,17 +131,33 @@
             validar: () => (!d.tipo ? "Toque no tipo do caminhão." : null),
           },
           {
-            titulo: "Descrição", icone: "nota", ajuda: "Opcional. Ajuda a reconhecer o caminhão.",
-            tela: () => NE.campoTexto("Descrição (opcional)", { id: "cad-desc", value: d.descricao, placeholder: "Ex.: VW 24.250 vermelho" }, (v) => { d.descricao = v; }),
+            titulo: "Detalhes", icone: "nota", ajuda: "Tudo opcional, mas ajuda a reconhecer o caminhão e controlar a carga.",
+            tela: () => el("div", {},
+              el("div", { class: "form-linha" }, NE.campoTexto("Marca", { id: "cad-marca", value: d.marca, placeholder: "Ex.: Volkswagen" }, (v) => { d.marca = v; }), NE.campoTexto("Modelo", { id: "cad-modelo", value: d.modelo, placeholder: "Ex.: 24.250" }, (v) => { d.modelo = v; })),
+              el("div", { class: "form-linha" }, NE.campoTexto("Ano", { id: "cad-ano", value: d.ano, inputmode: "numeric", maxlength: "4", placeholder: "2019" }, (v, i) => { d.ano = v.replace(/\D/g, "").slice(0, 4); if (i.value !== d.ano) i.value = d.ano; }), NE.campoTexto("Cor", { id: "cad-cor", value: d.cor, placeholder: "Vermelho" }, (v) => { d.cor = v; })),
+              NE.campoTexto("Capacidade de carga (toneladas)", { id: "cad-cap", value: d.capacidade_t, inputmode: "decimal", placeholder: "Ex.: 14" }, (v, i) => { d.capacidade_t = v.replace(",", ".").replace(/[^0-9.]/g, ""); if (i.value !== d.capacidade_t) i.value = d.capacidade_t; }, "Usado para avisar se a carga passar do limite."),
+              NE.campoTexto("Observação (opcional)", { id: "cad-desc", value: d.observacao, placeholder: "Ex.: munck de 8 t, pneus novos" }, (v) => { d.observacao = v; })),
+            validar: () => (d.ano && (Number(d.ano) < 1980 || Number(d.ano) > new Date().getFullYear() + 1) ? "Confira o ano do caminhão." : null),
+          },
+          {
+            titulo: "Fotos", icone: "camera", ajuda: "Opcional. Ajudam a achar o caminhão certo e provam o estado dele.",
+            tela: (r) => el("div", {},
+              NE.seletorFoto({ titulo: "Frente", lista: d.fotos.frente, varias: false, aoMudar: r }), NE.seletorFoto({ titulo: "Lateral", lista: d.fotos.lateral, varias: false, aoMudar: r }),
+              NE.seletorFoto({ titulo: "Traseira", lista: d.fotos.traseira, varias: false, aoMudar: r }), NE.seletorFoto({ titulo: "Placa", lista: d.fotos.placa, varias: false, aoMudar: r }),
+              NE.seletorFoto({ titulo: "Outras (avarias, carroceria, munck)", lista: d.fotos.outras, varias: true, aoMudar: r })),
           },
           {
             titulo: "Revisar", icone: "check", ajuda: "Confira antes de cadastrar.",
             tela: () => el("div", { class: "resumo" },
-              NE.linhaResumo("Placa", d.placa), NE.linhaResumo("Tipo", NE.tiposVeiculo[d.tipo]), NE.linhaResumo("Descrição", d.descricao.trim() || "—")),
+              NE.linhaResumo("Placa", d.placa), NE.linhaResumo("Tipo", NE.tiposVeiculo[d.tipo]), NE.linhaResumo("Veículo", [d.marca, d.modelo, d.ano].filter(Boolean).join(" ") || "—"),
+              NE.linhaResumo("Cor", d.cor || "—"), NE.linhaResumo("Capacidade", d.capacidade_t ? `${d.capacidade_t} t` : "—"), NE.linhaResumo("Fotos", String(Object.values(d.fotos).flat().length))),
           },
         ],
         async aoConcluir() {
-          await NE.dados.criarVeiculo({ placa: d.placa, tipo: d.tipo, descricao: d.descricao.trim() || null });
+          const fotos = [];
+          for (const [tipo, lista] of Object.entries(d.fotos)) for (const f of lista) fotos.push({ tipo, caminho: await NE.dados.enviarFoto(f.blob, (NE.app.perfil || {}).id) });
+          await NE.dados.criarVeiculo({ placa: d.placa, tipo: d.tipo, marca: d.marca.trim() || null, modelo: d.modelo.trim() || null, ano: d.ano ? Number(d.ano) : null, cor: d.cor.trim() || null,
+            capacidade_t: d.capacidade_t ? Number(d.capacidade_t) : null, descricao: d.observacao.trim() || null, fotos });
           NE.telaFim(raiz, {
             titulo: "Caminhão cadastrado", texto: `${d.placa} já aparece na lista da conferência.`,
             botoes: [{ rotulo: "Cadastrar outro", icone: "mais", acao: () => NE.cadastros.caminhao(raiz, voltar) }, { rotulo: "Voltar ao painel", acao: voltar }],
@@ -168,15 +205,18 @@
 
   NE.unidades = { un: "Unidade", m: "Metro", m3: "Metro cúbico", t: "Tonelada" };
 
-  function cartaoAcesso(usuario, senha) {
-    const texto = `Confere Carga · Nova Era\nUsuário: ${usuario}\nSenha: ${senha}`;
-    const copiar = el("button", { type: "button", class: "btn btn-azul btn-bloco", style: "margin-top:12px" }, "Copiar para mandar no WhatsApp");
+  function cartaoAcesso(usuario, senha, telefone, nome) {
+    const base = (window.NOVA_ERA || {}).urlPublica || location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
+    const texto = `Olá${nome ? ", " + nome.trim().split(" ")[0] : ""}! Seu acesso ao Confere Carga da Nova Era:\nEndereço: ${base.replace(/\/?$/, "/")}app.html\nUsuário: ${usuario}\nSenha: ${senha}`;
+    const zap = NE.linkWhatsApp(telefone, texto);
+    const copiar = el("button", { type: "button", class: "btn btn-azul btn-bloco", style: "margin-top:12px" }, "Copiar para mandar");
     copiar.addEventListener("click", async () => {
       try { await navigator.clipboard.writeText(texto); NE.aviso("Copiado. Cole na conversa com o funcionário.", "ok"); }
-      catch { const s = getSelection(); const r = document.createRange(); r.selectNodeContents(bloco); s.removeAllRanges(); s.addRange(r); NE.aviso("Texto selecionado. Copie pelo menu do celular.", "alerta"); }
+      catch { NE.aviso("Não deu para copiar neste aparelho. Anote o usuário e a senha.", "alerta"); }
     });
     const bloco = el("div", { class: "resumo", style: "text-align:left;margin:0" }, NE.linhaResumo("Usuário", usuario), NE.linhaResumo("Senha", senha));
-    return el("div", { style: "max-width:420px;margin:0 auto 22px" }, bloco, copiar,
+    return el("div", { style: "max-width:420px;margin:0 auto 22px" }, bloco,
+      zap && el("a", { class: "btn btn-verde btn-bloco", style: "margin-top:12px", href: zap, target: "_blank", rel: "noopener" }, ic("whatsapp"), "Mandar no WhatsApp dele"), copiar,
       el("p", { style: "font-size:.85rem;margin:10px auto 0" }, "Por segurança, a senha não aparece de novo depois desta tela."));
   }
 })();

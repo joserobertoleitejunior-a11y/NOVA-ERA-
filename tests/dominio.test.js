@@ -75,6 +75,8 @@ test("assistente local", () => {
   const ctx = { conferencias: [conf("1", [it("Meio-fio", 10, 12, 1)])], notas: [], saldos: [{ produto_id: 1, nome: "Meio-fio", unidade: "un", saldo: 4, minimo: 10, ultima_contagem: null }], movimentos: [], contagens: [], agora: AGORA };
   assert.match(D.responderLocal("o que saiu a mais hoje?", ctx).texto, /Meio-fio: \+2/);
   assert.match(D.responderLocal("estoque baixo", ctx).texto, /Meio-fio/);
-  assert.match(D.responderLocal("blablabla", ctx).texto, /Não entendi/);
+  assert.match(D.responderLocal("qual a receita de bolo de cenoura", ctx).texto, /só ajudo com a Nova Era/);
+  assert.match(D.responderLocal("o que significa o semáforo do painel?", ctx).texto, /Como ler o painel/);
+  assert.match(D.responderLocal("explica como funciona o estoque", ctx).texto, /Como funciona o estoque/);
 });
 test("csv escapa", () => assert.match(D.csv(["a"], [['x;"y']]), /"x;""y"/));
