@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Mensagens · Confere Carga</title>
+<style>
+/* ═══════════ COMPONENTE: MENSAGENS (copie do "início do componente" até o "fim do componente") ═══════════ */
+/* início do componente */
+:root {
+  --msg-ok: #1d7a46; --msg-erro: #b3261e; --msg-alerta: #b45309; --msg-info: #1a1f8f;
+}
+.mensagens { position: fixed; left: 0; right: 0; z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0 14px; pointer-events: none; }
+.mensagens.baixo { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); flex-direction: column-reverse; }
+.mensagens.topo { top: calc(14px + env(safe-area-inset-top, 0px)); }
+.mensagem { pointer-events: auto; display: flex; align-items: center; gap: 12px; width: max-content; max-width: min(92vw, 520px); padding: 13px 20px 13px 16px; border-radius: 20px; cursor: pointer;
+  font: 700 1.02rem/1.3 "Archivo NE", system-ui, "Segoe UI", Roboto, Arial, sans-serif; border: 1px solid; -webkit-backdrop-filter: blur(16px) saturate(170%); backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: 0 10px 30px rgba(11, 16, 56, .18), inset 0 1px 0 rgba(255, 255, 255, .7); animation: msg-entra .32s cubic-bezier(.2, .9, .3, 1.2) both; }
+.mensagem.saindo { animation: msg-sai .24s ease-in both; }
+.mensagem svg { width: 24px; height: 24px; flex: none; }
+.mensagem .msg-texto { min-width: 0; overflow-wrap: anywhere; }
+.mensagem .msg-acao { flex: none; margin-left: 6px; padding: 7px 12px; border-radius: 99px; border: 0; font: inherit; font-size: .9rem; font-weight: 800; color: #fff; cursor: pointer; }
+.mensagem.ok { color: var(--msg-ok); background: linear-gradient(180deg, rgba(228, 246, 235, .96), rgba(204, 236, 216, .82)); border-color: rgba(29, 122, 70, .35); } .mensagem.ok .msg-acao { background: var(--msg-ok); }
+.mensagem.erro { color: var(--msg-erro); background: linear-gradient(180deg, rgba(253, 236, 234, .96), rgba(250, 214, 210, .84)); border-color: rgba(179, 38, 30, .35); } .mensagem.erro .msg-acao { background: var(--msg-erro); }
+.mensagem.alerta { color: var(--msg-alerta); background: linear-gradient(180deg, rgba(255, 244, 226, .97), rgba(253, 228, 190, .84)); border-color: rgba(180, 83, 9, .35); } .mensagem.alerta .msg-acao { background: var(--msg-alerta); }
+.mensagem.info { color: var(--msg-info); background: linear-gradient(180deg, rgba(236, 240, 252, .97), rgba(210, 220, 247, .84)); border-color: rgba(26, 31, 143, .3); } .mensagem.info .msg-acao { background: var(--msg-info); }
+.mensagem .msg-barra { position: absolute; }
+@keyframes msg-entra { from { opacity: 0; transform: translateY(14px) scale(.94); } to { opacity: 1; transform: none; } }
+@keyframes msg-sai { to { opacity: 0; transform: translateY(8px) scale(.96); } }
+@media (prefers-reduced-motion: reduce) { .mensagem, .mensagem.saindo { animation-duration: .01s; } }
+/* fim do componente (CSS) */
+
+/* só da página de demonstração */
+body { margin: 0; min-height: 100vh; background: radial-gradient(60vmax 40vmax at 0 0, rgba(217, 20, 30, .18), transparent 60%), radial-gradient(60vmax 50vmax at 100% 10%, rgba(26, 31, 143, .2), transparent 60%), #eef0f6; font-family: "Archivo NE", system-ui, "Segoe UI", Roboto, Arial, sans-serif; color: #14172e; }
+main { max-width: 720px; margin: 0 auto; padding: 32px 18px 120px; }
+h1 { margin: 0 0 6px; font-size: 2.2rem; text-transform: uppercase; } p.sub { margin: 0 0 22px; color: #565a78; }
+.grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.demo { min-height: 56px; border-radius: 16px; border: 0; font: inherit; font-weight: 800; font-size: 1rem; color: #fff; cursor: pointer; }
+.demo.ok { background: var(--msg-ok); } .demo.erro { background: var(--msg-erro); } .demo.alerta { background: var(--msg-alerta); } .demo.info { background: var(--msg-info); } .demo.neutro { background: #fff; color: #14172e; box-shadow: inset 0 0 0 2px #c9cde0; }
+h2 { margin: 28px 0 10px; font-size: 1.2rem; text-transform: uppercase; }
+.linha { display: flex; gap: 8px; flex-wrap: wrap; } .chip { padding: 10px 16px; border-radius: 99px; border: 2px solid #c9cde0; background: #fff; font: inherit; font-weight: 700; cursor: pointer; } .chip[aria-pressed="true"] { border-color: #1a1f8f; color: #1a1f8f; background: #eaeefc; }
+pre { background: #0b1038; color: #dfe4ff; padding: 16px; border-radius: 16px; overflow-x: auto; font-size: .88rem; line-height: 1.5; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Mensagens</h1>
+  <p class="sub">Avisos rápidos que aparecem, dizem o que aconteceu e somem sozinhos. Toque na mensagem para fechar.</p>
+
+  <h2>Teste</h2>
+  <div class="grade">
+    <button class="demo ok" data-t="ok" data-m="Estoque ajustado.">Sucesso</button>
+    <button class="demo erro" data-t="erro" data-m="Sem internet. Confira o sinal e tente de novo.">Erro</button>
+    <button class="demo alerta" data-t="alerta" data-m="Esta nota espera conferência.">Atenção</button>
+    <button class="demo info" data-t="info" data-m="Nova nota na fila.">Informação</button>
+    <button class="demo neutro" id="b-desfazer">Com botão “Desfazer”</button>
+    <button class="demo neutro" id="b-varias">Várias de uma vez</button>
+  </div>
+
+  <h2>Onde aparece</h2>
+  <div class="linha" id="posicao"><button class="chip" aria-pressed="true" data-p="baixo">Embaixo</button><button class="chip" aria-pressed="false" data-p="topo">No topo</button></div>
+
+  <h2>Como usar no código</h2>
+<pre>Mensagem.ok("Estoque ajustado.");
+Mensagem.erro("Sem internet. Tente de novo.");
+Mensagem.alerta("Esta nota espera conferência.");
+Mensagem.info("Nova nota na fila.");
+
+// com botão e tempo próprio (ms)
+Mensagem.ok("Nota cancelada.", { acao: { rotulo: "Desfazer", fazer: () =&gt; desfazer() }, ms: 6000 });</pre>
+</main>
+
+<div class="mensagens baixo" id="mensagens" aria-live="polite"></div>
+
+<script>
+/* início do componente (JS) */
+const Mensagem = (() => {
+  const ICONES = {
+    ok: '<path d="m5 12.5 4.5 4.5L19 7"/>',
+    erro: '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/>',
+    alerta: '<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17.5v.01"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5v.01"/>',
+  };
+  const caixa = () => document.getElementById("mensagens");
+  function mostrar(texto, tipo = "ok", { ms, acao } = {}) {
+    const lugar = caixa(); if (!lugar) return null;
+    const m = document.createElement("div");
+    m.className = `mensagem ${tipo}`; m.setAttribute("role", tipo === "erro" ? "alert" : "status");
+    m.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONES[tipo] || ICONES.ok}</svg><span class="msg-texto"></span>`;
+    m.querySelector(".msg-texto").textContent = texto;              // texto puro: nunca interpreta HTML
+    if (acao) { const b = document.createElement("button"); b.type = "button"; b.className = "msg-acao"; b.textContent = acao.rotulo; b.addEventListener("click", (e) => { e.stopPropagation(); acao.fazer?.(); fechar(); }); m.append(b); }
+    let timer; const fechar = () => { clearTimeout(timer); if (!m.isConnected) return; m.classList.add("saindo"); setTimeout(() => m.remove(), 240); };
+    m.addEventListener("click", fechar);
+    lugar.append(m);
+    while (lugar.children.length > 4) lugar.firstElementChild.remove();   // no máximo 4 na tela
+    timer = setTimeout(fechar, ms ?? (tipo === "erro" ? 6500 : 3500));
+    return { fechar };
+  }
+  return { mostrar, ok: (t, o) => mostrar(t, "ok", o), erro: (t, o) => mostrar(t, "erro", o), alerta: (t, o) => mostrar(t, "alerta", o), info: (t, o) => mostrar(t, "info", o) };
+})();
+/* fim do componente (JS) */
+
+document.querySelectorAll("[data-t]").forEach((b) => b.addEventListener("click", () => Mensagem.mostrar(b.dataset.m, b.dataset.t)));
+document.getElementById("b-desfazer").addEventListener("click", () => Mensagem.ok("Nota cancelada.", { ms: 6000, acao: { rotulo: "Desfazer", fazer: () => Mensagem.info("Nota restaurada.") } }));
+document.getElementById("b-varias").addEventListener("click", () => { Mensagem.ok("Nota 48500 na fila."); setTimeout(() => Mensagem.alerta("Estoque baixo: Boca de lobo."), 250); setTimeout(() => Mensagem.erro("Não deu para enviar a foto."), 500); });
+document.querySelectorAll("#posicao .chip").forEach((c) => c.addEventListener("click", () => { document.querySelectorAll("#posicao .chip").forEach((x) => x.setAttribute("aria-pressed", String(x === c))); document.getElementById("mensagens").className = `mensagens ${c.dataset.p}`; Mensagem.info(c.dataset.p === "topo" ? "Agora aparece no topo." : "Agora aparece embaixo."); }));
+</script>
+</body>
+</html>

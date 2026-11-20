@@ -32,7 +32,7 @@
     const box = NE.el("div", { class: `aviso ${tipo}${ondeEl ? "" : " toast"}`, role: tipo === "erro" ? "alert" : "status" }, NE.ic(icone), NE.el("span", {}, texto));
     if (ondeEl) { ondeEl.replaceChildren(box); return box; }
     document.querySelectorAll(".toast").forEach((t) => t.remove());
-    document.body.append(box);
+    document.body.append(box); box.addEventListener("click", () => box.remove()); // toque fecha
     setTimeout(() => box.remove(), tipo === "erro" ? 6000 : 3500);
     return box;
   };

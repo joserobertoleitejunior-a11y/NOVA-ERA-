@@ -37,7 +37,7 @@
   const inicial = () => (ehAdmin() ? "inicio" : "notas");
 
   function desenhar() {
-    NE.fecharJanela?.(); NE.fecharSimples?.();
+    NE.fecharJanela?.(); NE.fecharSimples?.(); document.querySelectorAll(".janela-fundo, .folha-fundo").forEach((x) => x.remove()); // trocar de tela fecha qualquer janela aberta
     const { rota, params } = atual;
     const sem = SEM_NAV.has(rota);
     document.body.classList.toggle("com-nav", !sem);
