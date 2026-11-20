@@ -48,39 +48,61 @@
   fundo.addEventListener("click", (e) => { if (e.target === fundo) fecharMenu(); });
   painel.querySelectorAll("a[href^='#']").forEach((a) => a.addEventListener("click", () => fecharMenu(false)));
 
-  // ───────────────────────── CARROSSEL DE ATALHOS ─────────────────────────
-  const fotos = () => site().FOTOS || [];
-  const miniaturas = (qtd, inicio = 0) => el("div", { class: "car-fotos" }, fotos().slice(inicio, inicio + qtd).map((f, i) => el("button", { type: "button", class: "car-foto", "aria-label": `Ampliar: ${f.alt}`, onclick: () => { fecharAtalhos(); site().abrirFoto(inicio + i); } },
-    el("img", { src: `${f.src}-540.webp`, alt: "", loading: "lazy", decoding: "async" }))));
-  const CARTOES = () => [
-    { id: "insta", icone: IC.insta, titulo: "Instagram", sub: "@novaeradrenagem", corpo: [miniaturas(3, 0), el("p", {}, "Obras, fábrica e frota no dia a dia.")], acao: el("a", { class: "car-botao", href: C.instagram || "#", target: "_blank", rel: "noopener" }, "Seguir no Instagram") },
-    { id: "local", icone: IC.mapa, titulo: "Localização", sub: aberto() || "Itapetininga/SP", corpo: [el("p", { class: "car-forte" }, endereco()), el("p", {}, "Fábrica, usina de concreto e pátio no mesmo endereço. Entregamos com frota própria.")], acao: el("div", { class: "car-duplo" }, el("a", { class: "car-botao", href: rota(), target: "_blank", rel: "noopener" }, "Como chegar"), el("a", { class: "car-botao claro", href: C.mapaUrl || "#", target: "_blank", rel: "noopener" }, "Ver no mapa")) },
-    { id: "orc", icone: IC.lista, titulo: "Orçamento", sub: site().quantidade() ? `${site().quantidade()} na sua lista` : "Sem preço e sem compromisso", corpo: [el("p", {}, "Monte a lista com as peças e a calculadora de concreto. A equipe responde com valores e prazo.")], acao: el("div", { class: "car-duplo" }, el("button", { type: "button", class: "car-botao", onclick: () => { fecharAtalhos(); site().abrirLista(); } }, "Abrir minha lista"), el("a", { class: "car-botao claro", href: "#produtos", onclick: () => fecharAtalhos() }, "Ver produtos")) },
-    { id: "img", icone: IC.foto, titulo: "Imagens", sub: `${fotos().length} fotos reais`, corpo: [miniaturas(3, 3), el("p", {}, "Peças, pátio e obras entregues, sem banco de imagem.")], acao: el("a", { class: "car-botao", href: "#instagram", onclick: () => fecharAtalhos() }, "Ver todas as fotos") },
-    { id: "ent", icone: IC.caminhao, titulo: "Minha entrega", sub: "Rastreio ao vivo", corpo: [el("p", {}, "Recebeu um link no WhatsApp? Cole aqui e veja o horário de saída, o que foi carregado e a foto da carga.")], acao: el("a", { class: "car-botao", href: "#entrega", onclick: () => fecharAtalhos() }, "Acompanhar entrega") },
-    { id: "fala", icone: IC.fone, titulo: "Fale conosco", sub: C.telefoneEmpresa || "", corpo: [el("p", {}, "Atendimento comercial para obras, prefeituras e construtoras.")], acao: el("div", { class: "car-duplo" }, el("a", { class: "car-botao", href: `tel:${C.telefoneLink || ""}` }, "Ligar agora"), C.whatsapp ? el("a", { class: "car-botao zap", href: zap("Olá! Quero um orçamento."), target: "_blank", rel: "noopener" }, "WhatsApp") : el("a", { class: "car-botao claro", href: "#contato", onclick: () => fecharAtalhos() }, "Mais contatos")) },
-  ];
-  const faixa = el("div", { class: "car-faixa", tabindex: "0", "aria-label": "Atalhos do site, deslize para o lado" });
-  const pontos = el("div", { class: "car-pontos", "aria-hidden": "true" });
-  const setaE = el("button", { type: "button", class: "car-seta", "aria-label": "Atalho anterior", html: NE.icone.voltar }), setaD = el("button", { type: "button", class: "car-seta", "aria-label": "Próximo atalho", html: NE.icone.seguir });
-  const fecharA = el("button", { type: "button", class: "janela-fechar", "aria-label": "Fechar atalhos", html: NE.icone.fechar });
-  const folha = el("div", { class: "car-folha", role: "dialog", "aria-modal": "true", "aria-label": "Atalhos" }, el("div", { class: "car-topo" }, el("div", {}, el("p", { class: "sobre-titulo" }, "Atalhos"), el("h2", {}, "O que você procura?")), fecharA),
-    el("div", { class: "car-palco" }, setaE, faixa, setaD), pontos);
-  const fundoA = el("div", { class: "car-fundo", id: "atalhos", hidden: true }, folha); document.body.append(fundoA);
-  let cartoes = [];
-  const desenharCartoes = () => {
-    cartoes = CARTOES().map((c) => el("article", { class: "car-cartao", "data-id": c.id }, el("div", { class: "car-icone", html: c.icone }), el("h3", {}, c.titulo), el("p", { class: "car-sub" }, c.sub), ...c.corpo, el("div", { class: "car-acao" }, c.acao)));
-    faixa.replaceChildren(...cartoes); pontos.replaceChildren(...cartoes.map((_, i) => el("i", { class: i === 0 ? "ativo" : "" })));
-  };
-  const indice = () => Math.round(faixa.scrollLeft / (cartoes[0].offsetWidth + 14));
-  const ir = (i) => cartoes[Math.max(0, Math.min(cartoes.length - 1, i))].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  faixa.addEventListener("scroll", () => { const i = indice(); [...pontos.children].forEach((p, k) => p.classList.toggle("ativo", k === i)); setaE.disabled = i <= 0; setaD.disabled = i >= cartoes.length - 1; }, { passive: true });
-  setaE.addEventListener("click", () => ir(indice() - 1)); setaD.addEventListener("click", () => ir(indice() + 1));
-  faixa.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") { e.preventDefault(); ir(indice() + 1); } if (e.key === "ArrowLeft") { e.preventDefault(); ir(indice() - 1); } });
-  const abrirAtalhos = () => { desenharCartoes(); fundoA.hidden = false; requestAnimationFrame(() => { fundoA.classList.add("aberto"); faixa.scrollLeft = 0; setaE.disabled = true; setaD.disabled = false; }); trava(true); fecharA.focus({ preventScroll: true }); };
-  function fecharAtalhos() { fundoA.classList.remove("aberto"); trava(false); setTimeout(() => { fundoA.hidden = true; }, 260); }
-  fecharA.addEventListener("click", fecharAtalhos); fundoA.addEventListener("click", (e) => { if (e.target === fundoA) fecharAtalhos(); });
-  const pilha = $(".flutuantes");
-  if (pilha) { const b = el("button", { class: "flutuante atalhos", type: "button", id: "btn-atalhos", "aria-label": "Atalhos: Instagram, localização, orçamento e fotos", html: IC.grade }); b.addEventListener("click", abrirAtalhos); pilha.prepend(b); }
-  document.addEventListener("keydown", (e) => { if (e.key !== "Escape") return; if (!fundo.hidden) fecharMenu(); if (!fundoA.hidden) fecharAtalhos(); });
+  // ───────────────────────── FAIXA DE CONTATOS NO TOPO (rola sozinha e pode ser arrastada) ─────────────────────────
+  // Copiada do San e da Remop: faixa transparente logo abaixo do cabeçalho, com ícones brancos que andam sozinhos,
+  // podem ser arrastados com o dedo/mouse (com inércia) e fazem loop infinito nos dois sentidos (dois conjuntos iguais).
+  const hero = $("#inicio");
+  if (hero) {
+    const ITENS = [
+      C.whatsapp && { rotulo: "WhatsApp", icone: IC.zap, href: zap("Olá! Vim pelo site da Nova Era.") },
+      { rotulo: "Telefone", icone: IC.fone, href: `tel:${C.telefoneLink || ""}` },
+      { rotulo: "Instagram", icone: IC.insta, href: C.instagram || "#", fora: true },
+      { rotulo: "Localização no mapa", icone: IC.mapa, href: C.mapaUrl || "#", fora: true },
+      { rotulo: "Como chegar", icone: NE.icone.local, href: rota(), fora: true },
+      { rotulo: "Pedir orçamento", icone: IC.lista, acao: () => site().abrirLista() },
+      { rotulo: "Fotos da fábrica e das obras", icone: IC.foto, href: "#instagram" },
+      { rotulo: "Acompanhar minha entrega", icone: IC.caminhao, href: "#entrega" },
+    ].filter(Boolean);
+    const trilha = el("div", { class: "hero-faixa-trilha", id: "faixa-trilha" });
+    const faixa = el("div", { class: "hero-faixa", "aria-label": "Contatos e atalhos" }, trilha);
+    hero.append(faixa);
+    const icone = (it, copia) => {
+      const a = it.acao ? el("button", { type: "button", class: "hero-faixa-icone", "aria-label": it.rotulo, title: it.rotulo, html: it.icone }) : el("a", { class: "hero-faixa-icone", href: it.href, "aria-label": it.rotulo, title: it.rotulo, html: it.icone, ...(it.fora ? { target: "_blank", rel: "noopener" } : {}) });
+      if (it.acao) a.addEventListener("click", it.acao);
+      if (copia) { a.setAttribute("aria-hidden", "true"); a.tabIndex = -1; }
+      return a;
+    };
+    // repete os ícones até um conjunto ser mais largo que a tela; depois duplica o conjunto (loop infinito sem emenda)
+    const passo = () => (innerWidth >= 900 ? 98 : 64);
+    const vezes = Math.max(1, Math.ceil((innerWidth * 1.15) / (ITENS.length * passo())));
+    for (let c = 0; c < 2; c++) for (let v = 0; v < vezes; v++) ITENS.forEach((it) => trilha.append(icone(it, c === 1 || v > 0)));
+
+    const reduz = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const VEL = 0.035, ATRITO = 0.94, LIMIAR = 6; // px/ms · atrito da inércia · px para considerar arrasto (e não toque)
+    let largura = trilha.scrollWidth / 2, pos = 0, arrastando = false, moveu = false, soma = 0, px = 0, pt = 0, vel = 0, quadro = null, ultAuto = null, ultMom = null, visivel = true;
+    addEventListener("resize", () => { largura = trilha.scrollWidth / 2; });
+    const normalizar = () => { if (largura <= 0) return; while (pos <= -largura) pos += largura; while (pos > 0) pos -= largura; };
+    const desenhar = () => { normalizar(); trilha.style.transform = `translateX(${pos}px)`; };
+    const cancelar = () => { if (quadro) cancelAnimationFrame(quadro); quadro = null; };
+    function auto(agora) {
+      if (!visivel) { quadro = null; ultAuto = null; return; }
+      if (ultAuto === null) ultAuto = agora; const dt = agora - ultAuto; ultAuto = agora;
+      if (!arrastando && !reduz) { pos -= VEL * dt; desenhar(); }
+      quadro = requestAnimationFrame(auto);
+    }
+    function inercia(agora) {
+      if (ultMom === null) ultMom = agora; const dt = agora - ultMom; ultMom = agora;
+      pos += vel * dt; vel *= ATRITO; desenhar();
+      if (Math.abs(vel) > 0.01) quadro = requestAnimationFrame(inercia); else { ultMom = null; ultAuto = null; quadro = requestAnimationFrame(auto); }
+    }
+    if ("IntersectionObserver" in window) new IntersectionObserver((es) => { const antes = visivel; visivel = es[0].isIntersecting; if (visivel && !antes && !arrastando && !quadro) quadro = requestAnimationFrame(auto); }).observe(trilha);
+    trilha.addEventListener("pointerdown", (e) => { arrastando = true; moveu = false; soma = 0; cancelar(); px = e.clientX; pt = performance.now(); vel = 0; trilha.classList.add("arrastando"); try { trilha.setPointerCapture(e.pointerId); } catch { /* ok */ } });
+    trilha.addEventListener("pointermove", (e) => { if (!arrastando) return; const agora = performance.now(), dx = e.clientX - px, dt = Math.max(agora - pt, 1); pos += dx; vel = dx / dt; soma += Math.abs(dx); if (soma > LIMIAR) moveu = true; px = e.clientX; pt = agora; desenhar(); });
+    const soltar = () => { if (!arrastando) return; arrastando = false; trilha.classList.remove("arrastando"); cancelar(); ultMom = null; if (Math.abs(vel) > 0.02 && !reduz) quadro = requestAnimationFrame(inercia); else { ultAuto = null; quadro = requestAnimationFrame(auto); } };
+    trilha.addEventListener("pointerup", soltar); trilha.addEventListener("pointercancel", soltar);
+    trilha.addEventListener("pointerleave", (e) => { if (arrastando && e.buttons === 0) soltar(); });
+    trilha.addEventListener("click", (e) => { if (moveu) { e.preventDefault(); e.stopPropagation(); } }, true); // depois de arrastar, o clique que sobra não abre o link
+    quadro = requestAnimationFrame(auto);
+  }
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !fundo.hidden) fecharMenu(); });
 })();
