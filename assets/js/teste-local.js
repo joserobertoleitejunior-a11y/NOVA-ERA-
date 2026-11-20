@@ -5,7 +5,7 @@
 (() => {
   const NE = window.NE;
   const D = window.NEDominio;
-  const CHAVE = "ne-teste-v5";
+  const CHAVE = "ne-teste-v6";
   const MIN = D.MIN, DIA = D.DIA;
   const uid = (p = "t") => `${p}-${(crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()).replace(/-/g, "").slice(0, 12)}`;
   const tokenUuid = () => (crypto.randomUUID ? crypto.randomUUID() : "00000000-0000-4000-8000-" + String(Date.now()).padStart(12, "0"));
@@ -15,6 +15,16 @@
   function prng(semente) { let a = semente >>> 0; return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
   // ───────────────────────── dados de exemplo ─────────────────────────
+  // Estado VAZIO: só os acessos de teste (logins). Nenhum funcionário, produto, caminhão, nota ou conferência de mentira.
+  function semearVazio() {
+    const agora = Date.now(); const p = (id, nome, usuario, funcao, papel) => ({ id, nome, usuario, funcao, papel, ativo: true, telefone: "" });
+    const perfis = [p("u-admin", "Administrador (teste)", "admin", "diretoria", "admin"), p("u-t-vendas", "Vendas (teste)", "adminvendas", "vendedor", "admin"), p("u-t-exped", "Expedição (teste)", "adminexpedicao", "expedicao", "admin"),
+      p("u-t-dir", "Diretoria (teste)", "admindiretoria", "diretoria", "admin"), p("u-t-adm", "Administrativo (teste)", "adminadministrativo", "administrativo", "admin"),
+      p("u-t-conf", "Conferente (teste)", "conferente", "conferente", "funcionario"), p("u-t-ajud", "Ajudante (teste)", "ajudante", "ajudante", "funcionario"), p("u-t-moto", "Motorista (teste)", "motorista", "motorista", "funcionario")];
+    return { v: 6, criadoEm: agora, perfilId: "u-admin", perfis, veiculos: [], produtos: [], notas: [], conferencias: [], movimentos: [], contagens: [], alertas: [], config: { ...D.CONFIG_PADRAO }, vistoResumo: {} };
+  }
+  const querDemo = () => { try { return localStorage.getItem("ne-teste-demo") === "1"; } catch { return false; } };
+  // Dados de exemplo (SÓ para a apresentação para os diretores): ligados por "ne-teste-demo".
   function semear() {
     const r = prng(20261120); const agora = Date.now();
     const pick = (l) => l[Math.floor(r() * l.length)];
@@ -97,7 +107,7 @@
       { id: uid("ct"), criado_em: new Date(agora - 26 * 3600000).toISOString(), criado_por: "u-marcos", status: "aguardando_aprovacao", escopo: "Contagem do dia", itens: [itemC("p3", 126, 120), itemC("p5", 40, 40)] },
     ];
     const cfg = { ...D.CONFIG_PADRAO };
-    const estado = { v: 5, criadoEm: agora, perfilId: "u-admin", perfis, veiculos, produtos, notas, conferencias, movimentos, contagens, alertas: [], config: cfg, vistoResumo: {} };
+    const estado = { v: 6, criadoEm: agora, perfilId: "u-admin", perfis, veiculos, produtos, notas, conferencias, movimentos, contagens, alertas: [], config: cfg, vistoResumo: {} };
     // alertas dos últimos dias (as cargas com diferença de hoje e ontem)
     const saldos = D.calcularSaldos(produtos, movimentos, contagens);
     const sd = Object.fromEntries(saldos.map((s) => [s.produto_id, s.saldo]));
@@ -136,7 +146,7 @@
   // ───────────────────────── a implementação ─────────────────────────
   NE.criarTeste = () => {
     let e = NE.memoria.ler(CHAVE);
-    if (!e || e.v !== 5) e = semear();
+    if (!e || e.v !== 6) e = querDemo() ? semear() : semearVazio();
     else { // mantém os dados "de hoje": desloca tudo em dias inteiros
       const dias = Math.floor((Date.now() - e.criadoEm) / DIA);
       if (dias > 0) { const mov = (o) => { if (Array.isArray(o)) o.forEach(mov); else if (o && typeof o === "object") for (const k of Object.keys(o)) { if (CAMPOS_TEMPO.includes(k) && typeof o[k] === "string") o[k] = new Date(D.aMs(o[k]) + dias * DIA).toISOString(); else mov(o[k]); } }; mov(e); e.criadoEm += dias * DIA; }
@@ -178,7 +188,7 @@
       async perfil() { return copia(eu()); },
       // Só no ambiente de teste: alternar entre administrador e conferente para ver os dois lados
       async trocarPerfil(id) { e.perfilId = id; salvar(); },
-      async reiniciar() { NE.memoria.apagar(CHAVE); e = semear(); salvar(); },
+      async reiniciar() { try { localStorage.removeItem("ne-teste-demo"); } catch { /* ok */ } NE.memoria.apagar(CHAVE); e = semearVazio(); salvar(); }, // apaga TUDO
       veiculos: async (todos) => copia(e.veiculos.filter((v) => todos || v.ativo)),
       produtos: async (todos) => copia(e.produtos.filter((p) => todos || p.ativo)),
       funcionarios: async () => copia(e.perfis),

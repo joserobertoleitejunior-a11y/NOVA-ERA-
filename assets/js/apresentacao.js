@@ -42,7 +42,7 @@
   }
   async function preparar(c) {
     const p = c.pre || {};
-    if (p.reiniciar) { localStorage.removeItem("ne-teste-v5"); localStorage.removeItem("ne-modo-teste"); await carregarApp(); }
+    if (p.reiniciar) { localStorage.setItem("ne-teste-demo", "1"); localStorage.removeItem("ne-teste-v6"); localStorage.removeItem("ne-modo-teste"); await carregarApp(); }
     else if ("perfil" in p) await garantirPerfil(p.perfil === "admin" ? "admin" : p.perfil);
     if (p.rota && W().NE?.app) { W().NE.app.ir(p.rota, p.params || {}); await sleep(650); }
   }
@@ -121,7 +121,7 @@
   $("#b-som").addEventListener("click", () => { mudo = !mudo; audio.muted = mudo; if (mudo) speechSynthesis.cancel(); $("#b-som").textContent = mudo ? "🔇" : "🔊"; });
   $("#b-leg").addEventListener("click", () => { document.body.classList.toggle("sem-legenda"); $("#b-leg").classList.toggle("ligado"); });
   $("#b-tela").addEventListener("click", () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); });
-  const comecar = () => { localStorage.removeItem("ne-teste-v5"); localStorage.removeItem("ne-modo-teste"); $("#inicio").hidden = true; $("#fim").hidden = true; speechSynthesis.getVoices(); ir(0); };
+  const comecar = () => { localStorage.setItem("ne-teste-demo", "1"); localStorage.removeItem("ne-teste-v6"); localStorage.removeItem("ne-modo-teste"); $("#inicio").hidden = true; $("#fim").hidden = true; speechSynthesis.getVoices(); ir(0); };
   $("#b-comecar").addEventListener("click", comecar); $("#b-rever").addEventListener("click", comecar);
   addEventListener("keydown", (e) => { if (e.key === " ") { e.preventDefault(); pausarOuContinuar(); } else if (e.key === "ArrowRight") ir(Math.min(C.length - 1, i + 1)); else if (e.key === "ArrowLeft") ir(Math.max(0, i - 1)); else if (e.key.toLowerCase() === "f") $("#b-tela").click(); else if (e.key.toLowerCase() === "c") $("#b-leg").click(); });
   requestAnimationFrame(laco);

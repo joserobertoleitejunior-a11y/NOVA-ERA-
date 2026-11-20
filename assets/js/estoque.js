@@ -93,6 +93,7 @@
     let ids = pedido ? pedido.itens.map((i) => i.produto_id) : sugestao.map((s) => s.produto_id);
     if (!ids.length) ids = produtos.slice(0, 5).map((p) => p.id);
     const motivos = Object.fromEntries(sugestao.map((s) => [s.produto_id, s.motivos]));
+    if (!produtos.length) return NE.telaFim(raiz, { tipo: "alerta", titulo: "Ainda não tem produtos", texto: "Cadastre os produtos primeiro. Depois a contagem do estoque funciona.", botoes: [{ rotulo: "Cadastrar um produto", icone: "mais", acao: () => app.ir("guia", { fluxo: "novoProduto" }) }, { rotulo: "Voltar", acao: () => app.ir("estoque", {}, { substituir: true }) }] });
     let fase = "escolher", pos = 0; const val = {};
     const estado = { selecao: new Set(ids) };
     const sair = () => app.ir(app.admin ? "estoque" : "estoque", {}, { substituir: true });

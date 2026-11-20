@@ -84,9 +84,9 @@
     b.addEventListener("click", () => {
       if ($("#menu-teste")) return $("#menu-teste").remove();
       const trocar = el("button", { type: "button", id: "btn-trocar" }, adm ? "Ver como conferente" : "Voltar ao administrador");
-      trocar.addEventListener("click", async () => { $("#menu-teste")?.remove(); await NE.dados.trocarPerfil(adm ? "u-carlos" : "u-admin"); perfil = await NE.dados.perfil(); topo(); ir(inicial(), {}, { substituir: true }); sondar(); });
-      const zerar = el("button", { type: "button", id: "btn-zerar" }, "Zerar dados de exemplo");
-      zerar.addEventListener("click", async () => { $("#menu-teste")?.remove(); if (!confirm("Apagar os dados de exemplo e começar de novo?")) return; await NE.dados.reiniciar(); perfil = await NE.dados.perfil(); vistos = new Set(); topo(); ir(inicial(), {}, { substituir: true }); NE.aviso("Dados reiniciados.", "ok"); });
+      trocar.addEventListener("click", async () => { $("#menu-teste")?.remove(); await NE.dados.trocarPerfil(adm ? "u-t-conf" : "u-admin"); perfil = await NE.dados.perfil(); topo(); ir(inicial(), {}, { substituir: true }); sondar(); });
+      const zerar = el("button", { type: "button", id: "btn-zerar" }, "Apagar todos os dados de teste");
+      zerar.addEventListener("click", async () => { $("#menu-teste")?.remove(); if (!confirm("Apagar TODOS os dados de teste e começar do zero?")) return; await NE.dados.reiniciar(); perfil = await NE.dados.perfil(); vistos = new Set(); topo(); ir(inicial(), {}, { substituir: true }); NE.aviso("Dados reiniciados.", "ok"); });
       document.body.append(el("div", { class: "menu-teste", id: "menu-teste" }, trocar, zerar));
     });
     document.body.append(b);

@@ -80,6 +80,9 @@
     const numeros = el("div", { class: "numeros-simples" },
       el("div", {}, el("b", {}, String(r.kpis.total)), el("span", {}, r.kpis.total === 1 ? "carga conferida hoje" : "cargas conferidas hoje")),
       el("div", {}, el("b", {}, String(r.fila.total)), el("span", {}, r.fila.total === 1 ? "nota esperando" : "notas esperando")));
+    const [ps, vs] = await Promise.all([NE.dados.produtos(true), NE.dados.veiculos(true)]);
+    const passos = [[ps.length > 0, "Cadastre os produtos", "novoProduto"], [vs.length > 0, "Cadastre os caminhões", "novoVeiculo"], [(await NE.dados.funcionarios()).filter((x) => !/\(teste\)/.test(x.nome)).length > 0, "Cadastre a equipe", "novaPessoa"], [r.kpis.total > 0 || r.fila.total > 0, "Lance a primeira nota", "nota"]];
+    const comeco = !limitado && passos.some(([feito]) => !feito) ? el("section", { class: "primeiros-passos" }, el("h2", {}, "Comece por aqui"), el("p", {}, "Nada foi cadastrado ainda. Siga na ordem:"), passos.map(([feito, nome, fluxo], k) => el("button", { type: "button", class: `passo-comeco${feito ? " feito" : ""}`, onclick: () => app.ir("guia", { fluxo }) }, el("span", { class: "passo-num" }, feito ? "✓" : String(k + 1)), el("strong", {}, nome)))) : null;
     const T = [
       ["nota", "Lançar uma nota", "A nota chegou? Coloque na fila", () => app.ir("guia", { fluxo: "nota" })],
       ["raio", "Contar o estoque", "Leva uns 3 minutos", () => app.ir("contar", {})],
@@ -90,7 +93,7 @@
     ].filter((t, i) => !limitado || i === 0 || i === 2);
     const tiles = el("div", { class: "tiles" }, T.map(([icone, nome, sub, acao], i) => el("button", { type: "button", class: "tile", id: i === 0 ? "tile-nota" : null, onclick: acao }, el("span", { class: "tile-icone", html: NE.icone[icone] }), el("strong", {}, nome), el("small", {}, sub))));
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, `Olá, ${primeiro}`), el("p", {}, new Date(ctx.agora).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })))),
-      status, numeros, el("h2", { class: "titulo-tiles" }, "O que você quer fazer?"), tiles,
+      status, comeco, numeros, el("h2", { class: "titulo-tiles" }, "O que você quer fazer?"), tiles,
       el("div", { class: "links-fim" }, !limitado && el("button", { type: "button", class: "link-acao", id: "btn-resumo", onclick: () => app.ir("resumo", {}) }, ic("grafico"), "Ver o resumo completo"),
         el("button", { type: "button", class: "link-acao", onclick: () => NE.iniciarTour("painel", { verDicas: () => NE.abrirGuia("painel", raiz, () => app.ir("inicio"), { novaConferencia: () => app.ir("conferir") }) }) }, ic("ajuda"), "Como usar o app (1 minuto)")));
   };

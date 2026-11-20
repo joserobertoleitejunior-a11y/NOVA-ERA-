@@ -96,8 +96,4 @@ create policy cfotos_ler on public.conferencia_fotos for select to authenticated
 
 -- A gravação da conferência é feita SÓ pela função registrar_conferencia (003): atômica, idempotente e com estoque/avisos.
 
--- Produtos iniciais (do site da empresa) — ajustar com o Eduardo
-insert into public.produtos (nome) values
-  ('Boca de lobo'), ('Meio-fio'), ('Guia'), ('Caixa para galeria'), ('Caixa de inspeção'),
-  ('Tubo de concreto'), ('Aduela'), ('Dissipador'), ('Ala'), ('Laje')
-on conflict (nome) do nothing;
+-- (sem produtos de exemplo: o catálogo é cadastrado pelo app, ou nasce sozinho ao importar o XML das notas)
