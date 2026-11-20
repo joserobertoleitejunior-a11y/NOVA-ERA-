@@ -28,21 +28,21 @@
    },
    "acoes": [
     {
-     "at": 0.161,
+     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "adminvendas"
      ]
     },
     {
-     "at": 0.253,
+     "at": 0.35,
      "digitar": [
       "#login-senha",
       "admin"
      ]
     },
     {
-     "at": 0.345,
+     "at": 0.649,
      "clicar": "#btn-entrar"
     }
    ]
@@ -58,11 +58,11 @@
    },
    "acoes": [
     {
-     "at": 0.25,
+     "at": 0.05,
      "destacar": ".status-simples"
     },
     {
-     "at": 0.65,
+     "at": 0.751,
      "destacar": ".tiles"
     }
    ]
@@ -78,51 +78,52 @@
    },
    "acoes": [
     {
-     "at": 0.024,
+     "at": 0.05,
      "clicar": "#tile-nota"
     },
     {
-     "at": 0.066,
+     "at": 0.156,
      "clicarTexto": [
       ".escolha",
       "Vou digitar"
      ]
     },
     {
-     "at": 0.09,
+     "at": 0.262,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.12,
+     "at": 0.368,
      "digitar": [
       "#nn-numero",
       "48600"
      ]
     },
     {
-     "at": 0.15,
+     "at": 0.475,
      "digitar": [
       "#nn-cliente",
       "Prefeitura de Tatuí"
      ]
     },
     {
-     "at": 0.174,
+     "at": 0.581,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.204,
+     "at": 0.687,
      "clicar": ".grade-escolha .escolha"
     },
     {
-     "at": 0.228,
+     "at": 0.793,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.27,
+     "at": 0.899,
      "clicar": "#btn-seguir"
     }
-   ]
+   ],
+   "ritmo": 0.6
   },
   {
    "id": "04-cargas",
@@ -135,11 +136,11 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.05,
      "destacar": ".conf"
     },
     {
-     "at": 0.5,
+     "at": 0.552,
      "clicar": ".conf"
     }
    ]
@@ -155,18 +156,18 @@
    },
    "acoes": [
     {
-     "at": 0.1,
+     "at": 0.05,
      "clicar": ".conf"
     },
     {
-     "at": 0.3,
+     "at": 0.404,
      "clicarTexto": [
       ".janela-rodape .btn",
       "Enviar ao cliente"
      ]
     },
     {
-     "at": 0.65,
+     "at": 0.758,
      "destacar": ".previa-mensagem"
     }
    ]
@@ -182,11 +183,11 @@
    },
    "acoes": [
     {
-     "at": 0.104,
+     "at": 0.05,
      "destacar": ".alerta-item"
     },
     {
-     "at": 0.286,
+     "at": 0.404,
      "destacar": "#btn-sino"
     }
    ]

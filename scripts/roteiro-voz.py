@@ -3,8 +3,8 @@
 
   python3 scripts/roteiro-voz.py aplicar     # copia as falas de scripts/falas-humanas.json para os roteiros (legenda = fala)
   python3 scripts/roteiro-voz.py gerar       # escreve assets/apresentacao/ROTEIRO-VOZ.md (o arquivo para colar no ElevenLabs)
-  python3 scripts/roteiro-voz.py cortar gravacoes/bloco-01.mp3 [gravacoes/bloco-02.mp3 ...]
-                                             # corta cada bloco por cena (nos silêncios longos) e põe cada mp3 no lugar certo
+  python3 scripts/roteiro-voz.py cortar gravacoes/voz.mp3 [gravacoes/parte-2.mp3 ...]
+                                             # corta por cena (nos silêncios longos) e põe cada mp3 no lugar certo; aceita o texto inteiro em 1 arquivo ou dividido em partes, na ordem
 Opções do cortar: --silencio 2.0 (segundos de pausa que separam cenas)  --ruido -38 (dB)  --so-conferir (não grava nada)
 """
 import json, re, subprocess, sys, tempfile
@@ -20,9 +20,7 @@ PRONUNCIA = [("QR code", "quiú érre côde"), ("QR", "quiú érre"), ("XML", "x
 
 # Cada bloco = uma geração no ElevenLabs (cabe no limite de caracteres por geração)
 BLOCOS = [
-    ("Apresentação", [("apresentacao", f"{i:02d}") for i in range(1, 18)]),
-    ("Tutoriais · conferente, motorista e vendedor", [("conferente", None), ("motorista", None), ("vendedor", None)]),
-    ("Tutoriais · expedição, administrativo e diretoria", [("expedicao", None), ("administrativo", None), ("diretoria", None)]),
+    ("Tudo: apresentação + 6 tutoriais", [("apresentacao", None), ("conferente", None), ("motorista", None), ("vendedor", None), ("expedicao", None), ("administrativo", None), ("diretoria", None)]),
 ]
 
 
@@ -63,28 +61,25 @@ def gerar():
     linhas = [
         "# Roteiro de voz — Confere Carga (apresentação + 6 tutoriais)",
         "",
-        "Um único arquivo com **tudo o que precisa ser narrado**. São 3 blocos: gere **um áudio por bloco** no ElevenLabs.",
-        "Eu corto cada bloco em cenas e coloco no lugar certo.",
+        "**Um único texto, uma única geração, um único mp3.** Eu corto em cenas e coloco cada uma no lugar certo.",
         "",
-        "## Antes de gerar (1 vez só)",
-        "1. No ElevenLabs, abra **Text to Speech** e escolha o modelo **Eleven Multilingual v2** (ele entende as pausas do roteiro).",
-        "2. Escolha uma **voz brasileira natural**. Dica: ouça 3 vozes lendo a abertura do Bloco 1 e fique com a mais calorosa, não a mais “locutor”.",
-        "3. Ajustes da voz (ícone de engrenagem): **Stability 40%**, **Similarity 75%**, **Style 40%**, **Speaker boost ligado**, velocidade **1.0**.",
-        "   Mais estabilidade deixa a voz mais seca; menos deixa mais viva. Se ficar teatral demais, suba a Stability para 50%.",
-        "4. Use a **mesma voz e os mesmos ajustes nos 3 blocos**, para a apresentação toda soar como a mesma pessoa.",
+        "## Configuração do ElevenLabs",
+        "- **Modelo:** Eleven Multilingual v2 (é ele que entende as pausas `<break>`).",
+        "- **Voz:** brasileira e calorosa. Teste 2 ou 3 lendo a primeira frase e fique com a mais natural, não a mais “locutor”.",
+        "- **Stability:** 40%  ·  **Similarity:** 75%  ·  **Style:** 40%  ·  **Speaker boost:** ligado  ·  **Speed:** 1.0",
+        "- Se soar teatral, suba a Stability para 50%. Se soar seca e monótona, desça para 30%.",
         "",
-        "## Como gerar cada bloco",
-        "- Copie **só o texto dentro da caixa** do bloco (o botão de copiar da caixa serve) e cole no ElevenLabs, sem mudar nada.",
-        "- As marcas `<break time=\"3.0s\" />` são as pausas **entre cenas**. É nelas que eu corto: não apague.",
-        "- Gere, ouça tudo, e baixe em mp3. Nomeie **bloco-01.mp3, bloco-02.mp3 e bloco-03.mp3**.",
-        "- Se uma frase ficou estranha, **gere o bloco de novo** (cada geração sai um pouco diferente). Se persistir, me diga a cena e eu ajusto o texto.",
-        "- Se uma palavra sair com o sotaque errado, me diga qual: eu troco a grafia no roteiro.",
+        "## Como gerar",
+        "1. Copie **todo o texto da caixa abaixo** e cole no Text to Speech, sem mudar nada.",
+        "2. **Não apague** as linhas `<break time=\"3.0s\" />`: são as pausas entre cenas e é nelas que eu corto.",
+        "3. Gere, ouça e baixe o mp3. Se uma parte ficou ruim, gere de novo (cada geração sai um pouco diferente).",
+        "4. Envie o arquivo para a pasta **gravacoes/** do repositório (GitHub → Add file → Upload files, branch `claude/nova-era-app-6pqjx1`) e me avise.",
         "",
-        "## Enviar os áudios",
-        "Coloque os 3 mp3 na pasta **gravacoes/** do repositório (GitHub → Add file → Upload files, na branch `claude/nova-era-app-6pqjx1`) e me avise.",
-        "Eu confiro, corto por cena e ligo na apresentação e nos tutoriais.",
+        "**Se o ElevenLabs recusar por tamanho:** divida o texto em duas partes **numa linha de pausa** (por exemplo, logo depois de “Confere Carga: menos erro, menos prejuízo, mais controle. Obrigado.”), gere as duas e envie **parte-1.mp3** e **parte-2.mp3**. Eu junto na ordem.",
         "",
-        "> Custo: o ElevenLabs cobra por caractere. O total abaixo é a soma dos 3 blocos; refazer um bloco gasta de novo aquele bloco.",
+        "Eu corto, nivelo o volume de todas as cenas e confiro a contagem: se faltar ou sobrar uma cena, eu aviso antes de gravar qualquer coisa.",
+        "",
+        "> **CUSTO_AQUI**",
         "",
     ]
     total = 0
@@ -93,13 +88,11 @@ def gerar():
         cenas = cenas_do_bloco(itens)
         texto = f"\n{PAUSA_CENA}\n".join(falado(f) for _, _, f in cenas)
         total += len(texto)
-        manifesto.append({"bloco": n, "arquivo": f"bloco-{n:02d}.mp3", "cenas": [{"alvo": a, "id": c} for a, c, _ in cenas]})
+        manifesto.append({"bloco": n, "cenas": [{"alvo": a, "id": c} for a, c, _ in cenas]})
         linhas += [
-            f"---", "", f"## BLOCO {n:02d} — {titulo}  ({len(cenas)} cenas · {len(texto)} caracteres)", "",
-            "Cenas, em ordem: " + " · ".join(f"{a}/{c}" if a == 'apresentacao' else f"{a}/{c}" for a, c, _ in cenas),
-            "", "```text", texto, "```", "",
+            "---", "", f"## TEXTO PARA COLAR  ({len(cenas)} cenas · {len(texto)} caracteres)", "", "```text", texto, "```", "",
         ]
-    linhas.insert(linhas.index("> Custo: o ElevenLabs cobra por caractere. O total abaixo é a soma dos 3 blocos; refazer um bloco gasta de novo aquele bloco.") + 1, f"> **Total dos 3 blocos: {total} caracteres.**")
+    linhas[linhas.index("> **CUSTO_AQUI**")] = f"> O ElevenLabs cobra por caractere: este texto tem **{total} caracteres**. Gerar de novo gasta de novo."
     (RAIZ / "assets/apresentacao/ROTEIRO-VOZ.md").write_text("\n".join(linhas) + "\n", encoding="utf8")
     (RAIZ / "scripts/blocos-voz.json").write_text(json.dumps(manifesto, ensure_ascii=False, indent=1) + "\n", encoding="utf8")
     print(f"ROTEIRO-VOZ.md gerado: {len(BLOCOS)} blocos, {total} caracteres no total.")
@@ -127,38 +120,35 @@ def segmentos(arq, silencio, ruido):
 
 
 def cortar(arqs, silencio, ruido, so_conferir):
-    manifesto = json.loads((RAIZ / "scripts/blocos-voz.json").read_text(encoding="utf8"))
-    listas = {}
-    for arq in arqs:
-        arq = Path(arq)
-        m = re.search(r"bloco-?(\d+)", arq.name)
-        if not m:
-            sys.exit(f"Nome inesperado: {arq.name} (use bloco-01.mp3 ...)")
-        bloco = next((b for b in manifesto if b["bloco"] == int(m.group(1))), None)
-        if not bloco:
-            sys.exit(f"Bloco {m.group(1)} não existe.")
-        with tempfile.TemporaryDirectory() as tmp:
-            norm = Path(tmp) / "norm.wav"  # mesmo volume em todos os blocos
-            rodar(["ffmpeg", "-y", "-i", str(arq), "-af", "loudnorm=I=-16:TP=-1.5:LRA=9", "-ar", "44100", "-ac", "1", str(norm)])
+    cenas = json.loads((RAIZ / "scripts/blocos-voz.json").read_text(encoding="utf8"))[0]["cenas"]
+    with tempfile.TemporaryDirectory() as tmp:
+        trechos = []  # (arquivo normalizado, início, fim) na ordem em que foram falados
+        for k, arq in enumerate(arqs):
+            norm = Path(tmp) / f"norm{k}.wav"  # mesmo volume em todo o material
+            r = rodar(["ffmpeg", "-y", "-i", str(arq), "-af", "loudnorm=I=-16:TP=-1.5:LRA=9", "-ar", "44100", "-ac", "1", str(norm)])
+            if not norm.exists():
+                sys.exit(f"Não consegui ler {arq}: {r.stderr[-200:]}")
             segs = segmentos(norm, silencio, ruido)
-            esperado = len(bloco["cenas"])
-            print(f"\nBloco {bloco['bloco']:02d}: encontrei {len(segs)} trechos; esperado {esperado}.")
+            print(f"\n{Path(arq).name}: {len(segs)} trechos")
             for i, (a, b) in enumerate(segs, 1):
                 print(f"  {i:2d}. {a:7.1f}s → {b:7.1f}s  ({b - a:5.1f}s)")
-            if len(segs) != esperado:
-                print("  ✗ A contagem não bate. Provável causa: uma pausa dentro da cena passou de "
-                      f"{silencio}s (aumente --silencio) ou uma pausa entre cenas ficou curta (diminua). Nada foi gravado para este bloco.")
-                sys.exit(1)
-            for (a, b), c in zip(segs, bloco["cenas"]):
-                roteiro = json.loads(arquivo_roteiro(c["alvo"]).read_text(encoding="utf8"))
-                pasta = RAIZ / (roteiro.get("audio") or "assets/apresentacao/audio")
-                destino = pasta / f"{c['id']}.mp3"
-                if not so_conferir:
-                    pasta.mkdir(parents=True, exist_ok=True)
-                    rodar(["ffmpeg", "-y", "-ss", f"{max(a - 0.12, 0):.3f}", "-to", f"{b + 0.18:.3f}", "-i", str(norm),
-                           "-af", "afade=t=in:d=0.04,areverse,afade=t=in:d=0.12,areverse", "-b:a", "128k", str(destino)])
-                listas.setdefault(c["alvo"], []).append(c["id"])
-                print(f"     → {destino.relative_to(RAIZ)}")
+            trechos += [(norm, a, b) for a, b in segs]
+        print(f"\nTotal: {len(trechos)} trechos; esperado {len(cenas)} cenas.")
+        if len(trechos) != len(cenas):
+            print("✗ A contagem não bate. Provável causa: uma pausa dentro da cena passou de "
+                  f"{silencio}s (aumente --silencio) ou uma pausa entre cenas ficou curta (diminua). Nada foi gravado.")
+            sys.exit(1)
+        listas = {}
+        for (norm, a, b), c in zip(trechos, cenas):
+            roteiro = json.loads(arquivo_roteiro(c["alvo"]).read_text(encoding="utf8"))
+            pasta = RAIZ / (roteiro.get("audio") or "assets/apresentacao/audio")
+            destino = pasta / f"{c['id']}.mp3"
+            if not so_conferir:
+                pasta.mkdir(parents=True, exist_ok=True)
+                rodar(["ffmpeg", "-y", "-ss", f"{max(a - 0.12, 0):.3f}", "-to", f"{b + 0.18:.3f}", "-i", str(norm),
+                       "-af", "afade=t=in:d=0.04,areverse,afade=t=in:d=0.12,areverse", "-b:a", "128k", str(destino)])
+            listas.setdefault(c["alvo"], []).append(c["id"])
+            print(f"  → {destino.relative_to(RAIZ)}  ({b - a + 0.3:.1f}s)")
     if not so_conferir:
         for alvo in listas:
             roteiro = json.loads(arquivo_roteiro(alvo).read_text(encoding="utf8"))

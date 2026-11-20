@@ -54,7 +54,8 @@
   // ───────────────────────── cursor, destaque e ações ─────────────────────────
   // esp(): espera que ABORTA se a pessoa trocou de cena (assim os cliques da cena anterior nunca vazam para a próxima)
   const CANCELADO = Symbol("cancelado");
-  const esp = async (ms) => { const t0 = rodada; await sleep(RAPIDO ? ms / 3 : ms); if (t0 !== rodada) throw CANCELADO; };
+  let ritmo = 1; // cenas cheias de cliques usam um cursor mais ligeiro (ritmo < 1), para a mão acompanhar a fala
+  const esp = async (ms) => { const t0 = rodada; await sleep((RAPIDO ? ms / 3 : ms) * ritmo); if (t0 !== rodada) throw CANCELADO; };
   function ponto(el) {
     el.scrollIntoView?.({ block: "center" }); const r = el.getBoundingClientRect(), fr = F.getBoundingClientRect(), pr = palco.getBoundingClientRect(), esc = pr.width / palco.offsetWidth, k = fr.width / F.offsetWidth;
     return { x: (fr.left + (r.left + r.width / 2) * k - pr.left) / esc, y: (fr.top + (r.top + r.height / 2) * k - pr.top) / esc, x0: (fr.left + r.left * k - pr.left) / esc, y0: (fr.top + r.top * k - pr.top) / esc, w: (r.width * k) / esc, h: (r.height * k) / esc };
@@ -96,7 +97,7 @@
   async function ir(k) {
     if (k < 0 || k >= C.length) return; const token = ++rodada; i = k; const c = C[k]; pronto = false; terminou = false; tocando = false; fila = Promise.resolve(); pend = 0; feitas = new Set(); destaque.classList.remove("on");
     audio.pause(); speechSynthesis.cancel(); $("#fim").hidden = true; render(c, k); $("#legenda").textContent = "";
-    await preparar(c); if (token !== rodada) return;
+    ritmo = c.ritmo || 1; await preparar(c); if (token !== rodada) return;
     trechos = c.fala.match(/[^.!?]+[.!?]*/g).map((x) => x.trim()).filter(Boolean); t = 0; usaMp3 = !!temMp3[c.id]; dur = Math.max(6, c.fala.length / 14.5) / (RAPIDO ? 4 : 1);
     if (usaMp3) { audio.src = `${PASTA_AUDIO}/${c.id}.mp3`; audio.muted = mudo; await new Promise((ok) => { audio.onloadedmetadata = ok; audio.onerror = ok; setTimeout(ok, 2500); }); if (audio.duration && isFinite(audio.duration)) dur = (audio.duration + 0.4) / (RAPIDO ? 4 : 1); try { await audio.play(); } catch { usaMp3 = false; } }
     if (!usaMp3 && !mudo && !RAPIDO && "speechSynthesis" in window && vozes().length) { const u = new SpeechSynthesisUtterance(c.fala); u.lang = "pt-BR"; u.rate = 1.0; const v = melhorVoz(); if (v) u.voice = v; ttsFim = false; u.onend = u.onerror = () => { ttsFim = true; }; speechSynthesis.speak(u); } else ttsFim = true;

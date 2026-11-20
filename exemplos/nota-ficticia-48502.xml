@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- NOTA FICTÍCIA PARA TESTE DO CONFERE CARGA. Não tem valor fiscal. -->
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe" versao="4.00">
+  <NFe>
+    <infNFe Id="NFe35261111222333000181550010000485021485726131" versao="4.00">
+      <ide><cUF>35</cUF><cNF>48572613</cNF><natOp>Venda de producao do estabelecimento</natOp><mod>55</mod><serie>1</serie><nNF>48502</nNF><dhEmi>2026-11-20T08:30:00-03:00</dhEmi><tpNF>1</tpNF></ide>
+      <emit><CNPJ>11222333000181</CNPJ><xNome>NOVA ERA ARTEFATOS DE CONCRETO LTDA (TESTE)</xNome></emit>
+      <dest><CNPJ>46634267000150</CNPJ><xNome>Prefeitura de Tatui (TESTE)</xNome></dest>
+      <det nItem="1"><prod><cProd>MF-100</cProd><xProd>Meio-fio de concreto 1,00 m</xProd><NCM>68109100</NCM><CFOP>5101</CFOP><uCom>UN</uCom><qCom>80.0000</qCom><vUnCom>18.50</vUnCom><vProd>1480.00</vProd></prod></det>
+      <det nItem="2"><prod><cProd>CX-011</cProd><xProd>Caixa para galeria 1x1</xProd><NCM>68109100</NCM><CFOP>5101</CFOP><uCom>UN</uCom><qCom>2.0000</qCom><vUnCom>890.00</vUnCom><vProd>1780.00</vProd></prod></det>
+      <total><ICMSTot><vNF>3260.00</vNF></ICMSTot></total>
+    </infNFe>
+  </NFe>
+  <protNFe versao="4.00"><infProt><chNFe>35261111222333000181550010000485021485726131</chNFe></infProt></protNFe>
+</nfeProc>

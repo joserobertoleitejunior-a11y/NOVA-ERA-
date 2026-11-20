@@ -28,21 +28,21 @@
    },
    "acoes": [
     {
-     "at": 0.322,
+     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "adminexpedicao"
      ]
     },
     {
-     "at": 0.506,
+     "at": 0.387,
      "digitar": [
       "#login-senha",
       "admin"
      ]
     },
     {
-     "at": 0.69,
+     "at": 0.724,
      "clicar": "#btn-entrar"
     }
    ]
@@ -58,15 +58,15 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.05,
      "destacar": ".status-simples"
     },
     {
-     "at": 0.45,
+     "at": 0.376,
      "destacar": ".numeros-simples"
     },
     {
-     "at": 0.7,
+     "at": 0.703,
      "destacar": ".tiles"
     }
    ]
@@ -82,22 +82,22 @@
    },
    "acoes": [
     {
-     "at": 0.075,
+     "at": 0.05,
      "clicar": "#tile-nota"
     },
     {
-     "at": 0.282,
+     "at": 0.287,
      "destacar": ".grade-escolha"
     },
     {
-     "at": 0.564,
+     "at": 0.523,
      "clicarTexto": [
       ".escolha",
       "arquivo XML"
      ]
     },
     {
-     "at": 0.799,
+     "at": 0.76,
      "destacar": "#btn-escolher-xml"
     }
    ]
@@ -113,18 +113,18 @@
    },
    "acoes": [
     {
-     "at": 0.15,
+     "at": 0.05,
      "destacar": ".numeros"
     },
     {
-     "at": 0.4,
+     "at": 0.367,
      "clicarTexto": [
       ".chip",
       "Com diferença"
      ]
     },
     {
-     "at": 0.7,
+     "at": 0.685,
      "destacar": ".conf"
     }
    ]
@@ -140,15 +140,15 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.05,
      "destacar": ".linha-cartao"
     },
     {
-     "at": 0.5,
+     "at": 0.398,
      "destacar": "#btn-contagem"
     },
     {
-     "at": 0.75,
+     "at": 0.746,
      "destacar": "#btn-lancar"
     }
    ]
@@ -164,22 +164,22 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.05,
      "clicar": "#btn-cadastrar"
     },
     {
-     "at": 0.45,
+     "at": 0.305,
      "digitar": [
       "#cad-nome",
       "Marcos Lima"
      ]
     },
     {
-     "at": 0.6,
+     "at": 0.56,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.75,
+     "at": 0.815,
      "destacar": ".grade-escolha"
     }
    ]
@@ -195,11 +195,11 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.05,
      "destacar": ".alerta-item"
     },
     {
-     "at": 0.55,
+     "at": 0.728,
      "destacar": "#btn-sino"
     }
    ]

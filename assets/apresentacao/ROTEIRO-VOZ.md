@@ -1,34 +1,28 @@
 # Roteiro de voz — Confere Carga (apresentação + 6 tutoriais)
 
-Um único arquivo com **tudo o que precisa ser narrado**. São 3 blocos: gere **um áudio por bloco** no ElevenLabs.
-Eu corto cada bloco em cenas e coloco no lugar certo.
+**Um único texto, uma única geração, um único mp3.** Eu corto em cenas e coloco cada uma no lugar certo.
 
-## Antes de gerar (1 vez só)
-1. No ElevenLabs, abra **Text to Speech** e escolha o modelo **Eleven Multilingual v2** (ele entende as pausas do roteiro).
-2. Escolha uma **voz brasileira natural**. Dica: ouça 3 vozes lendo a abertura do Bloco 1 e fique com a mais calorosa, não a mais “locutor”.
-3. Ajustes da voz (ícone de engrenagem): **Stability 40%**, **Similarity 75%**, **Style 40%**, **Speaker boost ligado**, velocidade **1.0**.
-   Mais estabilidade deixa a voz mais seca; menos deixa mais viva. Se ficar teatral demais, suba a Stability para 50%.
-4. Use a **mesma voz e os mesmos ajustes nos 3 blocos**, para a apresentação toda soar como a mesma pessoa.
+## Configuração do ElevenLabs
+- **Modelo:** Eleven Multilingual v2 (é ele que entende as pausas `<break>`).
+- **Voz:** brasileira e calorosa. Teste 2 ou 3 lendo a primeira frase e fique com a mais natural, não a mais “locutor”.
+- **Stability:** 40%  ·  **Similarity:** 75%  ·  **Style:** 40%  ·  **Speaker boost:** ligado  ·  **Speed:** 1.0
+- Se soar teatral, suba a Stability para 50%. Se soar seca e monótona, desça para 30%.
 
-## Como gerar cada bloco
-- Copie **só o texto dentro da caixa** do bloco (o botão de copiar da caixa serve) e cole no ElevenLabs, sem mudar nada.
-- As marcas `<break time="3.0s" />` são as pausas **entre cenas**. É nelas que eu corto: não apague.
-- Gere, ouça tudo, e baixe em mp3. Nomeie **bloco-01.mp3, bloco-02.mp3 e bloco-03.mp3**.
-- Se uma frase ficou estranha, **gere o bloco de novo** (cada geração sai um pouco diferente). Se persistir, me diga a cena e eu ajusto o texto.
-- Se uma palavra sair com o sotaque errado, me diga qual: eu troco a grafia no roteiro.
+## Como gerar
+1. Copie **todo o texto da caixa abaixo** e cole no Text to Speech, sem mudar nada.
+2. **Não apague** as linhas `<break time="3.0s" />`: são as pausas entre cenas e é nelas que eu corto.
+3. Gere, ouça e baixe o mp3. Se uma parte ficou ruim, gere de novo (cada geração sai um pouco diferente).
+4. Envie o arquivo para a pasta **gravacoes/** do repositório (GitHub → Add file → Upload files, branch `claude/nova-era-app-6pqjx1`) e me avise.
 
-## Enviar os áudios
-Coloque os 3 mp3 na pasta **gravacoes/** do repositório (GitHub → Add file → Upload files, na branch `claude/nova-era-app-6pqjx1`) e me avise.
-Eu confiro, corto por cena e ligo na apresentação e nos tutoriais.
+**Se o ElevenLabs recusar por tamanho:** divida o texto em duas partes **numa linha de pausa** (por exemplo, logo depois de “Confere Carga: menos erro, menos prejuízo, mais controle. Obrigado.”), gere as duas e envie **parte-1.mp3** e **parte-2.mp3**. Eu junto na ordem.
 
-> Custo: o ElevenLabs cobra por caractere. O total abaixo é a soma dos 3 blocos; refazer um bloco gasta de novo aquele bloco.
-> **Total dos 3 blocos: 7091 caracteres.**
+Eu corto, nivelo o volume de todas as cenas e confiro a contagem: se faltar ou sobrar uma cena, eu aviso antes de gravar qualquer coisa.
+
+> O ElevenLabs cobra por caractere: este texto tem **7137 caracteres**. Gerar de novo gasta de novo.
 
 ---
 
-## BLOCO 01 — Apresentação  (17 cenas · 2587 caracteres)
-
-Cenas, em ordem: apresentacao/01-abertura · apresentacao/02-problema · apresentacao/03-entrar · apresentacao/04-inicio · apresentacao/05-nota · apresentacao/06-xml-ia · apresentacao/07-conferencia · apresentacao/08-etiquetas · apresentacao/09-avisos · apresentacao/10-estoque · apresentacao/11-contagem · apresentacao/12-equipe · apresentacao/13-frota · apresentacao/14-assistente · apresentacao/15-rastreio · apresentacao/16-site · apresentacao/17-fechamento
+## TEXTO PARA COLAR  (54 cenas · 7137 caracteres)
 
 ```text
 Esse é o Confere Carga: o aplicativo da Nova Era que confere cada carga antes do caminhão sair.
@@ -64,15 +58,7 @@ O cliente acompanha a entrega por um link no Uótsap: horário de saída, o que 
 E o site da Nova Era mostra os produtos com fotos reais e maquetes em 3D, e o cliente monta o orçamento ali mesmo.
 <break time="3.0s" />
 Confere Carga: menos erro, menos prejuízo, mais controle. Obrigado.
-```
-
----
-
-## BLOCO 02 — Tutoriais · conferente, motorista e vendedor  (18 cenas · 2302 caracteres)
-
-Cenas, em ordem: conferente/01-entrar · conferente/02-fila · conferente/03-conferir · conferente/04-diferenca · conferente/05-etiquetas · conferente/06-contagem · conferente/07-avisos · conferente/08-ajuda · motorista/01-entrar · motorista/02-fila · motorista/03-avisos · motorista/04-cliente · vendedor/01-entrar · vendedor/02-inicio · vendedor/03-nota · vendedor/04-cargas · vendedor/05-rastreio · vendedor/06-avisos
-
-```text
+<break time="3.0s" />
 Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar. Você cai na fila de notas.
 <break time="3.0s" />
 Aqui ficam as notas esperando conferência. Com o caminhão carregado, toque na nota.
@@ -108,15 +94,7 @@ Na aba cargas, toque numa carga pra ver itens, fotos e diferenças.
 Dentro da carga, toque em enviar ao cliente e escolha o Uótsap dele. Ele acompanha tudo por um link.
 <break time="3.0s" />
 Os avisos chegam no sino e no celular.
-```
-
----
-
-## BLOCO 03 — Tutoriais · expedição, administrativo e diretoria  (19 cenas · 2202 caracteres)
-
-Cenas, em ordem: expedicao/01-entrar · expedicao/02-inicio · expedicao/03-nota · expedicao/04-cargas · expedicao/05-estoque · expedicao/06-equipe · expedicao/07-avisos · administrativo/01-entrar · administrativo/02-inicio · administrativo/03-xml · administrativo/04-equipe · administrativo/05-frota · administrativo/06-avisos · diretoria/01-entrar · diretoria/02-inicio · diretoria/03-resumo · diretoria/04-ia · diretoria/05-equipe · diretoria/06-avisos
-
-```text
+<break time="3.0s" />
 Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar. Você comanda a operação.
 <break time="3.0s" />
 A tela inicial diz se está tudo certo. Se tiver problema, toque em resolver agora.

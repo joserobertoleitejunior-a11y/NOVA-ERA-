@@ -51,21 +51,21 @@
    },
    "acoes": [
     {
-     "at": 0.172,
+     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "admin"
      ]
     },
     {
-     "at": 0.328,
+     "at": 0.34,
      "digitar": [
       "#login-senha",
       "admin"
      ]
     },
     {
-     "at": 0.484,
+     "at": 0.629,
      "clicar": "#btn-entrar"
     }
    ]
@@ -85,15 +85,15 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.05,
      "destacar": ".status-simples"
     },
     {
-     "at": 0.5,
+     "at": 0.402,
      "destacar": ".numeros-simples"
     },
     {
-     "at": 0.68,
+     "at": 0.753,
      "destacar": ".tiles"
     }
    ]
@@ -114,55 +114,56 @@
    },
    "acoes": [
     {
-     "at": 0.043,
+     "at": 0.05,
      "clicar": "#tile-nota"
     },
     {
-     "at": 0.144,
+     "at": 0.145,
      "clicarTexto": [
       ".escolha",
       "Vou digitar"
      ]
     },
     {
-     "at": 0.202,
+     "at": 0.241,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.266,
+     "at": 0.336,
      "digitar": [
       "#nn-numero",
       "48500"
      ]
     },
     {
-     "at": 0.331,
+     "at": 0.432,
      "digitar": [
       "#nn-cliente",
       "Construtora Alfa"
      ]
     },
     {
-     "at": 0.389,
+     "at": 0.527,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.446,
+     "at": 0.623,
      "clicar": ".grade-escolha .escolha"
     },
     {
-     "at": 0.504,
+     "at": 0.718,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.576,
+     "at": 0.814,
      "destacar": ".resumo"
     },
     {
-     "at": 0.648,
+     "at": 0.909,
      "clicar": "#btn-seguir"
     }
-   ]
+   ],
+   "ritmo": 0.6
   },
   {
    "id": "06-xml-ia",
@@ -182,11 +183,11 @@
    },
    "acoes": [
     {
-     "at": 0.136,
+     "at": 0.05,
      "destacar": "#btn-escolher-xml"
     },
     {
-     "at": 0.374,
+     "at": 0.238,
      "ir": [
       "guia",
       {
@@ -195,18 +196,18 @@
      ]
     },
     {
-     "at": 0.462,
+     "at": 0.425,
      "clicarTexto": [
       ".escolha",
       "Tenho a foto da nota"
      ]
     },
     {
-     "at": 0.53,
+     "at": 0.613,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.598,
+     "at": 0.8,
      "destacar": ".foto-bloco"
     }
    ]
@@ -227,35 +228,35 @@
    },
    "acoes": [
     {
-     "at": 0.059,
+     "at": 0.05,
      "destacar": "#lista-minhas"
     },
     {
-     "at": 0.126,
+     "at": 0.136,
      "clicar": ".linha-cartao"
     },
     {
-     "at": 0.2,
+     "at": 0.223,
      "clicar": ".grade-escolha .escolha"
     },
     {
-     "at": 0.244,
+     "at": 0.309,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.326,
+     "at": 0.396,
      "clicar": "#btn-tudo-confere"
     },
     {
-     "at": 0.385,
+     "at": 0.482,
      "destacar": ".item"
     },
     {
-     "at": 0.429,
+     "at": 0.569,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.488,
+     "at": 0.655,
      "clicarTexto": [
       "button.link-acao",
       "Usar foto de teste",
@@ -263,7 +264,7 @@
      ]
     },
     {
-     "at": 0.533,
+     "at": 0.742,
      "clicarTexto": [
       "button.link-acao",
       "Usar foto de teste",
@@ -271,14 +272,15 @@
      ]
     },
     {
-     "at": 0.585,
+     "at": 0.828,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.644,
+     "at": 0.915,
      "clicar": "#btn-seguir"
     }
-   ]
+   ],
+   "ritmo": 0.6
   },
   {
    "id": "08-etiquetas",
@@ -295,18 +297,18 @@
    },
    "acoes": [
     {
-     "at": 0.15,
+     "at": 0.05,
      "clicar": ".linha-cartao"
     },
     {
-     "at": 0.4,
+     "at": 0.371,
      "clicarTexto": [
       ".janela-rodape .btn",
       "Etiquetas"
      ]
     },
     {
-     "at": 0.7,
+     "at": 0.692,
      "destacar": ".etiquetas-previa"
     }
    ]
@@ -327,15 +329,15 @@
    },
    "acoes": [
     {
-     "at": 0.15,
+     "at": 0.05,
      "destacar": ".alerta-item"
     },
     {
-     "at": 0.45,
+     "at": 0.408,
      "destacar": "#btn-sino"
     },
     {
-     "at": 0.7,
+     "at": 0.767,
      "destacar": ".link-acao.verde"
     }
    ]
@@ -355,15 +357,15 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.05,
      "destacar": ".linha-cartao"
     },
     {
-     "at": 0.5,
+     "at": 0.41,
      "destacar": ".chips"
     },
     {
-     "at": 0.72,
+     "at": 0.771,
      "destacar": "#btn-lancar"
     }
    ]
@@ -383,26 +385,26 @@
    },
    "acoes": [
     {
-     "at": 0.069,
+     "at": 0.05,
      "clicar": "#btn-contagem"
     },
     {
-     "at": 0.241,
+     "at": 0.23,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.396,
+     "at": 0.409,
      "destacar": ".contar-card"
     },
     {
-     "at": 0.499,
+     "at": 0.589,
      "digitar": [
       "#ct-pilhas",
       "3"
      ]
     },
     {
-     "at": 0.671,
+     "at": 0.769,
      "destacar": ".total-grande"
     }
    ]
@@ -422,47 +424,48 @@
    },
    "acoes": [
     {
-     "at": 0.058,
+     "at": 0.05,
      "destacar": ".pessoa-linha"
     },
     {
-     "at": 0.125,
+     "at": 0.17,
      "clicar": "#btn-cadastrar"
     },
     {
-     "at": 0.192,
+     "at": 0.29,
      "digitar": [
       "#cad-nome",
       "Carlos Souza"
      ]
     },
     {
-     "at": 0.24,
+     "at": 0.41,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.278,
+     "at": 0.53,
      "clicarTexto": [
       ".escolha",
       "Conferente"
      ]
     },
     {
-     "at": 0.317,
+     "at": 0.649,
      "clicar": "#btn-seguir"
     },
     {
-     "at": 0.355,
+     "at": 0.769,
      "digitar": [
       "#cad-tel",
       "15999990001"
      ]
     },
     {
-     "at": 0.403,
+     "at": 0.889,
      "clicar": "#btn-seguir"
     }
-   ]
+   ],
+   "ritmo": 0.6
   },
   {
    "id": "13-frota",
@@ -482,15 +485,15 @@
    },
    "acoes": [
     {
-     "at": 0.18,
+     "at": 0.05,
      "destacar": ".veiculo-miniatura"
     },
     {
-     "at": 0.45,
+     "at": 0.36,
      "clicar": ".pessoa-linha"
     },
     {
-     "at": 0.702,
+     "at": 0.671,
      "clicarTexto": [
       ".escolha",
       "Fotos"
@@ -513,15 +516,15 @@
    },
    "acoes": [
     {
-     "at": 0.15,
+     "at": 0.05,
      "clicar": "#fab-ia"
     },
     {
-     "at": 0.45,
+     "at": 0.427,
      "clicar": ".chat-sugestoes .chip"
     },
     {
-     "at": 0.75,
+     "at": 0.805,
      "destacar": ".chat"
     }
    ]
@@ -541,11 +544,11 @@
    },
    "acoes": [
     {
-     "at": 0.12,
+     "at": 0.05,
      "rastreio": true
     },
     {
-     "at": 0.55,
+     "at": 0.863,
      "rolar": ".resumo"
     }
    ]
@@ -566,11 +569,11 @@
      "site": true
     },
     {
-     "at": 0.4,
+     "at": 0.458,
      "siteRolar": "#produtos"
     },
     {
-     "at": 0.75,
+     "at": 0.867,
      "siteRolar": ".produto:nth-child(3)"
     }
    ]

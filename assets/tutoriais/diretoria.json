@@ -28,21 +28,21 @@
    },
    "acoes": [
     {
-     "at": 0.35,
+     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "admindiretoria"
      ]
     },
     {
-     "at": 0.55,
+     "at": 0.402,
      "digitar": [
       "#login-senha",
       "admin"
      ]
     },
     {
-     "at": 0.75,
+     "at": 0.754,
      "clicar": "#btn-entrar"
     }
    ]
@@ -58,11 +58,11 @@
    },
    "acoes": [
     {
-     "at": 0.25,
+     "at": 0.05,
      "destacar": ".status-simples"
     },
     {
-     "at": 0.6,
+     "at": 0.769,
      "destacar": ".numeros-simples"
     }
    ]
@@ -78,18 +78,18 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.05,
      "destacar": ".kpis"
     },
     {
-     "at": 0.5,
+     "at": 0.389,
      "clicarTexto": [
       ".chip",
       "7 dias"
      ]
     },
     {
-     "at": 0.75,
+     "at": 0.728,
      "destacar": ".barras"
     }
    ]
@@ -105,15 +105,15 @@
    },
    "acoes": [
     {
-     "at": 0.15,
+     "at": 0.05,
      "clicar": "#fab-ia"
     },
     {
-     "at": 0.45,
+     "at": 0.426,
      "clicar": ".chat-sugestoes .chip"
     },
     {
-     "at": 0.8,
+     "at": 0.802,
      "destacar": ".chat"
     }
    ]
@@ -145,11 +145,11 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.05,
      "destacar": ".alerta-item"
     },
     {
-     "at": 0.55,
+     "at": 0.699,
      "destacar": "#btn-sino"
     }
    ]

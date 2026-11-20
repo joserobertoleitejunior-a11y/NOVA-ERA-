@@ -1,7 +1,6 @@
 [
  {
   "bloco": 1,
-  "arquivo": "bloco-01.mp3",
   "cenas": [
    {
     "alvo": "apresentacao",
@@ -70,13 +69,7 @@
    {
     "alvo": "apresentacao",
     "id": "17-fechamento"
-   }
-  ]
- },
- {
-  "bloco": 2,
-  "arquivo": "bloco-02.mp3",
-  "cenas": [
+   },
    {
     "alvo": "conferente",
     "id": "01-entrar"
@@ -148,13 +141,7 @@
    {
     "alvo": "vendedor",
     "id": "06-avisos"
-   }
-  ]
- },
- {
-  "bloco": 3,
-  "arquivo": "bloco-03.mp3",
-  "cenas": [
+   },
    {
     "alvo": "expedicao",
     "id": "01-entrar"

@@ -28,21 +28,21 @@
    },
    "acoes": [
     {
-     "at": 0.182,
+     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "motorista"
      ]
     },
     {
-     "at": 0.286,
+     "at": 0.35,
      "digitar": [
       "#login-senha",
       "admin"
      ]
     },
     {
-     "at": 0.39,
+     "at": 0.649,
      "clicar": "#btn-entrar"
     }
    ]
@@ -77,11 +77,11 @@
    },
    "acoes": [
     {
-     "at": 0.2,
+     "at": 0.05,
      "destacar": ".alerta-item"
     },
     {
-     "at": 0.55,
+     "at": 0.571,
      "destacar": "#btn-sino"
     }
    ]
@@ -97,11 +97,11 @@
    },
    "acoes": [
     {
-     "at": 0.15,
+     "at": 0.05,
      "rastreio": true
     },
     {
-     "at": 0.6,
+     "at": 0.84,
      "rolar": ".resumo"
     }
    ]
