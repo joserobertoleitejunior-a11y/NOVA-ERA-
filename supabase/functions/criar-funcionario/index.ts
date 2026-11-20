@@ -16,7 +16,7 @@ const dataOk = (v: unknown) => (typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.t
 const texto = (v: unknown, max = 200) => { const t = String(v ?? "").trim().slice(0, max); return t === "" ? null : t; };
 
 // deno-lint-ignore no-explicit-any
-async function criarUm(admin: any, b: any) {
+async function criarUm(admin: any, b: any, cadastradoPor: string) {
   const nome = String(b.nome ?? "").trim();
   const usuario = String(b.usuario ?? "").trim().toLowerCase();
   const senha = String(b.senha ?? "");
@@ -30,7 +30,7 @@ async function criarUm(admin: any, b: any) {
   const { data: criado, error: e2 } = await admin.auth.admin.createUser({ email: `${usuario}@func.novaera.app`, password: senha, email_confirm: true, user_metadata: { nome } });
   if (e2) throw new Error(/registered|exists/i.test(e2.message) ? `O usuário "${usuario}" já existe.` : "Não foi possível criar o login.");
   const { error: e3 } = await admin.from("perfis").insert({
-    id: criado.user.id, nome, usuario, funcao, papel, ativo: true, telefone,
+    id: criado.user.id, nome, usuario, funcao, papel, ativo: true, telefone, cadastrado_por: cadastradoPor, // quem cadastrou (auditoria)
     email_contato: texto(b.email_contato), admissao: dataOk(b.admissao), cnh_validade: dataOk(b.cnh_validade), observacao: texto(b.observacao, 400), foto: texto(b.foto, 300),
   });
   if (e3) { await admin.auth.admin.deleteUser(criado.user.id); throw new Error("Não foi possível salvar o perfil."); } // desfaz para não sobrar login sem perfil
@@ -46,6 +46,7 @@ Deno.serve(async (req) => {
     const comoUsuario = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: auth } } });
     const { data: ehAdmin, error: e1 } = await comoUsuario.rpc("is_admin");
     if (e1 || ehAdmin !== true) return resp(403, { erro: "Só a administração cadastra funcionários." });
+    const { data: quem } = await comoUsuario.auth.getUser(); const euId = quem?.user?.id; if (!euId) return resp(401, { erro: "Faça login novamente." });
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const b = await req.json();
 
@@ -62,12 +63,12 @@ Deno.serve(async (req) => {
       if (b.lote.length > 50) return resp(400, { erro: "No máximo 50 pessoas por vez." });
       const resultados = [];
       for (const item of b.lote) {
-        try { resultados.push({ ok: true, ...(await criarUm(admin, item)) }); }
+        try { resultados.push({ ok: true, ...(await criarUm(admin, item, euId)) }); }
         catch (e) { resultados.push({ ok: false, nome: String(item?.nome ?? ""), erro: (e as Error).message }); }
       }
       return resp(200, { resultados });
     }
-    try { return resp(200, await criarUm(admin, b)); }
+    try { return resp(200, await criarUm(admin, b, euId)); }
     catch (e) { return resp(400, { erro: (e as Error).message }); }
   } catch (e) {
     console.error("criar-funcionario", e);

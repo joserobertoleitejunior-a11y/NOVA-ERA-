@@ -20,7 +20,7 @@
       const cnh = p.cnh_validade ? Math.floor((new Date(p.cnh_validade).getTime() - hoje) / D.DIA) : null;
       return el("div", {},
         el("button", { type: "button", class: "pessoa-linha link-acao", style: "text-align:left;font-weight:inherit", onclick: () => app.ir("guia", { fluxo: "pessoa", id: p.id }) }, NE.avatar(p.nome, p.foto),
-          el("div", {}, el("strong", {}, p.nome), el("div", { class: "meta" }, `${NE.funcoes[p.funcao] || p.funcao}${p.papel === "admin" ? " · administração" : ""}`), cnh !== null && cnh <= 45 && el("span", { class: `etiqueta ${cnh < 0 ? "erro" : "alerta"}` }, cnh < 0 ? "CNH vencida" : `CNH vence em ${cnh} dias`))),
+          el("div", {}, el("strong", {}, p.nome), el("div", { class: "meta" }, `${NE.funcoes[p.funcao] || p.funcao}${p.papel === "admin" ? " · administração" : ""}`), p.cadastrado_por && el("div", { class: "meta" }, `Cadastrado por ${(pessoas.find((x) => x.id === p.cadastrado_por) || {}).nome || "administrador"}${p.criado_em ? ` em ${new Date(p.criado_em).toLocaleDateString("pt-BR")}` : ""}`), cnh !== null && cnh <= 45 && el("span", { class: `etiqueta ${cnh < 0 ? "erro" : "alerta"}` }, cnh < 0 ? "CNH vencida" : `CNH vence em ${cnh} dias`))),
         el("div", { class: "pessoa-acoes" }, NE.linkWhatsApp(p.telefone) && el("a", { class: "btn-zap", href: NE.linkWhatsApp(p.telefone, `Olá, ${p.nome.split(" ")[0]}!`), target: "_blank", rel: "noopener", "aria-label": `Chamar ${p.nome} no WhatsApp`, html: NE.icone.whatsapp }),
           NE.chave(p.ativo, "Pode entrar", (v) => NE.dados.alterarFuncionario(p.id, { ativo: v }))));
     }));

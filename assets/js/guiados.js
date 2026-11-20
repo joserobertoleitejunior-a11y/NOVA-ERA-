@@ -152,7 +152,7 @@
           validar: () => (d.telefone && NE.soDigitos(d.telefone).length < 10 ? "O celular precisa ter DDD e número (10 ou 11 dígitos), ou deixe em branco." : null) },
         { titulo: "Quer colocar uma foto?", icone: "camera", ajuda: "Opcional. Aparece ao lado do nome na equipe.", tela: (r) => el("div", {}, NE.seletorFoto({ titulo: "Foto de perfil", dica: "Rosto de frente, com boa luz.", lista: d.fotos, varias: false, frontal: true, aoMudar: r }), dica("Pode pular: toque em Continuar.")) },
         { titulo: "Confirme o cadastro", icone: "check", ajuda: "Usuário e senha foram criados sozinhos. Você recebe o cartão de acesso no fim.",
-          tela: (r) => el("div", {}, el("div", { class: "resumo" }, NE.linhaResumo("Nome", d.nome.trim()), NE.linhaResumo("Função", NE.funcoes[d.funcao]), NE.linhaResumo("Vê no app", U.papelDe(d.funcao) === "admin" ? "Painel da administração" : "Só a conferência"), NE.linhaResumo("WhatsApp", d.telefone || "—"), NE.linhaResumo("Foto", d.fotos.length ? "Sim" : "Sem foto"), NE.linhaResumo("Usuário", usuario()), NE.linhaResumo("Senha", d.senha)),
+          tela: (r) => el("div", {}, el("div", { class: "resumo" }, NE.linhaResumo("Nome", d.nome.trim()), NE.linhaResumo("Função", NE.funcoes[d.funcao]), NE.linhaResumo("Vê no app", U.papelDe(d.funcao) === "admin" ? "Painel da administração" : "Só a conferência"), NE.linhaResumo("WhatsApp", d.telefone || "—"), NE.linhaResumo("Foto", d.fotos.length ? "Sim" : "Sem foto"), NE.linhaResumo("Usuário", usuario()), NE.linhaResumo("Senha", d.senha), NE.linhaResumo("Cadastrado por", `${app.perfil.nome} (você)`)),
             U.papelDe(d.funcao) === "admin" && el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, "Esta função vê fotos e dados de todas as cargas. Confirme que é a pessoa certa.")),
             el("button", { type: "button", class: "link-acao", onclick: () => { d.senha = U.senhaNova(); r(); } }, ic("chave"), "Gerar outra senha")) },
       ],
@@ -160,7 +160,7 @@
         const foto = d.fotos[0] ? await NE.dados.enviarFoto(d.fotos[0].blob, app.perfil.id) : null; const u = usuario();
         await NE.dados.criarFuncionario({ nome: d.nome.trim(), usuario: u, senha: d.senha, funcao: d.funcao, papel: U.papelDe(d.funcao), telefone: NE.soDigitos(d.telefone) || null, foto });
         const cartao = { nome: d.nome.trim(), usuario: u, senha: d.senha, funcao: d.funcao, telefone: NE.soDigitos(d.telefone) };
-        NE.telaFim(raiz, { titulo: "Pessoa cadastrada", texto: `${d.nome.trim().split(" ")[0]} já pode entrar no app. Entregue o cartão de acesso agora: a senha não aparece de novo.`,
+        NE.telaFim(raiz, { titulo: "Pessoa cadastrada", texto: `${d.nome.trim().split(" ")[0]} já pode entrar no app. O cadastro ficou registrado em nome de ${app.perfil.nome}. Entregue o cartão de acesso agora: a senha não aparece de novo.`,
           botoes: [{ rotulo: "Mostrar o cartão de acesso", icone: "qr", acao: () => U.cartoes([cartao], "Cartão de acesso") }, { rotulo: "Cadastrar outra pessoa", icone: "mais", acao: () => G.novaPessoa(raiz, app, { funcao: d.funcao }) }, { rotulo: "Voltar à equipe", acao: () => app.ir("equipe", {}, { substituir: true }) }] });
       },
     });

@@ -5,7 +5,7 @@
 (() => {
   const NE = window.NE;
   const D = window.NEDominio;
-  const CHAVE = "ne-teste-v4";
+  const CHAVE = "ne-teste-v5";
   const MIN = D.MIN, DIA = D.DIA;
   const uid = (p = "t") => `${p}-${(crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()).replace(/-/g, "").slice(0, 12)}`;
   const tokenUuid = () => (crypto.randomUUID ? crypto.randomUUID() : "00000000-0000-4000-8000-" + String(Date.now()).padStart(12, "0"));
@@ -32,6 +32,7 @@
       { id: "u-t-moto", nome: "Motorista (teste)", usuario: "motorista", funcao: "motorista", papel: "funcionario", ativo: true, telefone: "15999990016" },
       { id: "u-paulo", nome: "Paulo Dias", usuario: "paulo", funcao: "motorista", papel: "funcionario", ativo: true, telefone: "15999990004", cnh_validade: new Date(agora + 21 * DIA).toISOString().slice(0, 10), observacao: "Opera o truck com munck" },
     ];
+    perfis.forEach((p, k) => { if (p.id !== "u-admin") { p.cadastrado_por = "u-admin"; p.criado_em = new Date(agora - (20 + k * 9) * DIA).toISOString(); } });
     const veiculos = [["ABC1D23", "caminhao"], ["BRA2E19", "caminhao"], ["CDE3F45", "caminhao"], ["FGH4I67", "caminhao"], ["IJK5L89", "caminhao"],
       ["LMN6O01", "caminhao"], ["OPQ7R23", "caminhao"], ["RST8U45", "truck_munck"], ["UVW9X67", "truck_munck"]].map(([placa, tipo], i) => ({ id: `v${i + 1}`, placa, tipo, descricao: "", ativo: true,
       marca: ["Volkswagen", "Mercedes-Benz", "Volvo"][i % 3], modelo: tipo === "truck_munck" ? "Truck 6x2 + munck" : ["24.250", "Atego 2426", "VM 270"][i % 3], ano: 2016 + (i % 8), cor: i % 2 ? "Vermelho" : "Branco", capacidade_t: tipo === "truck_munck" ? 12 : 14 + (i % 3) * 2,
@@ -96,7 +97,7 @@
       { id: uid("ct"), criado_em: new Date(agora - 26 * 3600000).toISOString(), criado_por: "u-marcos", status: "aguardando_aprovacao", escopo: "Contagem do dia", itens: [itemC("p3", 126, 120), itemC("p5", 40, 40)] },
     ];
     const cfg = { ...D.CONFIG_PADRAO };
-    const estado = { v: 4, criadoEm: agora, perfilId: "u-admin", perfis, veiculos, produtos, notas, conferencias, movimentos, contagens, alertas: [], config: cfg, vistoResumo: {} };
+    const estado = { v: 5, criadoEm: agora, perfilId: "u-admin", perfis, veiculos, produtos, notas, conferencias, movimentos, contagens, alertas: [], config: cfg, vistoResumo: {} };
     // alertas dos últimos dias (as cargas com diferença de hoje e ontem)
     const saldos = D.calcularSaldos(produtos, movimentos, contagens);
     const sd = Object.fromEntries(saldos.map((s) => [s.produto_id, s.saldo]));
@@ -135,7 +136,7 @@
   // ───────────────────────── a implementação ─────────────────────────
   NE.criarTeste = () => {
     let e = NE.memoria.ler(CHAVE);
-    if (!e || e.v !== 4) e = semear();
+    if (!e || e.v !== 5) e = semear();
     else { // mantém os dados "de hoje": desloca tudo em dias inteiros
       const dias = Math.floor((Date.now() - e.criadoEm) / DIA);
       if (dias > 0) { const mov = (o) => { if (Array.isArray(o)) o.forEach(mov); else if (o && typeof o === "object") for (const k of Object.keys(o)) { if (CAMPOS_TEMPO.includes(k) && typeof o[k] === "string") o[k] = new Date(D.aMs(o[k]) + dias * DIA).toISOString(); else mov(o[k]); } }; mov(e); e.criadoEm += dias * DIA; }
@@ -187,12 +188,12 @@
         await pausa(); const u = String(d.usuario || "").toLowerCase().trim();
         if (!u || String(d.senha || "").length < 6) throw new Error("Usuário e senha (6+ caracteres) são obrigatórios.");
         if (e.perfis.some((p) => p.usuario === u)) throw new Error(`O usuário "${u}" já existe.`);
-        const p = { id: uid("u"), nome: d.nome.trim(), usuario: u, funcao: d.funcao, papel: d.papel || "funcionario", ativo: true, telefone: d.telefone || "", email_contato: d.email_contato || null, admissao: d.admissao || null, cnh_validade: d.cnh_validade || null, observacao: d.observacao || null, foto: d.foto || null }; e.perfis.push(p); salvar();
+        const p = { id: uid("u"), nome: d.nome.trim(), usuario: u, funcao: d.funcao, papel: d.papel || "funcionario", ativo: true, telefone: d.telefone || "", email_contato: d.email_contato || null, admissao: d.admissao || null, cnh_validade: d.cnh_validade || null, observacao: d.observacao || null, foto: d.foto || null, cadastrado_por: eu().id, criado_em: new Date().toISOString() }; e.perfis.push(p); salvar();
         return { id: p.id, usuario: u, senha: d.senha };
       },
       async criarFuncionarios(lista) { const out = []; for (const d of lista) { try { out.push({ ok: true, ...(await api.criarFuncionario(d)), nome: d.nome }); } catch (er) { out.push({ ok: false, nome: d.nome, erro: er.message }); } } return out; },
       async redefinirSenha(id, senha) { const s = senha || `nova${1000 + Math.floor(Math.random() * 9000)}`; const p = e.perfis.find((x) => x.id === id); if (!p) throw new Error("Funcionário não encontrado."); return { usuario: p.usuario, senha: s }; },
-      async alterarFuncionario(id, campos) { Object.assign(e.perfis.find((p) => p.id === id), campos); salvar(); },
+      async alterarFuncionario(id, campos) { const { cadastrado_por, criado_em, ...ok } = campos; Object.assign(e.perfis.find((p) => p.id === id), ok); salvar(); }, // quem cadastrou e quando não mudam
       async criarVeiculo(v) { const placa = String(v.placa || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); if (e.veiculos.some((x) => x.placa === placa)) throw new Error("Essa placa já está cadastrada."); e.veiculos.push({ id: uid("v"), ativo: true, descricao: "", ...v, placa }); salvar(); },
       async alterarVeiculo(id, c) { Object.assign(e.veiculos.find((v) => v.id === id), c); salvar(); },
       async criarProduto(p) { if (e.produtos.some((x) => D.normalizar(x.nome) === D.normalizar(p.nome))) throw new Error("Esse produto já existe."); e.produtos.push({ id: uid("p"), unidade: "un", minimo: 0, por_pilha: null, ativo: true, codigo: "", ...p }); salvar(); },
