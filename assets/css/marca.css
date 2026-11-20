@@ -41,7 +41,8 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-app
 input[type="number"] { -moz-appearance: textfield; }
 textarea { resize: none; }
 img { -webkit-user-drag: none; user-select: none; }
-body.sem-rolagem, html.sem-rolagem, html.sem-rolagem body { overflow: hidden; overscroll-behavior: none; }
+/* Trava a rolagem só na página (html); o body continua "solto" para o cabeçalho grudado (sticky) não soltar */
+body.sem-rolagem, html.sem-rolagem { overflow: hidden; overscroll-behavior: none; }
 body {
   background: var(--concreto);
   color: var(--texto);
@@ -559,3 +560,18 @@ html[data-qualidade="baixa"] { --desfoque: none; --vidro: linear-gradient(180deg
 .logo-cliente .logo-ne { justify-content: center; width: 100%; } .logo-cliente svg { height: 44px; margin: 0; }
 
 .selo-demo .demo-link { color: #fff; font-size: .85rem; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; padding: 6px 4px; }
+
+/* Botões do tutorial: sempre na mesma linha, dividindo a largura */
+.tour-botoes { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 10px; }
+.tour-botoes .btn { padding: 0 12px; min-width: 0; white-space: nowrap; }
+.tour-balao { max-height: calc(100% - 24px); overflow-y: auto; }
+
+/* Telas de fotos: nada alarga a tela em celular estreito */
+.foto-bloco { min-width: 0; }
+.foto-bloco-topo { flex-wrap: wrap; row-gap: 6px; }
+.foto-bloco .dica { overflow-wrap: anywhere; }
+.foto-acoes { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+.foto-acoes .btn { min-width: 0; }
+@media (max-width: 380px) { .foto-acoes { grid-template-columns: minmax(0, 1fr); } }
+/* Ações em forma de botão podem quebrar o texto em vez de alargar a tela */
+.link-acao { white-space: normal; text-align: center; padding-block: 8px; height: auto; line-height: 1.2; max-width: 100%; }

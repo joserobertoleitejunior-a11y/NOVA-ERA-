@@ -49,25 +49,28 @@
     function posicionar() {
       const alvo = document.querySelector(passos[i].alvo);
       if (!alvo) return;
-      const r = alvo.getBoundingClientRect(), m = 6;
+      const r = alvo.getBoundingClientRect(), m = 6, margem = 12;
       Object.assign(foco.style, { top: `${r.top - m}px`, left: `${r.left - m}px`, width: `${r.width + m * 2}px`, height: `${r.height + m * 2}px` });
-      const abaixo = r.bottom + 14 + balao.offsetHeight < innerHeight - 12;
-      balao.style.top = `${abaixo ? r.bottom + 14 : Math.max(12, r.top - balao.offsetHeight - 14)}px`;
+      const altura = balao.offsetHeight, tela = innerHeight;
+      const cabeAbaixo = r.bottom + 14 + altura <= tela - margem;
+      const cabeAcima = r.top - 14 - altura >= margem;
+      let topo = cabeAbaixo ? r.bottom + 14 : cabeAcima ? r.top - 14 - altura : tela - altura - margem;
+      balao.style.top = `${Math.max(margem, Math.min(topo, tela - altura - margem))}px`;
     }
     function desenhar() {
       const p = passos[i];
       const alvo = document.querySelector(p.alvo);
       // rola só por conta do tutorial (a pessoa não consegue rolar)
       document.documentElement.classList.remove("sem-rolagem");
-      alvo.scrollIntoView({ block: "center", behavior: "instant" });
+      if (!alvo.closest(".topo, .acoes, .flutuantes")) alvo.scrollIntoView({ block: "center", behavior: "instant" });
       document.documentElement.classList.add("sem-rolagem");
       const ultimo = i === passos.length - 1;
       balao.replaceChildren(
         el("div", { class: "tour-contagem" }, passos.map((_, k) => el("i", { class: k <= i ? "ativo" : "" }))),
         el("h2", { id: "tour-titulo" }, p.titulo), el("p", {}, p.texto),
         el("div", { class: "tour-botoes" },
-          el("button", { type: "button", class: "btn btn-secundario", onclick: terminar }, ultimo ? "Fechar" : "Pular"),
-          ultimo && verDicas ? el("button", { type: "button", class: "btn btn-azul", onclick: () => { terminar(); verDicas(); } }, "Ver dicas") : null,
+          ultimo ? (verDicas ? el("button", { type: "button", class: "btn btn-secundario", onclick: () => { terminar(); verDicas(); } }, "Ver dicas") : null)
+                 : el("button", { type: "button", class: "btn btn-secundario", onclick: terminar }, "Pular"),
           el("button", { type: "button", class: "btn btn-principal", id: "tour-proximo", onclick: avancar }, ultimo ? "Entendi" : "Próximo")));
       requestAnimationFrame(posicionar);
       balao.querySelector("#tour-proximo").focus({ preventScroll: true });
