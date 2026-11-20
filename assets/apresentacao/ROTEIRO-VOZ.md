@@ -22,7 +22,49 @@ Eu corto, nivelo o volume de todas as cenas e confiro a contagem: se faltar ou s
 
 ---
 
-## TEXTO PARA COLAR  (54 cenas · 7137 caracteres)
+## TEXTO A — SÓ A APRESENTAÇÃO  (17 cenas · 2587 caracteres)  ← comece por este
+
+```text
+Esse é o Confere Carga: o aplicativo da Nova Era que confere cada carga antes do caminhão sair.
+<break time="3.0s" />
+O problema é simples: peça que sai a mais não é cobrada, peça que falta vira reclamação, e o estoque fica errado. O aplicativo confere a carga com a nota e avisa na hora.
+<break time="3.0s" />
+Cada pessoa entra com o seu usuário e senha, e vê só o que precisa pra trabalhar.
+<break time="3.0s" />
+A tela inicial diz, numa frase, se está tudo certo. Se tiver problema, é só tocar em resolver agora.
+<break time="3.0s" />
+Uma nota nova entra na fila em quatro passos. Primeiro, como a nota chegou. Depois, o número e o cliente. Em seguida, os produtos e as quantidades. E por fim, confirmar. Pronto! <break time="0.4s" /> Rápido e sem papel. Os conferentes são avisados na hora, no celular.
+<break time="3.0s" />
+Com o arquivo xis ême éle, o aplicativo lê a nota sozinho: número, cliente e todos os itens. E na versão premium, até a foto da nota.
+<break time="3.0s" />
+O conferente toca na nota e escolhe o caminhão. Se a carga está certa, toca em tudo confere. Se tem diferença, informa quantas peças subiram. Depois, tira a foto da carga e da placa. Fica tudo registrado, com hora e nome, e ninguém apaga. Tudo em poucos toques.
+<break time="3.0s" />
+As etiquetas com quiú érre côde fazem a contagem peça por peça, só apontando a câmera.
+<break time="3.0s" />
+Peça a mais, peça faltando, estoque negativo: a administração é avisada na hora, no celular e no Uótsap.
+<break time="3.0s" />
+O estoque se atualiza sozinho a cada carga conferida, e mostra em uma palavra se está ok, baixo ou negativo.
+<break time="3.0s" />
+A contagem rápida leva uns três minutos. Se não bater, a administração decide: corrigir, ou contar de novo.
+<break time="3.0s" />
+Cadastrar uma pessoa é uma pergunta por tela: nome, função, Uótsap e foto. O aplicativo cria o acesso e manda no Uótsap, com um vídeo ensinando a função. E registra quem cadastrou. Leva um minuto.
+<break time="3.0s" />
+A frota fica cadastrada, com placa, dados e fotos. Na conferência, é só escolher o caminhão.
+<break time="3.0s" />
+Na versão completa, um assistente de inteligência artificial responde com os dados reais da empresa. E só fala sobre a Nova Era.
+<break time="3.0s" />
+O cliente acompanha a entrega por um link no Uótsap: horário de saída, o que foi carregado e a foto da carga.
+<break time="3.0s" />
+E o site da Nova Era mostra os produtos com fotos reais e maquetes em 3D, e o cliente monta o orçamento ali mesmo.
+<break time="3.0s" />
+Confere Carga: menos erro, menos prejuízo, mais controle. Obrigado.
+```
+
+Se gravar só este, envie o mp3 normalmente: eu reconheço as 17 cenas da apresentação. Os tutoriais ficam com a voz provisória até você gerar o texto B.
+
+---
+
+## TEXTO B — TUDO: apresentação + 6 tutoriais  (54 cenas · 7137 caracteres)  ← para depois
 
 ```text
 Esse é o Confere Carga: o aplicativo da Nova Era que confere cada carga antes do caminhão sair.

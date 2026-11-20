@@ -84,13 +84,16 @@ def gerar():
     ]
     total = 0
     manifesto = []
+    ap = cenas_do_bloco([("apresentacao", None)]); texto_ap = f"\n{PAUSA_CENA}\n".join(falado(f) for _, _, f in ap)
+    linhas += ["---", "", f"## TEXTO A — SÓ A APRESENTAÇÃO  ({len(ap)} cenas · {len(texto_ap)} caracteres)  ← comece por este", "", "```text", texto_ap, "```", "",
+               "Se gravar só este, envie o mp3 normalmente: eu reconheço as 17 cenas da apresentação. Os tutoriais ficam com a voz provisória até você gerar o texto B.", ""]
     for n, (titulo, itens) in enumerate(BLOCOS, 1):
         cenas = cenas_do_bloco(itens)
         texto = f"\n{PAUSA_CENA}\n".join(falado(f) for _, _, f in cenas)
         total += len(texto)
         manifesto.append({"bloco": n, "cenas": [{"alvo": a, "id": c} for a, c, _ in cenas]})
         linhas += [
-            "---", "", f"## TEXTO PARA COLAR  ({len(cenas)} cenas · {len(texto)} caracteres)", "", "```text", texto, "```", "",
+            "---", "", f"## TEXTO B — TUDO: apresentação + 6 tutoriais  ({len(cenas)} cenas · {len(texto)} caracteres)  ← para depois", "", "```text", texto, "```", "",
         ]
     linhas[linhas.index("> **CUSTO_AQUI**")] = f"> O ElevenLabs cobra por caractere: este texto tem **{total} caracteres**. Gerar de novo gasta de novo."
     (RAIZ / "assets/apresentacao/ROTEIRO-VOZ.md").write_text("\n".join(linhas) + "\n", encoding="utf8")
@@ -133,6 +136,10 @@ def cortar(arqs, silencio, ruido, so_conferir):
             for i, (a, b) in enumerate(segs, 1):
                 print(f"  {i:2d}. {a:7.1f}s → {b:7.1f}s  ({b - a:5.1f}s)")
             trechos += [(norm, a, b) for a, b in segs]
+        so_apres = [c for c in cenas if c["alvo"] == "apresentacao"]
+        if len(trechos) == len(so_apres) != len(cenas):
+            cenas = so_apres  # só a apresentação foi gravada
+            print("\n(Gravação só da apresentação.)")
         print(f"\nTotal: {len(trechos)} trechos; esperado {len(cenas)} cenas.")
         if len(trechos) != len(cenas):
             print("✗ A contagem não bate. Provável causa: uma pausa dentro da cena passou de "
