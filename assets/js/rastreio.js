@@ -53,7 +53,7 @@
     // Ambiente de teste (admin/admin): o link de uma nota de teste abre os dados de teste guardados neste aparelho
     if (C.modoTeste) {
       try {
-        const e = JSON.parse(localStorage.getItem("ne-teste-v3") || "null"); const conf = e && e.conferencias.find((c) => c.token_publico === token);
+        const e = JSON.parse(localStorage.getItem("ne-teste-v4") || "null"); const conf = e && e.conferencias.find((c) => c.token_publico === token);
         if (conf) { raiz.replaceChildren(NE.renderRastreio(NE.rastreioDe(conf, null))); return; }
       } catch { /* segue para o banco */ }
     }

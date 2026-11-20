@@ -190,6 +190,7 @@
     ativa = null; tentouTeste = teste; ligar();
   };
 
+  const USUARIOS_TESTE = ["admin", "adminvendas", "adminexpedicao", "admindiretoria", "adminadministrativo", "conferente", "ajudante", "motorista"];
   const nomes = ["emCache", "perfil", "veiculos", "produtos", "funcionarios", "criarFuncionario", "criarFuncionarios", "redefinirSenha", "alterarFuncionario", "criarVeiculo", "alterarVeiculo", "criarProduto", "alterarProduto",
     "notas", "criarNota", "importarNotas", "cancelarNota", "enviarFoto", "urlFoto", "fotoExemplo", "registrarConferencia", "sincronizar", "pendentes", "conferencias", "contexto",
     "saldos", "movimentos", "lancarMovimento", "contagens", "pedirContagem", "concluirContagem", "aplicarAjuste", "descartarContagem", "alertas", "marcarLidos", "resolverAlerta", "preferencias", "salvarPreferencias", "config", "salvarConfig",
@@ -198,7 +199,7 @@
     get modoTeste() { return !!ligar().modoTeste; },
     // login: admin/admin abre o ambiente de teste (se estiver ligado em config.js); qualquer outro usuário vai ao banco de verdade
     async entrar(usuario, senha) {
-      if (C.modoTeste && usuario.trim().toLowerCase() === "admin" && senha === "admin") { trocarPara(true); return ligar().entrar(); }
+      if (C.modoTeste && senha === "admin" && USUARIOS_TESTE.includes(usuario.trim().toLowerCase())) { trocarPara(true); return ligar().entrar(usuario); }
       trocarPara(false); return ligar().entrar(usuario, senha);
     },
     async sair() { const a = ligar(); await a.sair(); if (a.modoTeste) trocarPara(false); },

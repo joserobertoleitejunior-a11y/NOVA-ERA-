@@ -5,7 +5,7 @@
 (() => {
   const NE = window.NE;
   const D = window.NEDominio;
-  const CHAVE = "ne-teste-v3";
+  const CHAVE = "ne-teste-v4";
   const MIN = D.MIN, DIA = D.DIA;
   const uid = (p = "t") => `${p}-${(crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()).replace(/-/g, "").slice(0, 12)}`;
   const tokenUuid = () => (crypto.randomUUID ? crypto.randomUUID() : "00000000-0000-4000-8000-" + String(Date.now()).padStart(12, "0"));
@@ -23,6 +23,13 @@
       { id: "u-eduardo", nome: "Eduardo", usuario: "eduardo", funcao: "expedicao", papel: "admin", ativo: true, telefone: "15999990001", observacao: "Responsável pela expedição" },
       { id: "u-carlos", nome: "Carlos Souza", usuario: "carlos", funcao: "conferente", papel: "funcionario", ativo: true, telefone: "15999990002", admissao: "2022-03-14" },
       { id: "u-marcos", nome: "Marcos Lima", usuario: "marcos", funcao: "conferente", papel: "funcionario", ativo: true, telefone: "15999990003", admissao: "2023-08-01" },
+      { id: "u-t-vendas", nome: "Vendas (teste)", usuario: "adminvendas", funcao: "vendedor", papel: "admin", ativo: true, telefone: "15999990010" },
+      { id: "u-t-exped", nome: "Expedição (teste)", usuario: "adminexpedicao", funcao: "expedicao", papel: "admin", ativo: true, telefone: "15999990011" },
+      { id: "u-t-dir", nome: "Diretoria (teste)", usuario: "admindiretoria", funcao: "diretoria", papel: "admin", ativo: true, telefone: "15999990012" },
+      { id: "u-t-adm", nome: "Administrativo (teste)", usuario: "adminadministrativo", funcao: "administrativo", papel: "admin", ativo: true, telefone: "15999990013" },
+      { id: "u-t-conf", nome: "Conferente (teste)", usuario: "conferente", funcao: "conferente", papel: "funcionario", ativo: true, telefone: "15999990014" },
+      { id: "u-t-ajud", nome: "Ajudante (teste)", usuario: "ajudante", funcao: "ajudante", papel: "funcionario", ativo: true, telefone: "15999990015" },
+      { id: "u-t-moto", nome: "Motorista (teste)", usuario: "motorista", funcao: "motorista", papel: "funcionario", ativo: true, telefone: "15999990016" },
       { id: "u-paulo", nome: "Paulo Dias", usuario: "paulo", funcao: "motorista", papel: "funcionario", ativo: true, telefone: "15999990004", cnh_validade: new Date(agora + 21 * DIA).toISOString().slice(0, 10), observacao: "Opera o truck com munck" },
     ];
     const veiculos = [["ABC1D23", "caminhao"], ["BRA2E19", "caminhao"], ["CDE3F45", "caminhao"], ["FGH4I67", "caminhao"], ["IJK5L89", "caminhao"],
@@ -89,7 +96,7 @@
       { id: uid("ct"), criado_em: new Date(agora - 26 * 3600000).toISOString(), criado_por: "u-marcos", status: "aguardando_aprovacao", escopo: "Contagem do dia", itens: [itemC("p3", 126, 120), itemC("p5", 40, 40)] },
     ];
     const cfg = { ...D.CONFIG_PADRAO };
-    const estado = { v: 3, criadoEm: agora, perfilId: "u-admin", perfis, veiculos, produtos, notas, conferencias, movimentos, contagens, alertas: [], config: cfg, vistoResumo: {} };
+    const estado = { v: 4, criadoEm: agora, perfilId: "u-admin", perfis, veiculos, produtos, notas, conferencias, movimentos, contagens, alertas: [], config: cfg, vistoResumo: {} };
     // alertas dos últimos dias (as cargas com diferença de hoje e ontem)
     const saldos = D.calcularSaldos(produtos, movimentos, contagens);
     const sd = Object.fromEntries(saldos.map((s) => [s.produto_id, s.saldo]));
@@ -128,7 +135,7 @@
   // ───────────────────────── a implementação ─────────────────────────
   NE.criarTeste = () => {
     let e = NE.memoria.ler(CHAVE);
-    if (!e || e.v !== 3) e = semear();
+    if (!e || e.v !== 4) e = semear();
     else { // mantém os dados "de hoje": desloca tudo em dias inteiros
       const dias = Math.floor((Date.now() - e.criadoEm) / DIA);
       if (dias > 0) { const mov = (o) => { if (Array.isArray(o)) o.forEach(mov); else if (o && typeof o === "object") for (const k of Object.keys(o)) { if (CAMPOS_TEMPO.includes(k) && typeof o[k] === "string") o[k] = new Date(D.aMs(o[k]) + dias * DIA).toISOString(); else mov(o[k]); } }; mov(e); e.criadoEm += dias * DIA; }
@@ -165,7 +172,7 @@
     const api = {
       modoTeste: true,
       emCache: () => null,
-      async entrar() { e.perfilId = "u-admin"; salvar(); },
+      async entrar(usuario) { const p = e.perfis.find((x) => x.usuario === String(usuario || "admin").trim().toLowerCase()); if (!p) throw new Error("Usuário ou senha incorretos."); e.perfilId = p.id; salvar(); },
       async sair() {},
       async perfil() { return copia(eu()); },
       // Só no ambiente de teste: alternar entre administrador e conferente para ver os dois lados

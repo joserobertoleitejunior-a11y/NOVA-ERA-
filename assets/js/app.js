@@ -14,10 +14,17 @@
   const SEM_NAV = new Set(["conferir", "contar", "leitor"]);
   const PAI_NAV = { alertas: "mais", equipe: "mais", cadastros: "mais", config: "mais", exportar: "mais" };
   const ehAdmin = () => perfil?.papel === "admin";
+  // O que cada função enxerga. Sem regra aqui, vale o padrão do papel (administração = tudo; funcionário = conferência).
+  const REGRAS = {
+    vendedor: { nav: ["inicio", "notas", "cargas", "mais"], conferir: false, ia: false, limitado: true },   // comercial: notas, cargas e rastreio ao cliente
+    motorista: { nav: ["notas", "alertas"], conferir: false, ia: false },                                    // vê a fila e os avisos; não confere
+  };
+  const perm = () => { const r = REGRAS[perfil?.funcao] || {}; return { nav: r.nav || null, conferir: r.conferir !== false, ia: r.ia !== undefined ? r.ia : ehAdmin(), limitado: !!r.limitado }; };
 
   NE.app = {
     get perfil() { return perfil; },
     get admin() { return ehAdmin(); },
+    get perm() { return perm(); },
     ir, voltar: () => history.back(), recarregar: () => desenhar(), atualizarSino: () => sondar(),
   };
 
@@ -44,7 +51,7 @@
   function nav(rota, esconder) {
     let barra = $("#nav-inferior"); if (barra) barra.remove();
     if (esconder || !perfil) return;
-    const itens = ehAdmin() ? NAV_ADMIN : NAV_FUNC; const ativo = PAI_NAV[rota] || rota;
+    const itens = (ehAdmin() ? NAV_ADMIN : NAV_FUNC).filter(([id]) => !perm().nav || perm().nav.includes(id)); const ativo = PAI_NAV[rota] || rota;
     barra = el("nav", { class: "nav-inferior", id: "nav-inferior", "aria-label": "Menu principal" }, el("div", { class: "nav-inferior-dentro" }, itens.map(([id, nome, icone]) => {
       const b = el("button", { type: "button", class: "nav-item", "data-rota": id, "aria-current": ativo === id ? "page" : false }, ic(icone), el("span", {}, nome));
       b.addEventListener("click", () => ir(id));
@@ -106,7 +113,7 @@
 
   function botaoIA(esconder) {
     $("#fab-ia")?.remove();
-    if (esconder || !perfil || !ehAdmin() || !NE.abrirAssistente) return;
+    if (esconder || !perfil || !perm().ia || !NE.abrirAssistente) return;
     const b = el("button", { type: "button", class: "fab-ia", id: "fab-ia" }, ic("faisca"), "Perguntar");
     b.addEventListener("click", () => NE.abrirAssistente()); document.body.append(b);
   }
@@ -133,7 +140,7 @@
     NE.dados.aoMudarFila = mostrarFila; mostrarFila();
     iniciarSondagem();
     const alvo = (location.hash || "").slice(1);
-    const rota = NE.rotas[alvo] && !SEM_NAV.has(alvo) && (ehAdmin() || ["notas", "estoque", "alertas"].includes(alvo)) ? alvo : inicial();
+    const rota = NE.rotas[alvo] && !SEM_NAV.has(alvo) && (ehAdmin() || ["notas", "estoque", "alertas"].includes(alvo)) && (!perm().nav || perm().nav.includes(alvo) || alvo === "alertas") ? alvo : inicial();
     ir(rota, {}, { substituir: true });
     if (!NE.tourJaVisto(tipoGuia())) setTimeout(() => NE.iniciarTour(tipoGuia(), { verDicas: abrirDicas }), 500);
   }

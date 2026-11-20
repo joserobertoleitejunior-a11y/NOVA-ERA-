@@ -22,11 +22,11 @@
     const chips = el("div", { class: "chips" });
     const nova = el("button", { class: "btn btn-principal btn-bloco btn-gigante", type: "button", id: "btn-nova" }, ic("caminhao"), "Conferir uma carga");
     nova.addEventListener("click", () => app.ir("conferir", {}));
-    const cab = el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, admin ? "Notas" : "Fila de carga"), el("p", {}, admin ? "O que está esperando conferência e o histórico." : "Toque numa nota para conferir. Sem nota? Use o botão abaixo.")),
+    const cab = el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, admin ? "Notas" : "Fila de carga"), el("p", {}, admin ? "O que está esperando conferência e o histórico." : app.perm.conferir ? "Toque numa nota para conferir. Sem nota? Use o botão abaixo." : "Notas esperando conferência.")),
       admin && el("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
         el("button", { type: "button", class: "btn btn-azul", id: "btn-nota-nova", onclick: () => app.ir("notas", { nova: "1" }) }, ic("mais"), "Nova nota"),
         el("button", { type: "button", class: "btn btn-secundario", id: "btn-importar", onclick: () => app.ir("notas", { importar: "1" }) }, ic("baixar"), "Importar XML")));
-    raiz.replaceChildren(cab, nova, el("div", { style: "height:14px" }), admin && chips, box);
+    raiz.replaceChildren(cab, app.perm.conferir ? nova : null, el("div", { style: "height:14px" }), admin && chips, box);
     let todas = [];
     const desenharChips = () => chips.replaceChildren(...[["fila", "Na fila"], ["todas", "Todas"]].map(([id, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(aba === id), onclick: () => { aba = id; desenharChips(); desenharLista(); } }, nome)));
     const desenharLista = () => {
@@ -47,7 +47,7 @@
       el("strong", {}, `Nota ${n.numero}`, n.cliente ? ` · ${n.cliente}` : ""),
       el("span", { class: "meta" }, `${D.plural((n.itens || []).length, "item", "itens")}${n.vendedor ? ` · ${n.vendedor}` : ""} · ${fila ? `espera há ${D.duracao(idade)}` : D.tempoRelativo(n.criado_em, agora)}`),
       el("span", { class: "lado" }, el("span", { class: `etiqueta ${parada ? "erro" : stat[1]}` }, parada ? "Parada" : stat[0])));
-    b.addEventListener("click", () => (app.admin ? detalhe(n, app) : fila ? app.ir("conferir", { nota_id: n.id }) : null));
+    b.addEventListener("click", () => (app.admin ? detalhe(n, app) : !app.perm.conferir ? NE.aviso("Esta nota espera conferência. Quem confere a carga é o conferente.", "alerta") : fila ? app.ir("conferir", { nota_id: n.id }) : null));
     return b;
   }
 
