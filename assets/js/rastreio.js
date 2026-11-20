@@ -109,7 +109,6 @@
           el("div", { class: "campo" }, el("label", { for: "fone-cliente" }, "WhatsApp do cliente (opcional)"),
             el("span", { class: "dica" }, "Sem número, o WhatsApp abre para você escolher o contato."), fone),
           el("div", { class: "previa-mensagem" }, mensagem()),
-          NE.modoTeste && el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, "Ambiente de teste: o link abre neste aparelho, com os dados de teste.")),
           el("div", { style: "display:grid;gap:10px" }, abrir, copiar,
             el("button", { type: "button", class: "link-acao", onclick: () => { tela.remove(); NE.verComoCliente(c); } }, ic("olho"), "Ver como o cliente vê")))));
     fechar.addEventListener("click", () => tela.remove());

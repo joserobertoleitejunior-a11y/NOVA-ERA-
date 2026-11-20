@@ -64,19 +64,25 @@
     const ajuda = el("button", { class: "btn-ajuda", type: "button", id: "btn-ajuda" }, ic("ajuda"), "Ajuda");
     ajuda.addEventListener("click", abrirAjuda);
     const sair = el("button", { class: "link-acao", type: "button", "aria-label": "Sair" }, ic("sair"));
-    sair.addEventListener("click", async () => { pararSondagem(); await NE.dados.sair(); perfil = null; document.body.classList.remove("com-nav"); $("#nav-inferior")?.remove(); $("#fab-ia")?.remove(); iniciar(); });
+    sair.addEventListener("click", async () => { pararSondagem(); await NE.dados.sair(); perfil = null; document.body.classList.remove("com-nav"); $("#nav-inferior")?.remove(); $("#fab-ia")?.remove(); $("#fab-teste")?.remove(); $("#menu-teste")?.remove(); iniciar(); });
     area.append(ajuda, el("span", { class: "nome" }, perfil.nome.split(" ")[0]), sino, sair);
     faixaTeste(faixa);
   }
+  // Sem nenhuma mensagem de "teste" na tela: só um botãozinho discreto (canto esquerdo) com as ferramentas de demonstração.
   function faixaTeste(faixa) {
-    if (!NE.modoTeste) { faixa.hidden = true; return; }
-    faixa.hidden = false;
+    faixa.hidden = true; $("#fab-teste")?.remove(); $("#menu-teste")?.remove();
+    if (!NE.modoTeste) return;
     const adm = ehAdmin();
-    const trocar = el("button", { type: "button", id: "btn-trocar" }, adm ? "Ver como conferente" : "Voltar ao administrador");
-    trocar.addEventListener("click", async () => { await NE.dados.trocarPerfil(adm ? "u-carlos" : "u-admin"); perfil = await NE.dados.perfil(); topo(); ir(inicial(), {}, { substituir: true }); sondar(); });
-    const zerar = el("button", { type: "button", id: "btn-zerar" }, "Zerar dados de teste");
-    zerar.addEventListener("click", async () => { if (!confirm("Apagar os dados de teste e começar de novo com os exemplos?")) return; await NE.dados.reiniciar(); perfil = await NE.dados.perfil(); vistos = new Set(); topo(); ir(inicial(), {}, { substituir: true }); NE.aviso("Dados de teste reiniciados.", "ok"); });
-    faixa.replaceChildren(el("span", {}, el("b", {}, "AMBIENTE DE TESTE"), " · dados de exemplo, só neste aparelho. Nada vai para o banco de verdade."), trocar, zerar);
+    const b = el("button", { type: "button", class: "fab-teste", id: "fab-teste", "aria-label": "Alternar visão" }, ic("pessoas"));
+    b.addEventListener("click", () => {
+      if ($("#menu-teste")) return $("#menu-teste").remove();
+      const trocar = el("button", { type: "button", id: "btn-trocar" }, adm ? "Ver como conferente" : "Voltar ao administrador");
+      trocar.addEventListener("click", async () => { $("#menu-teste")?.remove(); await NE.dados.trocarPerfil(adm ? "u-carlos" : "u-admin"); perfil = await NE.dados.perfil(); topo(); ir(inicial(), {}, { substituir: true }); sondar(); });
+      const zerar = el("button", { type: "button", id: "btn-zerar" }, "Zerar dados de exemplo");
+      zerar.addEventListener("click", async () => { $("#menu-teste")?.remove(); if (!confirm("Apagar os dados de exemplo e começar de novo?")) return; await NE.dados.reiniciar(); perfil = await NE.dados.perfil(); vistos = new Set(); topo(); ir(inicial(), {}, { substituir: true }); NE.aviso("Dados reiniciados.", "ok"); });
+      document.body.append(el("div", { class: "menu-teste", id: "menu-teste" }, trocar, zerar));
+    });
+    document.body.append(b);
   }
 
   async function sondar() {
@@ -145,9 +151,7 @@
     const btn = el("button", { class: "btn btn-principal btn-bloco", type: "submit", id: "btn-entrar" }, "Entrar");
     const avisoBox = el("div", {});
     const adm = window.NE_ENTRADA === "admin";
-    const teste = C.modoTeste ? el("div", { class: "aviso alerta", style: "margin-top:14px;align-items:center" }, ic("alerta"),
-      el("span", {}, el("b", {}, "Modo de teste: "), "usuário ", el("b", {}, "admin"), " e senha ", el("b", {}, "admin"), ". Abre um ambiente com dados de exemplo, só neste aparelho."),
-      el("button", { type: "button", class: "link-acao", id: "btn-teste", onclick: () => { usuario.value = "admin"; senha.value = "admin"; form.requestSubmit(); } }, "Entrar agora")) : null;
+    const teste = null; // sem dica de login na tela: o acesso de teste é só de quem conhece
     const form = el("form", { class: "cartao" },
       el("h1", {}, adm ? "Administração" : "Confere Carga"), el("p", {}, adm ? "Área da expedição e da diretoria. Entre com seu usuário e senha." : "Entre com o usuário e a senha que a expedição te passou."), avisoBox,
       el("div", { class: "campo" }, el("label", { for: "login-usuario" }, "Usuário"), usuario),

@@ -161,3 +161,9 @@ body.imprimindo-cartoes #area-cartoes { display: block !important; padding: 8mm;
 .lista-simples .pessoa-linha strong { display: block; font-size: 1.05rem; text-transform: none; }
 .lista-simples .pessoa-linha .meta { color: var(--texto-suave); font-size: .88rem; }
 .lista-simples .pessoa-linha:active { opacity: .7; }
+
+/* Ferramenta discreta de demonstração (só no acesso de teste) */
+.fab-teste { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); bottom: calc(80px + env(safe-area-inset-bottom, 0px)); z-index: 24; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--borda-vidro); background: var(--vidro); color: var(--texto-suave); display: grid; place-items: center; cursor: pointer; opacity: .55; -webkit-backdrop-filter: var(--desfoque); backdrop-filter: var(--desfoque); }
+.fab-teste:hover, .fab-teste:focus-visible { opacity: 1; } .fab-teste svg { width: 20px; height: 20px; }
+.menu-teste { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); bottom: calc(126px + env(safe-area-inset-bottom, 0px)); z-index: 26; display: grid; gap: 6px; padding: 8px; border-radius: 16px; background: var(--vidro-forte); border: 1px solid var(--borda-vidro); box-shadow: 0 12px 32px rgba(11,16,56,.2); }
+.menu-teste button { min-height: 44px; padding: 0 14px; border-radius: 12px; border: 0; background: #fff; font: inherit; font-weight: 700; cursor: pointer; text-align: left; }
