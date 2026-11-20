@@ -34,3 +34,16 @@ que acontecem numa fração (`at`, de 0 a 1) do tempo da fala.
 
 ## Segurança
 A chave do ElevenLabs só é usada no seu computador, pelo script. Ela não fica no repositório nem no site.
+
+## Vídeos tutoriais por função
+`tutorial.html?f=<função>` é o vídeo de uma função (conferente, ajudante, motorista, vendedor, expedicao, administrativo, diretoria).
+Em celular em pé ele usa o formato vertical. Os roteiros ficam em `assets/tutoriais/<função>.json` (ajudante usa o do conferente).
+
+Quando um funcionário é cadastrado, o botão "Mandar acesso e vídeo no WhatsApp" envia o link
+`boas-vindas.html#…`: uma tela com o usuário, a senha e o vídeo da função dele. Os dados vão depois do `#`
+(o servidor nunca recebe essa parte do endereço).
+
+Voz do ElevenLabs para todos os tutoriais de uma vez:
+```bash
+node scripts/gerar-voz-elevenlabs.mjs --tutoriais            # ou: --tutorial conferente
+```

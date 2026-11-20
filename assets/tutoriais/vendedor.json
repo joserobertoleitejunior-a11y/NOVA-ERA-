@@ -1,0 +1,195 @@
+{
+  "titulo": "Tutorial · Vendas",
+  "audio": "assets/tutoriais/audio/vendedor",
+  "voz": {
+    "modelo": "eleven_multilingual_v2",
+    "estabilidade": 0.55,
+    "similaridade": 0.8,
+    "estilo": 0.25
+  },
+  "inicio": {
+    "titulo": "Tutorial · Vendas",
+    "sub": "Notas, cargas e rastreio ao cliente",
+    "botao": "Assistir ao tutorial"
+  },
+  "fim": {
+    "titulo": "Pronto!",
+    "sub": "Lance a nota e mande o rastreio: o cliente agradece."
+  },
+  "cenas": [
+    {
+      "id": "01-entrar",
+      "titulo": "Como entrar",
+      "pontos": [],
+      "fala": "Para entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você vê as notas e as cargas, e manda o rastreio ao cliente.",
+      "pre": {
+        "perfil": null,
+        "reiniciar": true
+      },
+      "acoes": [
+        {
+          "at": 0.35,
+          "digitar": [
+            "#login-usuario",
+            "adminvendas"
+          ]
+        },
+        {
+          "at": 0.55,
+          "digitar": [
+            "#login-senha",
+            "admin"
+          ]
+        },
+        {
+          "at": 0.75,
+          "clicar": "#btn-entrar"
+        }
+      ]
+    },
+    {
+      "id": "02-inicio",
+      "titulo": "A tela inicial",
+      "pontos": [],
+      "fala": "A tela inicial mostra, em uma frase, se está tudo certo. Embaixo ficam os botões do que você faz: lançar uma nota e ver as cargas.",
+      "pre": {
+        "perfil": "adminvendas",
+        "rota": "inicio"
+      },
+      "acoes": [
+        {
+          "at": 0.25,
+          "destacar": ".status-simples"
+        },
+        {
+          "at": 0.65,
+          "destacar": ".tiles"
+        }
+      ]
+    },
+    {
+      "id": "03-nota",
+      "titulo": "Lançar uma nota",
+      "pontos": [],
+      "fala": "Para lançar uma nota: escolha como ela chegou, digite o número e o cliente, escolha os produtos, e confirme. Ela entra na fila e os conferentes são avisados.",
+      "pre": {
+        "perfil": "adminvendas",
+        "rota": "inicio"
+      },
+      "acoes": [
+        {
+          "at": 0.08,
+          "clicar": "#tile-nota"
+        },
+        {
+          "at": 0.22,
+          "clicarTexto": [
+            ".escolha",
+            "Vou digitar"
+          ]
+        },
+        {
+          "at": 0.3,
+          "clicar": "#btn-seguir"
+        },
+        {
+          "at": 0.4,
+          "digitar": [
+            "#nn-numero",
+            "48600"
+          ]
+        },
+        {
+          "at": 0.5,
+          "digitar": [
+            "#nn-cliente",
+            "Prefeitura de Tatuí"
+          ]
+        },
+        {
+          "at": 0.58,
+          "clicar": "#btn-seguir"
+        },
+        {
+          "at": 0.68,
+          "clicar": ".grade-escolha .escolha"
+        },
+        {
+          "at": 0.76,
+          "clicar": "#btn-seguir"
+        },
+        {
+          "at": 0.9,
+          "clicar": "#btn-seguir"
+        }
+      ]
+    },
+    {
+      "id": "04-cargas",
+      "titulo": "Ver as cargas",
+      "pontos": [],
+      "fala": "Na aba cargas você vê tudo que já saiu. Toque numa carga para ver os itens, as fotos e se teve diferença.",
+      "pre": {
+        "perfil": "adminvendas",
+        "rota": "cargas"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "destacar": ".conf"
+        },
+        {
+          "at": 0.5,
+          "clicar": ".conf"
+        }
+      ]
+    },
+    {
+      "id": "05-rastreio",
+      "titulo": "Mandar o rastreio ao cliente",
+      "pontos": [],
+      "fala": "Dentro da carga, toque em enviar ao cliente. Escolha o WhatsApp dele. O cliente recebe um link com o horário de saída, o que foi carregado e a foto da carga. Menos ligação, mais confiança.",
+      "pre": {
+        "perfil": "adminvendas",
+        "rota": "cargas"
+      },
+      "acoes": [
+        {
+          "at": 0.1,
+          "clicar": ".conf"
+        },
+        {
+          "at": 0.3,
+          "clicarTexto": [
+            ".janela-rodape .btn",
+            "Enviar ao cliente"
+          ]
+        },
+        {
+          "at": 0.65,
+          "destacar": ".previa-mensagem"
+        }
+      ]
+    },
+    {
+      "id": "06-avisos",
+      "titulo": "Os avisos",
+      "pontos": [],
+      "fala": "Os avisos chegam no sino e no celular: nota conferida, diferença na carga e outros recados da operação.",
+      "pre": {
+        "perfil": "adminvendas",
+        "rota": "alertas"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "destacar": ".alerta-item"
+        },
+        {
+          "at": 0.55,
+          "destacar": "#btn-sino"
+        }
+      ]
+    }
+  ]
+}

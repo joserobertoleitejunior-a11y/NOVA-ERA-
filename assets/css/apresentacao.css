@@ -64,3 +64,23 @@ h1 { margin: 0; font-size: 58px; line-height: .98; text-transform: uppercase; fo
 .inicio p { margin: 0; font-size: 28px; color: rgba(255, 255, 255, .85); }
 .inicio button { margin-top: 18px; min-height: 64px; padding: 0 38px; border-radius: 18px; border: 0; font-size: 24px; font-weight: 800; color: #fff; background: linear-gradient(135deg, var(--vermelho), #ff4b55); box-shadow: 0 16px 40px rgba(217, 20, 30, .5); }
 .inicio small { font-size: 16px; color: rgba(255, 255, 255, .7); max-width: 520px; }
+
+
+/* ── Modo vertical (celular em pé): palco 720×1280 — o app grande no meio, texto e legenda embaixo ── */
+#palco[data-modo="vertical"] { width: 720px; height: 1280px; }
+#palco[data-modo="vertical"] .moldura { grid-template-columns: 1fr; grid-template-rows: auto 1fr; padding: 24px 26px 22px; gap: 0; }
+#palco[data-modo="vertical"] .coluna-texto { display: contents; }
+#palco[data-modo="vertical"] .marca { grid-row: 1; margin-bottom: 8px; }
+#palco[data-modo="vertical"] .coluna-celular { grid-row: 2; align-self: start; height: 760px; overflow: visible; }
+#palco[data-modo="vertical"] .aparelho { transform: scale(1.12); transform-origin: top center; margin-top: 18px; }
+#palco[data-modo="vertical"] .cena-texto { position: absolute; left: 34px; right: 34px; top: 840px; padding: 0; }
+#palco[data-modo="vertical"] h1 { font-size: 42px; } #palco[data-modo="vertical"] .etapa { font-size: 14px; margin-bottom: 6px; }
+#palco[data-modo="vertical"] .pontos, #palco[data-modo="vertical"] .subtitulo { display: none; }
+#palco[data-modo="vertical"] .legenda { position: absolute; left: 34px; right: 34px; top: 980px; margin: 0; min-height: 130px; font-size: 27px; }
+#palco[data-modo="vertical"] .controles { position: absolute; left: 34px; right: 34px; bottom: 34px; }
+#palco[data-modo="vertical"] .controles button { width: 48px; height: 48px; font-size: 20px; } #palco[data-modo="vertical"] .controles button.principal { width: 56px; height: 56px; }
+#palco[data-modo="vertical"] .inicio h2 { font-size: 64px; } #palco[data-modo="vertical"] .inicio p { font-size: 26px; padding: 0 30px; }
+#palco[data-modo="vertical"] .aparelho { transform: scale(1.03); margin-top: 8px; }
+#palco[data-modo="vertical"] .cena-texto { top: 858px; } #palco[data-modo="vertical"] h1 { font-size: 40px; }
+#palco[data-modo="vertical"] .legenda { top: 990px; }
+#palco[data-modo="vertical"] .inicio h2 { font-size: 52px; padding: 0 24px; }

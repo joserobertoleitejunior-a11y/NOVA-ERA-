@@ -1,0 +1,208 @@
+{
+  "titulo": "Tutorial · Expedição",
+  "audio": "assets/tutoriais/audio/expedicao",
+  "voz": {
+    "modelo": "eleven_multilingual_v2",
+    "estabilidade": 0.55,
+    "similaridade": 0.8,
+    "estilo": 0.25
+  },
+  "inicio": {
+    "titulo": "Tutorial · Expedição",
+    "sub": "Notas, cargas, estoque e equipe",
+    "botao": "Assistir ao tutorial"
+  },
+  "fim": {
+    "titulo": "Pronto!",
+    "sub": "A expedição no controle. Dúvida? Toque em Ajuda."
+  },
+  "cenas": [
+    {
+      "id": "01-entrar",
+      "titulo": "Como entrar",
+      "pontos": [],
+      "fala": "Para entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você comanda a operação: notas, cargas, estoque e equipe.",
+      "pre": {
+        "perfil": null,
+        "reiniciar": true
+      },
+      "acoes": [
+        {
+          "at": 0.35,
+          "digitar": [
+            "#login-usuario",
+            "adminexpedicao"
+          ]
+        },
+        {
+          "at": 0.55,
+          "digitar": [
+            "#login-senha",
+            "admin"
+          ]
+        },
+        {
+          "at": 0.75,
+          "clicar": "#btn-entrar"
+        }
+      ]
+    },
+    {
+      "id": "02-inicio",
+      "titulo": "A tela inicial",
+      "pontos": [],
+      "fala": "A tela inicial diz, em uma frase, se está tudo certo. Se tiver problema, toque em resolver agora. Embaixo, os botões do que você quer fazer.",
+      "pre": {
+        "perfil": "adminexpedicao",
+        "rota": "inicio"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "destacar": ".status-simples"
+        },
+        {
+          "at": 0.45,
+          "destacar": ".numeros-simples"
+        },
+        {
+          "at": 0.7,
+          "destacar": ".tiles"
+        }
+      ]
+    },
+    {
+      "id": "03-nota",
+      "titulo": "Lançar notas",
+      "pontos": [],
+      "fala": "Para lançar uma nota, escolha como ela chegou: arquivo XML, foto ou digitando. Número, cliente, itens e confirmar. Se tiver o XML, o aplicativo lê tudo sozinho.",
+      "pre": {
+        "perfil": "adminexpedicao",
+        "rota": "inicio"
+      },
+      "acoes": [
+        {
+          "at": 0.08,
+          "clicar": "#tile-nota"
+        },
+        {
+          "at": 0.3,
+          "destacar": ".grade-escolha"
+        },
+        {
+          "at": 0.6,
+          "clicarTexto": [
+            ".escolha",
+            "arquivo XML"
+          ]
+        },
+        {
+          "at": 0.85,
+          "destacar": "#btn-escolher-xml"
+        }
+      ]
+    },
+    {
+      "id": "04-cargas",
+      "titulo": "Cargas e diferenças",
+      "pontos": [],
+      "fala": "Na aba cargas, veja tudo que saiu. Filtre só as que tiveram diferença. Toque numa carga para ver fotos, itens, e imprimir as etiquetas.",
+      "pre": {
+        "perfil": "adminexpedicao",
+        "rota": "cargas"
+      },
+      "acoes": [
+        {
+          "at": 0.15,
+          "destacar": ".numeros"
+        },
+        {
+          "at": 0.4,
+          "clicarTexto": [
+            ".chip",
+            "Com diferença"
+          ]
+        },
+        {
+          "at": 0.7,
+          "destacar": ".conf"
+        }
+      ]
+    },
+    {
+      "id": "05-estoque",
+      "titulo": "Estoque e contagem",
+      "pontos": [],
+      "fala": "O estoque se atualiza sozinho a cada carga conferida. Para corrigir, a equipe faz a contagem do dia, e você decide: corrigir o estoque ou contar de novo.",
+      "pre": {
+        "perfil": "adminexpedicao",
+        "rota": "estoque"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "destacar": ".linha-cartao"
+        },
+        {
+          "at": 0.5,
+          "destacar": "#btn-contagem"
+        },
+        {
+          "at": 0.75,
+          "destacar": "#btn-lancar"
+        }
+      ]
+    },
+    {
+      "id": "06-equipe",
+      "titulo": "Cadastrar a equipe",
+      "pontos": [],
+      "fala": "Para cadastrar uma pessoa: nome, função, WhatsApp e foto, um passo de cada vez. O aplicativo cria o usuário e a senha, e manda no WhatsApp dela um link com o acesso e o vídeo tutorial da função.",
+      "pre": {
+        "perfil": "adminexpedicao",
+        "rota": "equipe"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "clicar": "#btn-cadastrar"
+        },
+        {
+          "at": 0.45,
+          "digitar": [
+            "#cad-nome",
+            "Marcos Lima"
+          ]
+        },
+        {
+          "at": 0.6,
+          "clicar": "#btn-seguir"
+        },
+        {
+          "at": 0.75,
+          "destacar": ".grade-escolha"
+        }
+      ]
+    },
+    {
+      "id": "07-avisos",
+      "titulo": "Os avisos",
+      "pontos": [],
+      "fala": "O aplicativo avisa você na hora: peça a mais na carga, estoque baixo, nota parada na fila, conferência fora do horário, e pedido de ajuda de senha. Tudo no sino e no celular.",
+      "pre": {
+        "perfil": "adminexpedicao",
+        "rota": "alertas"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "destacar": ".alerta-item"
+        },
+        {
+          "at": 0.55,
+          "destacar": "#btn-sino"
+        }
+      ]
+    }
+  ]
+}

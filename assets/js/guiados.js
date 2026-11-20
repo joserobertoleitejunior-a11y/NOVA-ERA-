@@ -161,8 +161,8 @@
         const foto = d.fotos[0] ? await NE.dados.enviarFoto(d.fotos[0].blob, app.perfil.id) : null; const u = usuario();
         await NE.dados.criarFuncionario({ nome: d.nome.trim(), usuario: u, senha: d.senha, funcao: d.funcao, papel: U.papelDe(d.funcao), telefone: NE.soDigitos(d.telefone) || null, foto });
         const cartao = { nome: d.nome.trim(), usuario: u, senha: d.senha, funcao: d.funcao, telefone: NE.soDigitos(d.telefone) };
-        NE.telaFim(raiz, { titulo: "Pessoa cadastrada", texto: `${d.nome.trim().split(" ")[0]} já pode entrar no app. O cadastro ficou registrado em nome de ${app.perfil.nome}. Entregue o cartão de acesso agora: a senha não aparece de novo.`,
-          botoes: [{ rotulo: "Mostrar o cartão de acesso", icone: "qr", acao: () => U.cartoes([cartao], "Cartão de acesso") }, { rotulo: "Cadastrar outra pessoa", icone: "mais", acao: () => G.novaPessoa(raiz, app, { funcao: d.funcao }) }, { rotulo: "Voltar à equipe", acao: () => app.ir("equipe", {}, { substituir: true }) }] });
+        NE.telaFim(raiz, { titulo: "Pessoa cadastrada", texto: `${d.nome.trim().split(" ")[0]} já pode entrar no app. O cadastro ficou registrado em nome de ${app.perfil.nome}. Mande o acesso e o vídeo tutorial da função pelo WhatsApp agora: a senha não aparece de novo.`,
+          botoes: [{ rotulo: "Mandar acesso e vídeo no WhatsApp", icone: "whatsapp", acao: () => window.open(U.zapBV(cartao), "_blank", "noopener") }, { rotulo: "Mostrar o cartão de acesso", icone: "qr", acao: () => U.cartoes([cartao], "Cartão de acesso") }, { rotulo: "Cadastrar outra pessoa", icone: "mais", acao: () => G.novaPessoa(raiz, app, { funcao: d.funcao }) }, { rotulo: "Voltar à equipe", acao: () => app.ir("equipe", {}, { substituir: true }) }] });
       },
     });
   };

@@ -6,16 +6,20 @@
   const NE = window.NE;
   ["#logo", "#logo2", "#logo3"].forEach((s) => { $(s).innerHTML = NE.logo; });
   const palco = $("#palco"), F = $("#app"), cursor = $("#cursor"), destaque = $("#destaque");
-  const ajustar = () => palco.style.setProperty("--escala", Math.min(innerWidth / 1280, innerHeight / 720)); ajustar(); addEventListener("resize", ajustar);
-  const R = await (await fetch("assets/apresentacao/roteiro.json")).json(); const C = R.cenas;
+  const PARAMS = new URLSearchParams(location.search); const FUNCAO = (PARAMS.get("f") || "").replace(/[^a-z]/g, ""); // ?f=conferente → tutorial dessa função
+  // Tela em pé (celular) usa palco vertical 720×1280; tela deitada usa 1280×720
+  const ajustar = () => { const vertical = PARAMS.has("vertical") || innerHeight > innerWidth * 1.1; palco.dataset.modo = vertical ? "vertical" : "horizontal"; const L = vertical ? 720 : 1280, A = vertical ? 1280 : 720; palco.style.setProperty("--escala", Math.min(innerWidth / L, innerHeight / A)); };
+  ajustar(); addEventListener("resize", ajustar);
+  const R = await (await fetch(FUNCAO ? `assets/tutoriais/${FUNCAO === "ajudante" ? "conferente" : FUNCAO}.json` : "assets/apresentacao/roteiro.json")).json(); const C = R.cenas; const PASTA_AUDIO = R.audio || "assets/apresentacao/audio";
+  document.title = R.titulo || document.title; if (R.inicio) { $("#inicio h2").textContent = R.inicio.titulo; $("#inicio p").textContent = R.inicio.sub; $("#b-comecar").textContent = R.inicio.botao || "Começar"; } if (R.fim) { $("#fim h2").textContent = R.fim.titulo; $("#fim p").textContent = R.fim.sub; }
   const RAPIDO = new URLSearchParams(location.search).has("rapido"); // ?rapido=1 para conferir o roteiro em velocidade 4x
   const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const norm = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 
   // quais cenas têm voz do ElevenLabs (mp3) e quais usam a voz do navegador
-  const temMp3 = {}; let lista = []; try { const r = await fetch("assets/apresentacao/audio/lista.json"); if (r.ok) lista = await r.json(); } catch { /* sem áudios ainda */ } C.forEach((c) => { temMp3[c.id] = lista.includes(c.id); });
+  const temMp3 = {}; let lista = []; try { const r = await fetch(`${PASTA_AUDIO}/lista.json`); if (r.ok) lista = await r.json(); } catch { /* sem áudios ainda */ } C.forEach((c) => { temMp3[c.id] = lista.includes(c.id); });
   const nMp3 = Object.values(temMp3).filter(Boolean).length;
-  $("#aviso-voz").textContent = nMp3 === C.length ? "Voz: ElevenLabs. Ative o som do aparelho." : nMp3 ? `Voz: ElevenLabs em ${nMp3} de ${C.length} cenas; nas outras, voz do navegador.` : "Voz do navegador (provisória). Para a voz do ElevenLabs, gere os áudios (veja LEIA-ME da apresentação). Ative o som do aparelho.";
+  if (FUNCAO) $("#aviso-voz").textContent = "Ative o som do aparelho para ouvir."; else $("#aviso-voz").textContent = nMp3 === C.length ? "Voz: ElevenLabs. Ative o som do aparelho." : nMp3 ? `Voz: ElevenLabs em ${nMp3} de ${C.length} cenas; nas outras, voz do navegador.` : "Voz do navegador (provisória). Para a voz do ElevenLabs, gere os áudios (veja LEIA-ME da apresentação). Ative o som do aparelho.";
 
   // barra de progresso por cena
   const prog = $("#progresso"); const segs = C.map((c, k) => { const b = document.createElement("button"); b.type = "button"; b.title = c.titulo; b.setAttribute("aria-label", `Cena ${k + 1}: ${c.titulo}`); b.append(document.createElement("i")); b.addEventListener("click", () => ir(k)); prog.append(b); return b; });
@@ -52,7 +56,7 @@
   const CANCELADO = Symbol("cancelado");
   const esp = async (ms) => { const t0 = rodada; await sleep(RAPIDO ? ms / 3 : ms); if (t0 !== rodada) throw CANCELADO; };
   function ponto(el) {
-    el.scrollIntoView?.({ block: "center" }); const r = el.getBoundingClientRect(), fr = F.getBoundingClientRect(), pr = palco.getBoundingClientRect(), esc = pr.width / 1280, k = fr.width / F.offsetWidth;
+    el.scrollIntoView?.({ block: "center" }); const r = el.getBoundingClientRect(), fr = F.getBoundingClientRect(), pr = palco.getBoundingClientRect(), esc = pr.width / palco.offsetWidth, k = fr.width / F.offsetWidth;
     return { x: (fr.left + (r.left + r.width / 2) * k - pr.left) / esc, y: (fr.top + (r.top + r.height / 2) * k - pr.top) / esc, x0: (fr.left + r.left * k - pr.left) / esc, y0: (fr.top + r.top * k - pr.top) / esc, w: (r.width * k) / esc, h: (r.height * k) / esc };
   }
   async function mover(el) { await esp(120); const p = ponto(el); cursor.style.opacity = "1"; cursor.style.transform = `translate(${p.x - 6}px, ${p.y - 4}px)`; await esp(820); return p; }
@@ -94,7 +98,7 @@
     audio.pause(); speechSynthesis.cancel(); $("#fim").hidden = true; render(c, k); $("#legenda").textContent = "";
     await preparar(c); if (token !== rodada) return;
     trechos = c.fala.match(/[^.!?]+[.!?]*/g).map((x) => x.trim()).filter(Boolean); t = 0; usaMp3 = !!temMp3[c.id]; dur = Math.max(6, c.fala.length / 14.5) / (RAPIDO ? 4 : 1);
-    if (usaMp3) { audio.src = `assets/apresentacao/audio/${c.id}.mp3`; audio.muted = mudo; await new Promise((ok) => { audio.onloadedmetadata = ok; audio.onerror = ok; setTimeout(ok, 2500); }); if (audio.duration && isFinite(audio.duration)) dur = (audio.duration + 0.4) / (RAPIDO ? 4 : 1); try { await audio.play(); } catch { usaMp3 = false; } }
+    if (usaMp3) { audio.src = `${PASTA_AUDIO}/${c.id}.mp3`; audio.muted = mudo; await new Promise((ok) => { audio.onloadedmetadata = ok; audio.onerror = ok; setTimeout(ok, 2500); }); if (audio.duration && isFinite(audio.duration)) dur = (audio.duration + 0.4) / (RAPIDO ? 4 : 1); try { await audio.play(); } catch { usaMp3 = false; } }
     if (!usaMp3 && !mudo && !RAPIDO && "speechSynthesis" in window && vozes().length) { const u = new SpeechSynthesisUtterance(c.fala); u.lang = "pt-BR"; u.rate = 1.0; const v = melhorVoz(); if (v) u.voice = v; ttsFim = false; u.onend = u.onerror = () => { ttsFim = true; }; speechSynthesis.speak(u); } else ttsFim = true;
     if (token !== rodada) return; pronto = true; tocando = true; $("#b-play").textContent = "⏸"; $("#b-play").setAttribute("aria-label", "Pausar");
   }

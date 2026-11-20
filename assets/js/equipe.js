@@ -11,6 +11,13 @@
   const papelDe = (f) => (["expedicao", "diretoria", "vendedor"].includes(f) ? "admin" : "funcionario");
   const urlApp = () => { const b = (window.NOVA_ERA || {}).urlPublica || location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, ""); return `${b.replace(/\/?$/, "/")}app.html`; };
 
+  // Link que vai no WhatsApp: abre a tela de boas-vindas com o acesso (usuário e senha) e o vídeo tutorial da função.
+  // Os dados vão depois do "#" (o servidor nunca recebe essa parte do endereço).
+  const b64 = (o) => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const linkBoasVindas = (p) => `${urlApp().replace(/app\.html$/, "")}boas-vindas.html#${b64({ n: p.nome, u: p.usuario, s: p.senha, f: p.funcao })}`;
+  const mensagemBV = (p) => `Olá, ${p.nome.split(" ")[0]}! Bem-vindo à Nova Era. Abra este link: nele estão o seu acesso ao Confere Carga (usuário e senha) e o vídeo que mostra como usar o aplicativo na sua função.\n${linkBoasVindas(p)}`;
+  const zapBV = (p) => NE.linkWhatsApp(p.telefone, mensagemBV(p)) || `https://wa.me/?text=${encodeURIComponent(mensagemBV(p))}`;
+
   NE.rotas.equipe = async (raiz, params, app) => {
     const lista = el("div", { class: "lista-simples" }, el("div", { class: "esqueleto" }));
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Equipe"), el("p", {}, "Toque numa pessoa para mudar algo."))),
@@ -28,9 +35,9 @@
 
   // Cartão de acesso: nome, usuário, senha e QR que abre o app já com o usuário preenchido
   async function cartoes(lista, titulo, aoFechar) {
-    let svgs = []; try { await NE.carregarScript("assets/vendor/qrcode.js"); svgs = lista.map((p) => { const q = window.qrcode(0, "M"); q.addData(`${urlApp()}#u=${encodeURIComponent(p.usuario)}`); q.make(); return q.createSvgTag({ cellSize: 3, margin: 0, scalable: true }); }); } catch { /* sem QR */ }
+    let svgs = []; try { await NE.carregarScript("assets/vendor/qrcode.js"); svgs = lista.map((p) => { const q = window.qrcode(0, "M"); q.addData(linkBoasVindas(p)); q.make(); return q.createSvgTag({ cellSize: 3, margin: 0, scalable: true }); }); } catch { /* sem QR */ }
     const card = (p, i) => el("div", { class: "cartao-acesso" }, el("div", {}, el("h3", {}, p.nome), el("div", { class: "cred" }, `Usuário: ${p.usuario}`), el("div", { class: "cred" }, `Senha: ${p.senha}`), el("small", {}, `${NE.funcoes[p.funcao] || ""} · Nova Era · Confere Carga`), el("small", {}, urlApp().replace(/^https?:\/\//, ""))), svgs[i] && el("div", { class: "qr", html: svgs[i] }));
-    const zap = (p) => NE.linkWhatsApp(p.telefone, `Olá, ${p.nome.split(" ")[0]}! Seu acesso ao Confere Carga da Nova Era:\nEndereço: ${urlApp()}\nUsuário: ${p.usuario}\nSenha: ${p.senha}`) || `https://wa.me/?text=${encodeURIComponent(`Olá, ${p.nome.split(" ")[0]}! Seu acesso ao Confere Carga da Nova Era:\nEndereço: ${urlApp()}\nUsuário: ${p.usuario}\nSenha: ${p.senha}`)}`;
+    const zap = zapBV;
     const grade = el("div", { class: "grade-cartoes" }, lista.map(card));
     const envios = el("div", { style: "display:grid;gap:8px;margin-top:12px" }, lista.map((p) => el("a", { class: "link-acao verde", target: "_blank", rel: "noopener", href: zap(p) }, ic("whatsapp"), `Mandar para ${p.nome.split(" ")[0]} no WhatsApp`)));
     const imprimir = el("button", { type: "button", class: "btn btn-azul", onclick: () => { const area = el("div", { id: "area-cartoes" }, lista.map(card)); document.body.append(area); document.body.classList.add("imprimindo-cartoes"); window.print(); setTimeout(() => { document.body.classList.remove("imprimindo-cartoes"); area.remove(); }, 500); } }, ic("etiqueta"), "Imprimir cartões");
@@ -39,5 +46,5 @@
     j.fundo.querySelector(".janela-fechar").addEventListener("click", () => aoFechar?.());
   }
 
-  NE.equipeUtil = { cartoes, usuarioDe, senhaNova, papelDe, FUNCOES };
+  NE.equipeUtil = { linkBoasVindas, zapBV, cartoes, usuarioDe, senhaNova, papelDe, FUNCOES };
 })();

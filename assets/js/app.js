@@ -158,6 +158,7 @@
     const btn = el("button", { class: "btn btn-principal btn-bloco", type: "submit", id: "btn-entrar" }, "Entrar");
     const avisoBox = el("div", {});
     const adm = window.NE_ENTRADA === "admin";
+    const pre = /(?:^|[#&])u=([^&]+)/.exec(location.hash); if (pre) { try { usuario.value = decodeURIComponent(pre[1]); } catch { /* ignora */ } } // vindo da tela de boas-vindas: usuário já preenchido
     const teste = null; // sem dica de login na tela: o acesso de teste é só de quem conhece
     const form = el("form", { class: "cartao" },
       el("h1", {}, adm ? "Administração" : "Confere Carga"), el("p", {}, adm ? "Área da expedição e da diretoria. Entre com seu usuário e senha." : "Entre com o usuário e a senha que a expedição te passou."), avisoBox,

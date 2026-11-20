@@ -1,0 +1,168 @@
+{
+  "titulo": "Tutorial · Administrativo",
+  "audio": "assets/tutoriais/audio/administrativo",
+  "voz": {
+    "modelo": "eleven_multilingual_v2",
+    "estabilidade": 0.55,
+    "similaridade": 0.8,
+    "estilo": 0.25
+  },
+  "inicio": {
+    "titulo": "Tutorial · Administrativo",
+    "sub": "Cadastros: notas, equipe, frota e produtos",
+    "botao": "Assistir ao tutorial"
+  },
+  "fim": {
+    "titulo": "Pronto!",
+    "sub": "Cadastros em dia, operação sem erro."
+  },
+  "cenas": [
+    {
+      "id": "01-entrar",
+      "titulo": "Como entrar",
+      "pontos": [],
+      "fala": "Para entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você cuida dos cadastros: notas, equipe, frota e produtos.",
+      "pre": {
+        "perfil": null,
+        "reiniciar": true
+      },
+      "acoes": [
+        {
+          "at": 0.35,
+          "digitar": [
+            "#login-usuario",
+            "adminadministrativo"
+          ]
+        },
+        {
+          "at": 0.55,
+          "digitar": [
+            "#login-senha",
+            "admin"
+          ]
+        },
+        {
+          "at": 0.75,
+          "clicar": "#btn-entrar"
+        }
+      ]
+    },
+    {
+      "id": "02-inicio",
+      "titulo": "A tela inicial",
+      "pontos": [],
+      "fala": "Na tela inicial, uma frase mostra se está tudo certo, e botões simples levam a cada tarefa. Tem também o botão para ver o resumo completo.",
+      "pre": {
+        "perfil": "adminadministrativo",
+        "rota": "inicio"
+      },
+      "acoes": [
+        {
+          "at": 0.25,
+          "destacar": ".status-simples"
+        },
+        {
+          "at": 0.6,
+          "destacar": ".tiles"
+        },
+        {
+          "at": 0.85,
+          "destacar": "#btn-resumo"
+        }
+      ]
+    },
+    {
+      "id": "03-xml",
+      "titulo": "Notas por XML",
+      "pontos": [],
+      "fala": "Para lançar várias notas de uma vez, use o arquivo XML. Escolha os arquivos, confira o que foi lido, e envie. Os produtos que não existem ainda são cadastrados sozinhos.",
+      "pre": {
+        "perfil": "adminadministrativo",
+        "rota": "guia",
+        "params": {
+          "fluxo": "xml"
+        }
+      },
+      "acoes": [
+        {
+          "at": 0.3,
+          "destacar": "#btn-escolher-xml"
+        }
+      ]
+    },
+    {
+      "id": "04-equipe",
+      "titulo": "Equipe",
+      "pontos": [],
+      "fala": "Na aba mais, equipe: cadastre pessoas, mude o WhatsApp, a foto ou a função, e gere uma senha nova para quem esqueceu.",
+      "pre": {
+        "perfil": "adminadministrativo",
+        "rota": "equipe"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "destacar": ".pessoa-linha"
+        },
+        {
+          "at": 0.5,
+          "clicar": ".pessoa-linha"
+        },
+        {
+          "at": 0.75,
+          "destacar": ".grade-escolha"
+        }
+      ]
+    },
+    {
+      "id": "05-frota",
+      "titulo": "Frota e produtos",
+      "pontos": [],
+      "fala": "Cadastre os caminhões com placa, dados e fotos, e os produtos com estoque mínimo e peças por pilha. Isso deixa o aplicativo mais esperto.",
+      "pre": {
+        "perfil": "adminadministrativo",
+        "rota": "cadastros",
+        "params": {
+          "aba": "caminhoes"
+        }
+      },
+      "acoes": [
+        {
+          "at": 0.25,
+          "destacar": ".veiculo-miniatura"
+        },
+        {
+          "at": 0.55,
+          "clicarTexto": [
+            ".aba",
+            "Produtos"
+          ]
+        },
+        {
+          "at": 0.85,
+          "destacar": ".lista-simples"
+        }
+      ]
+    },
+    {
+      "id": "06-avisos",
+      "titulo": "Os avisos",
+      "pontos": [],
+      "fala": "Os avisos mostram o que precisa de atenção. Quem esquece a senha manda um pedido, que aparece aqui para você.",
+      "pre": {
+        "perfil": "adminadministrativo",
+        "rota": "alertas"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "destacar": ".alerta-item"
+        },
+        {
+          "at": 0.55,
+          "destacar": "#btn-sino"
+        }
+      ]
+    }
+  ]
+}

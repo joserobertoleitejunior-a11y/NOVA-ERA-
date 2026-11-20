@@ -1,0 +1,110 @@
+{
+  "titulo": "Tutorial · Motorista",
+  "audio": "assets/tutoriais/audio/motorista",
+  "voz": {
+    "modelo": "eleven_multilingual_v2",
+    "estabilidade": 0.55,
+    "similaridade": 0.8,
+    "estilo": 0.25
+  },
+  "inicio": {
+    "titulo": "Tutorial · Motorista",
+    "sub": "O que você precisa saber",
+    "botao": "Assistir ao tutorial"
+  },
+  "fim": {
+    "titulo": "Pronto!",
+    "sub": "Sempre saia só depois da carga conferida."
+  },
+  "cenas": [
+    {
+      "id": "01-entrar",
+      "titulo": "Como entrar",
+      "pontos": [],
+      "fala": "Para entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você vai acompanhar a fila e os avisos.",
+      "pre": {
+        "perfil": null,
+        "reiniciar": true
+      },
+      "acoes": [
+        {
+          "at": 0.35,
+          "digitar": [
+            "#login-usuario",
+            "motorista"
+          ]
+        },
+        {
+          "at": 0.55,
+          "digitar": [
+            "#login-senha",
+            "admin"
+          ]
+        },
+        {
+          "at": 0.75,
+          "clicar": "#btn-entrar"
+        }
+      ]
+    },
+    {
+      "id": "02-fila",
+      "titulo": "A fila de cargas",
+      "pontos": [
+        "Veja se a sua carga já está na fila",
+        "Quem confere é o conferente"
+      ],
+      "fala": "A sua tela mostra as notas que estão esperando conferência. Você não precisa conferir nada: quem confere a carga é o conferente. Quando a conferência termina, o caminhão está liberado para sair.",
+      "pre": {
+        "perfil": "motorista",
+        "rota": "notas"
+      },
+      "acoes": [
+        {
+          "at": 0.3,
+          "destacar": "#lista-minhas"
+        }
+      ]
+    },
+    {
+      "id": "03-avisos",
+      "titulo": "Os avisos",
+      "pontos": [],
+      "fala": "Fique de olho no sino. Quando houver algum aviso para você, ele aparece aqui, e também no celular se você ligar os avisos.",
+      "pre": {
+        "perfil": "motorista",
+        "rota": "alertas"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "destacar": ".alerta-item"
+        },
+        {
+          "at": 0.55,
+          "destacar": "#btn-sino"
+        }
+      ]
+    },
+    {
+      "id": "04-cliente",
+      "titulo": "O cliente acompanha a entrega",
+      "pontos": [],
+      "fala": "Depois da conferência, o vendedor manda um link para o cliente. Ele vê a hora em que você saiu, o que foi carregado e a foto da carga. Por isso, saia do pátio só depois de a carga ser conferida.",
+      "pre": {
+        "perfil": "motorista",
+        "rota": "notas"
+      },
+      "acoes": [
+        {
+          "at": 0.15,
+          "rastreio": true
+        },
+        {
+          "at": 0.6,
+          "rolar": ".resumo"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "titulo": "Tutorial · Diretoria",
+  "audio": "assets/tutoriais/audio/diretoria",
+  "voz": {
+    "modelo": "eleven_multilingual_v2",
+    "estabilidade": 0.55,
+    "similaridade": 0.8,
+    "estilo": 0.25
+  },
+  "inicio": {
+    "titulo": "Tutorial · Diretoria",
+    "sub": "A empresa inteira em uma tela",
+    "botao": "Assistir ao tutorial"
+  },
+  "fim": {
+    "titulo": "Pronto!",
+    "sub": "Decisão com informação, sem abrir planilha."
+  },
+  "cenas": [
+    {
+      "id": "01-entrar",
+      "titulo": "Como entrar",
+      "pontos": [],
+      "fala": "Para entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você vê a empresa inteira em uma tela.",
+      "pre": {
+        "perfil": null,
+        "reiniciar": true
+      },
+      "acoes": [
+        {
+          "at": 0.35,
+          "digitar": [
+            "#login-usuario",
+            "admindiretoria"
+          ]
+        },
+        {
+          "at": 0.55,
+          "digitar": [
+            "#login-senha",
+            "admin"
+          ]
+        },
+        {
+          "at": 0.75,
+          "clicar": "#btn-entrar"
+        }
+      ]
+    },
+    {
+      "id": "02-inicio",
+      "titulo": "Como está a empresa",
+      "pontos": [],
+      "fala": "A tela inicial mostra, em uma frase, como está a empresa agora. Verde, tudo certo. Amarelo ou vermelho, toque em resolver agora.",
+      "pre": {
+        "perfil": "admindiretoria",
+        "rota": "inicio"
+      },
+      "acoes": [
+        {
+          "at": 0.25,
+          "destacar": ".status-simples"
+        },
+        {
+          "at": 0.6,
+          "destacar": ".numeros-simples"
+        }
+      ]
+    },
+    {
+      "id": "03-resumo",
+      "titulo": "O resumo completo",
+      "pontos": [],
+      "fala": "O resumo completo mostra os números do dia, da semana e do mês: quantas cargas, quantas com diferença, onde mais erra, e como está a equipe. Cada recado leva direto à tela para resolver.",
+      "pre": {
+        "perfil": "admindiretoria",
+        "rota": "resumo"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "destacar": ".kpis"
+        },
+        {
+          "at": 0.5,
+          "clicarTexto": [
+            ".chip",
+            "7 dias"
+          ]
+        },
+        {
+          "at": 0.75,
+          "destacar": ".barras"
+        }
+      ]
+    },
+    {
+      "id": "04-ia",
+      "titulo": "O assistente de inteligência artificial",
+      "pontos": [],
+      "fala": "Pergunte ao assistente: resumo do dia, o que saiu a mais, estoque baixo, notas paradas. Ele responde com os dados reais, explica o painel, e só fala da Nova Era.",
+      "pre": {
+        "perfil": "admindiretoria",
+        "rota": "inicio"
+      },
+      "acoes": [
+        {
+          "at": 0.15,
+          "clicar": "#fab-ia"
+        },
+        {
+          "at": 0.45,
+          "clicar": ".chat-sugestoes .chip"
+        },
+        {
+          "at": 0.8,
+          "destacar": ".chat"
+        }
+      ]
+    },
+    {
+      "id": "05-equipe",
+      "titulo": "Quem cadastrou quem",
+      "pontos": [],
+      "fala": "Na equipe, cada pessoa mostra qual administrador a cadastrou e quando. É o registro de quem deu acesso.",
+      "pre": {
+        "perfil": "admindiretoria",
+        "rota": "equipe"
+      },
+      "acoes": [
+        {
+          "at": 0.3,
+          "destacar": ".pessoa-linha"
+        }
+      ]
+    },
+    {
+      "id": "06-avisos",
+      "titulo": "Os avisos",
+      "pontos": [],
+      "fala": "Os avisos críticos chegam no sino e no seu celular, com botão para chamar no WhatsApp quem precisa resolver.",
+      "pre": {
+        "perfil": "admindiretoria",
+        "rota": "alertas"
+      },
+      "acoes": [
+        {
+          "at": 0.2,
+          "destacar": ".alerta-item"
+        },
+        {
+          "at": 0.55,
+          "destacar": "#btn-sino"
+        }
+      ]
+    }
+  ]
+}
