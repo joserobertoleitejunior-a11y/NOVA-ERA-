@@ -4,7 +4,7 @@
   const NE = window.NE;
   const D = window.NEDominio;
   const { el, ic } = NE;
-  const ROTA = { conferencia: ["cargas", { dif: "1" }], nota: ["notas", {}], produto: ["estoque", {}], contagem: ["estoque", { aba: "contagens" }], painel: ["inicio", {}] };
+  const ROTA = { conferencia: ["cargas", { dif: "1" }], nota: ["notas", {}], produto: ["estoque", {}], contagem: ["estoque", { aba: "contagens" }], painel: ["inicio", {}], equipe: ["equipe", {}] };
 
   NE.rotas.alertas = (raiz, params, app) => {
     const lista = el("div", { id: "lista-alertas" }, el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }));

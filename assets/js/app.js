@@ -65,7 +65,7 @@
     $("#logo").innerHTML = NE.logo;
     const area = $("#usuario"); area.replaceChildren();
     const faixa = $("#faixa-teste");
-    if (!perfil) { faixa.hidden = true; return; }
+    if (!perfil) { faixa.hidden = true; area.append(el("a", { class: "link-acao", href: "index.html", id: "link-voltar-site" }, ic("voltar"), "Voltar ao site")); return; }
     const sino = el("button", { class: "sino", type: "button", id: "btn-sino", "aria-label": "Avisos" }, ic("sino"), el("span", { class: "nav-n", id: "sino-n", hidden: true }, "0"));
     sino.addEventListener("click", () => ir("alertas"));
     const ajuda = el("button", { class: "btn-ajuda", type: "button", id: "btn-ajuda" }, ic("ajuda"), "Ajuda");
@@ -162,9 +162,37 @@
     const form = el("form", { class: "cartao" },
       el("h1", {}, adm ? "Administração" : "Confere Carga"), el("p", {}, adm ? "Área da expedição e da diretoria. Entre com seu usuário e senha." : "Entre com o usuário e a senha que a expedição te passou."), avisoBox,
       el("div", { class: "campo" }, el("label", { for: "login-usuario" }, "Usuário"), usuario),
-      el("div", { class: "campo" }, el("label", { for: "login-senha" }, "Senha"), senha), btn, teste);
+      el("div", { class: "campo" }, el("label", { for: "login-senha" }, "Senha"), senha), btn, teste,
+      el("div", { class: "login-links" }, el("button", { type: "button", class: "link-acao", id: "btn-esqueci", onclick: () => telaEsqueci(usuario.value) }, "Esqueci minha senha"),
+        el("a", { class: "link-acao", href: "index.html", id: "btn-voltar-site" }, ic("voltar"), "Voltar ao site")));
     if (msg) NE.aviso(msg, "erro", avisoBox);
     form.addEventListener("submit", (e) => { e.preventDefault(); NE.comCarregando(btn, async () => { await NE.dados.entrar(usuario.value, senha.value); await iniciar(); }); });
+    raiz().replaceChildren(el("div", { class: "entrar" }, form));
+  }
+
+  // "Esqueci minha senha": manda um aviso direto para os administradores (sino e celular deles)
+  function telaEsqueci(usuarioInicial = "") {
+    $("main").className = "";
+    const usuario = el("input", { class: "entrada", id: "esq-usuario", autocomplete: "username", autocapitalize: "none", value: usuarioInicial.trim(), required: true });
+    const nome = el("input", { class: "entrada", id: "esq-nome", autocomplete: "name", placeholder: "Como você é chamado (opcional)" });
+    const msg = el("textarea", { class: "entrada", id: "esq-msg", placeholder: "Quer deixar um recado? (opcional)", maxlength: "300" });
+    const btn = el("button", { class: "btn btn-principal btn-bloco", type: "submit", id: "btn-enviar-esqueci" }, ic("enviar"), "Avisar o administrador");
+    const avisoBox = el("div", {});
+    const form = el("form", { class: "cartao" }, el("h1", {}, "Esqueci a senha"), el("p", {}, "Mandamos um aviso direto para a administração. Alguém vai te passar uma senha nova."), avisoBox,
+      el("div", { class: "campo" }, el("label", { for: "esq-usuario" }, "Seu usuário"), usuario), el("div", { class: "campo" }, el("label", { for: "esq-nome" }, "Seu nome"), nome), el("div", { class: "campo" }, el("label", { for: "esq-msg" }, "Recado"), msg), btn,
+      el("div", { class: "login-links" }, el("button", { type: "button", class: "link-acao", id: "btn-voltar-login", onclick: () => telaEntrar() }, ic("voltar"), "Voltar ao login")));
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      NE.comCarregando(btn, async () => {
+        await NE.dados.pedirAjudaSenha({ usuario: usuario.value, nome: nome.value.trim(), mensagem: msg.value.trim() });
+        const texto = `Olá! Esqueci a senha do Confere Carga. Meu usuário é "${usuario.value.trim()}"${nome.value.trim() ? ` (${nome.value.trim()})` : ""}. Pode me passar uma senha nova?`;
+        const zap = C.whatsappAdmin || C.whatsapp ? `https://wa.me/${C.whatsappAdmin || C.whatsapp}?text=${encodeURIComponent(texto)}` : `https://wa.me/?text=${encodeURIComponent(texto)}`;
+        raiz().replaceChildren(el("div", { class: "entrar" }, el("section", { class: "cartao fim", id: "esqueci-enviado" }, el("div", { class: "selo ok", html: NE.icone.check }), el("h1", {}, "Aviso enviado"),
+          el("p", {}, "A administração recebeu o seu pedido. Se for urgente, chame no WhatsApp também."),
+          el("div", { style: "display:grid;gap:10px" }, el("a", { class: "btn btn-verde btn-bloco", href: zap, target: "_blank", rel: "noopener" }, ic("whatsapp"), "Chamar no WhatsApp"),
+            el("button", { type: "button", class: "btn btn-secundario btn-bloco", onclick: () => telaEntrar() }, "Voltar ao login")))));
+      });
+    });
     raiz().replaceChildren(el("div", { class: "entrar" }, form));
   }
 

@@ -267,6 +267,9 @@
     new IntersectionObserver(([e]) => document.body.classList.toggle("passou-hero", !e.isIntersecting), { threshold: 0.15 }).observe(hero);
   } else document.body.classList.add("passou-hero");
 
+  // Pontos de contato com o menu e o carrossel de atalhos (painel-site.js)
+  NE.site = { FOTOS, abrirFoto, abrirLista, quantidade: () => lista.length };
+
   // Efeitos de rolagem depois que o conteúdo dinâmico existe
   window.NEMotion?.iniciar();
 })();

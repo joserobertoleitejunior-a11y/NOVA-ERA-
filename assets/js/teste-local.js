@@ -276,6 +276,13 @@
       async resolverAlerta(id) { const a = e.alertas.find((x) => x.id === id); if (a) { a.resolvido_em = new Date().toISOString(); a.lido_em = a.lido_em || a.resolvido_em; salvar(); } },
       async preferencias() { const p = eu(); return (p.alertas || D.alertasPadrao(p.papel)).slice(); },
       async salvarPreferencias(lista) { eu().alertas = lista.slice(); salvar(); },
+      // "Esqueci minha senha": avisa os administradores (no app de verdade, o banco faz isso e ainda manda push)
+      async pedirAjudaSenha({ usuario, nome, mensagem }) {
+        const u = String(usuario || "").trim().toLowerCase(); if (!/^[a-z0-9._-]{3,30}$/.test(u)) throw new Error("Digite o seu usuário.");
+        const p = e.perfis.find((x) => x.usuario === u); const agora = Date.now(); const janela = Math.floor(agora / 600000);
+        emitir(e, { tipo: "senha_esquecida", severidade: "atencao", titulo: "Pedido de ajuda para entrar", texto: `${(p && p.nome) || nome || u} (usuário ${u})${p ? "" : " — usuário NÃO encontrado, confira o nome"} pediu ajuda com a senha.${mensagem ? ` Mensagem: ${String(mensagem).slice(0, 300)}` : ""}`, ref_tipo: "equipe", ref_id: null, chave_dedupe: `senha:${u}:${janela}` }, agora);
+        salvar();
+      },
       async config() { return copia(D.comPadrao(e.config)); },
       async salvarConfig(c) { e.config = D.comPadrao(c); salvar(); },
 

@@ -153,6 +153,9 @@
       async config() { const { data } = await sb.from("configuracoes").select("valor").eq("id", 1).maybeSingle(); return D.comPadrao(data?.valor); },
       salvarConfig: async (c) => ok(await sb.from("configuracoes").upsert({ id: 1, valor: c })),
 
+      // "Esqueci minha senha": o banco avisa os administradores (sino + push). Não revela se o usuário existe.
+      pedirAjudaSenha: async ({ usuario, nome, mensagem }) => ok(await sb.rpc("pedir_ajuda_senha", { p_usuario: usuario, p_nome: nome || null, p_mensagem: mensagem || null })),
+
       pushSuportado: () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window,
       async pushAssinar() {
         if (!api.pushSuportado()) throw new Error("Este aparelho não aceita avisos com o app fechado.");
@@ -195,6 +198,8 @@
     "notas", "criarNota", "importarNotas", "cancelarNota", "enviarFoto", "urlFoto", "fotoExemplo", "registrarConferencia", "sincronizar", "pendentes", "conferencias", "contexto",
     "saldos", "movimentos", "lancarMovimento", "contagens", "pedirContagem", "concluirContagem", "aplicarAjuste", "descartarContagem", "alertas", "marcarLidos", "resolverAlerta", "preferencias", "salvarPreferencias", "config", "salvarConfig",
     "pushSuportado", "pushAssinar", "pushRemover", "pushTestar", "iaDisponivel", "iaPerguntar", "iaLerNota", "trocarPerfil", "reiniciar"];
+  // Antes do login não há sessão: o pedido de senha dos usuários de teste vai para o ambiente de teste, os demais para o banco.
+  const pedirAjudaSenhaAntesLogin = (d) => (C.modoTeste && USUARIOS_TESTE.includes(String(d.usuario || "").trim().toLowerCase()) ? NE.criarTeste().pedirAjudaSenha(d) : (testeAtivo() ? NE.criarTeste().pedirAjudaSenha(d) : real_().pedirAjudaSenha(d)));
   const dados = {
     get modoTeste() { return !!ligar().modoTeste; },
     // login: admin/admin abre o ambiente de teste (se estiver ligado em config.js); qualquer outro usuário vai ao banco de verdade
@@ -204,6 +209,8 @@
     },
     async sair() { const a = ligar(); await a.sair(); if (a.modoTeste) trocarPara(false); },
   };
+  let realSolto = null; const real_ = () => (realSolto = realSolto || real());
+  dados.pedirAjudaSenha = (d) => pedirAjudaSenhaAntesLogin(d);
   for (const n of nomes) dados[n] = (...a) => { const f = ligar()[n]; if (!f) { if (n === "sincronizar" || n === "pendentes") return Promise.resolve(0); throw new Error("Isto não está disponível aqui."); } return f.apply(ligar(), a); };
   Object.defineProperty(dados, "aoMudarFila", { get: () => ligar().aoMudarFila, set: (f) => { ligar().aoMudarFila = f; } });
   void tentouTeste;

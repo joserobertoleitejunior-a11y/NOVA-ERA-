@@ -145,7 +145,7 @@ revoke execute on function public.fora_expediente(timestamptz) from public, anon
 -- Quem quer receber cada tipo de aviso (padrão por papel quando a pessoa não escolheu)
 create or replace function public.emitir_alerta(p_tipo text, p_sev text, p_titulo text, p_texto text, p_ref_tipo text, p_ref_id uuid, p_dedupe text)
 returns void language plpgsql security definer set search_path = public, pg_temp as $$
-declare r record; v_admin text[] := array['saida_sem_nota','divergencia_carga','estoque_negativo','estoque_baixo','contagem_divergente','nota_parada','fora_horario','resumo_dia','sistema'];
+declare r record; v_admin text[] := array['saida_sem_nota','divergencia_carga','estoque_negativo','estoque_baixo','contagem_divergente','nota_parada','fora_horario','senha_esquecida','resumo_dia','sistema'];
         v_func text[] := array['nota_nova','contagem_solicitada']; v_url text; v_seg text; v_novo uuid;
 begin
   for r in select id from public.perfis where ativo and p_tipo = any(coalesce(alertas, case when papel = 'admin' then v_admin else v_func end)) loop
