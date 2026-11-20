@@ -35,6 +35,23 @@
 
   const baixar = (nome, texto) => { const a = el("a", { href: URL.createObjectURL(new Blob([texto], { type: "text/csv;charset=utf-8" })), download: nome }); document.body.append(a); a.click(); a.remove(); };
   const cabecalhoAba = (titulo, dica, rotulo, acao) => el("div", { class: "cabecalho-aba" }, el("div", {}, el("h2", {}, titulo), el("p", {}, dica)), el("button", { type: "button", class: "btn btn-azul", onclick: acao }, ic("mais"), rotulo));
+  // Editar e apagar um cadastro (caminhão ou produto). Apagar pede confirmação; se já tem histórico, o app não apaga: só tira de uso.
+  const acoesCadastro = ({ nome, editar, apagar, desativar, aoFim }) => el("div", { class: "acoes-cadastro" },
+    el("button", { type: "button", class: "btn-mini", "aria-label": `Editar ${nome}`, onclick: editar }, ic("editar"), "Editar"),
+    el("button", { type: "button", class: "btn-mini perigo", "aria-label": `Apagar ${nome}`, onclick: () => {
+      const confirmar = el("button", { type: "button", class: "btn btn-principal" }, ic("lixeira"), "Apagar");
+      const cancelar = el("button", { type: "button", class: "btn btn-secundario" }, "Cancelar");
+      const j = NE.janelaSimples({ etiqueta: "Atenção", titulo: `Apagar ${nome}?`, pequena: true,
+        corpo: el("p", {}, "Só apague se foi cadastrado por engano. Se já foi usado em notas ou cargas, o app não apaga: ele só tira da lista de uso, e o histórico fica guardado."), rodape: [cancelar, confirmar] });
+      cancelar.addEventListener("click", j.fechar);
+      confirmar.addEventListener("click", () => NE.comCarregando(confirmar, async () => {
+        try { await apagar(); j.fechar(); NE.aviso(`${nome} foi apagado.`, "ok"); aoFim(); }
+        catch (e) {
+          if (e && e.emUso) { await desativar(); j.fechar(); NE.aviso(`${nome} já tem histórico, então não foi apagado. Ficou como fora de uso.`, "ok"); aoFim(); }
+          else NE.aviso(NE.mensagemErro(e), "erro");
+        }
+      }));
+    } }, ic("lixeira"), "Apagar"));
   const vazio = (t) => el("p", { class: "vazio", style: "flex:1" }, t);
 
   // ───────────────────────── CARGAS ─────────────────────────
@@ -104,11 +121,13 @@
         const miniatura = el("span", { class: "veiculo-miniatura", html: NE.icone.caminhao }); const f0 = (v.fotos || [])[0]; if (f0) NE.dados.urlFoto(f0.caminho).then((u) => { if (u) miniatura.replaceChildren(el("img", { src: u, alt: "" })); }).catch(() => {});
         return el("div", {}, el("button", { type: "button", class: "pessoa-linha link-acao", style: "text-align:left;font-weight:inherit", onclick: () => app.ir("guia", { fluxo: "veiculo", id: v.id }) }, miniatura,
           el("div", {}, el("span", { class: "placa-br" }, v.placa), el("div", { class: "meta" }, `${NE.tiposVeiculo[v.tipo] || v.tipo}${detalhes ? " · " + detalhes : ""}`), (v.fotos || []).length ? el("div", { class: "meta" }, `${D.plural(v.fotos.length, "foto", "fotos")}`) : null)),
-          NE.chave(v.ativo, "Em uso", (x) => NE.dados.alterarVeiculo(v.id, { ativo: x })));
+          el("div", { class: "linha-cadastro" }, NE.chave(v.ativo, "Em uso", (x) => NE.dados.alterarVeiculo(v.id, { ativo: x })),
+            acoesCadastro({ nome: v.placa, editar: () => app.ir("guia", { fluxo: "veiculo", id: v.id }), apagar: () => NE.dados.excluirVeiculo(v.id), desativar: () => NE.dados.alterarVeiculo(v.id, { ativo: false }), aoFim: () => app.ir("cadastros", { aba: "caminhoes" }, { substituir: true }) })));
       }) : [vazio("Nenhum caminhão ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
     } else {
       conteudo.replaceChildren(cabecalhoAba("Produtos", "Mínimo e peças por pilha deixam o estoque e a contagem mais inteligentes.", "Cadastrar produto", () => app.ir("guia", { fluxo: "novoProduto" })), lista);
-      NE.dados.produtos(true).then((ps) => lista.replaceChildren(...(ps.length ? ps.map((p) => el("div", {}, el("button", { type: "button", class: "link-acao", style: "text-align:left;display:block", onclick: () => app.ir("guia", { fluxo: "produto", id: p.id }) }, el("strong", {}, p.nome), el("div", { class: "meta" }, `mínimo ${D.fmt(p.minimo || 0)}${p.por_pilha ? ` · ${p.por_pilha} por pilha` : ""} · toque para ajustar`)), NE.chave(p.ativo, "Em uso", (x) => NE.dados.alterarProduto(p.id, { ativo: x })))) : [vazio("Nenhum produto ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
+      NE.dados.produtos(true).then((ps) => lista.replaceChildren(...(ps.length ? ps.map((p) => el("div", {}, el("button", { type: "button", class: "link-acao", style: "text-align:left;display:block", onclick: () => app.ir("guia", { fluxo: "produto", id: p.id }) }, el("strong", {}, p.nome), el("div", { class: "meta" }, `mínimo ${D.fmt(p.minimo || 0)}${p.por_pilha ? ` · ${p.por_pilha} por pilha` : ""} · toque para ajustar`)), el("div", { class: "linha-cadastro" }, NE.chave(p.ativo, "Em uso", (x) => NE.dados.alterarProduto(p.id, { ativo: x })),
+        acoesCadastro({ nome: p.nome, editar: () => app.ir("guia", { fluxo: "produto", id: p.id }), apagar: () => NE.dados.excluirProduto(p.id), desativar: () => NE.dados.alterarProduto(p.id, { ativo: false }), aoFim: () => app.ir("cadastros", { aba: "produtos" }, { substituir: true }) })))) : [vazio("Nenhum produto ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
     }
   };
   // ───────────────────────── CONFIGURAÇÕES ─────────────────────────

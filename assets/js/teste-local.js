@@ -205,9 +205,11 @@
       async redefinirSenha(id, senha) { const s = senha || `nova${1000 + Math.floor(Math.random() * 9000)}`; const p = e.perfis.find((x) => x.id === id); if (!p) throw new Error("Funcionário não encontrado."); return { usuario: p.usuario, senha: s }; },
       async alterarFuncionario(id, campos) { const { cadastrado_por, criado_em, ...ok } = campos; Object.assign(e.perfis.find((p) => p.id === id), ok); salvar(); }, // quem cadastrou e quando não mudam
       async criarVeiculo(v) { const placa = String(v.placa || "").toUpperCase().replace(/[^A-Z0-9]/g, ""); if (e.veiculos.some((x) => x.placa === placa)) throw new Error("Essa placa já está cadastrada."); e.veiculos.push({ id: uid("v"), ativo: true, descricao: "", ...v, placa }); salvar(); },
-      async alterarVeiculo(id, c) { Object.assign(e.veiculos.find((v) => v.id === id), c); salvar(); },
+      async alterarVeiculo(id, c) { if (c.placa && e.veiculos.some((x) => x.id !== id && x.placa === c.placa)) throw new Error("Essa placa já está cadastrada."); Object.assign(e.veiculos.find((v) => v.id === id), c); salvar(); },
       async criarProduto(p) { if (e.produtos.some((x) => D.normalizar(x.nome) === D.normalizar(p.nome))) throw new Error("Esse produto já existe."); e.produtos.push({ id: uid("p"), unidade: "un", minimo: 0, por_pilha: null, ativo: true, codigo: "", ...p }); salvar(); },
       async alterarProduto(id, c) { Object.assign(e.produtos.find((p) => p.id === id), c); salvar(); },
+      async excluirVeiculo(id) { if (e.conferencias.some((c) => c.veiculo_id === id)) throw Object.assign(new Error("Já tem histórico."), { emUso: true }); e.veiculos = e.veiculos.filter((v) => v.id !== id); salvar(); },
+      async excluirProduto(id) { if (e.movimentos.some((m) => m.produto_id === id) || JSON.stringify([e.notas, e.conferencias, e.contagens]).includes(`"produto_id":"${id}"`)) throw Object.assign(new Error("Já tem histórico."), { emUso: true }); e.produtos = e.produtos.filter((p) => p.id !== id); salvar(); },
 
       // notas
       async notas({ status } = {}) { varredura(e, Date.now()); return copia(e.notas.filter((n) => !status || (Array.isArray(status) ? status.includes(n.status) : n.status === status)).sort((a, b) => D.aMs(a.criado_em) - D.aMs(b.criado_em))); },

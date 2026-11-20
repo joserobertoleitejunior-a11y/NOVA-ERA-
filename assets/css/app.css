@@ -204,3 +204,11 @@ body.imprimindo-cartoes #area-cartoes { display: block !important; padding: 8mm;
 .passo-comeco { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 0 14px; border-radius: 16px; border: 2px solid var(--linha); background: #fff; font: inherit; text-align: left; cursor: pointer; }
 .passo-num { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--vermelho); color: #fff; font-weight: 800; flex: none; }
 .passo-comeco.feito { opacity: .6; } .passo-comeco.feito .passo-num { background: var(--ok); }
+
+/* Editar e apagar um cadastro (caminhão, produto) */
+.linha-cadastro { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 4px; }
+.acoes-cadastro { display: flex; gap: 8px; margin-left: auto; }
+.btn-mini { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 12px; border: 2px solid var(--linha); background: var(--placa); color: var(--azul); font-family: var(--fonte-marca); font-stretch: var(--largura-marca); font-weight: 700; font-size: 1rem; letter-spacing: .02em; text-transform: uppercase; cursor: pointer; }
+.btn-mini svg { width: 20px; height: 20px; }
+.btn-mini.perigo { color: var(--vermelho); }
+.btn-mini:active { transform: scale(.97); }

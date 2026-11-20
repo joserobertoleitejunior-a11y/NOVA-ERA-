@@ -29,6 +29,7 @@
   // ───────────────────────── REAL ─────────────────────────
   function real() {
     const sb = window.supabase.createClient(C.supabaseUrl, C.supabaseAnonKey);
+    const semHistorico = ({ error }) => { if (error) { if (error.code === "23503" || /foreign key|violates/i.test(error.message)) throw Object.assign(new Error("Já tem histórico."), { emUso: true }); throw new Error(error.message); } };
     const ok = ({ data, error }) => { if (error) throw new Error(error.message); return data; };
     const cacheUrl = new Map();
     const mem = new Map();
@@ -82,6 +83,9 @@
       alterarVeiculo: async (id, c) => ok(await sb.from("veiculos").update(c).eq("id", id)),
       criarProduto: async (p) => ok(await sb.from("produtos").insert(p)),
       alterarProduto: async (id, c) => ok(await sb.from("produtos").update(c).eq("id", id)),
+      // Apagar: o banco recusa se já existe histórico (nota, conferência, movimento): nunca se perde registro
+      excluirVeiculo: async (id) => semHistorico(await sb.from("veiculos").delete().eq("id", id)),
+      excluirProduto: async (id) => semHistorico(await sb.from("produtos").delete().eq("id", id)),
 
       async notas({ status } = {}) {
         let q = sb.from("notas").select("*, itens:nota_itens(*)").order("criado_em", { ascending: true }).limit(300);
@@ -194,7 +198,7 @@
   };
 
   const USUARIOS_TESTE = ["admin", "adminvendas", "adminexpedicao", "admindiretoria", "adminadministrativo", "conferente", "ajudante", "motorista"];
-  const nomes = ["emCache", "perfil", "veiculos", "produtos", "funcionarios", "criarFuncionario", "criarFuncionarios", "redefinirSenha", "alterarFuncionario", "criarVeiculo", "alterarVeiculo", "criarProduto", "alterarProduto",
+  const nomes = ["emCache", "perfil", "veiculos", "produtos", "funcionarios", "criarFuncionario", "criarFuncionarios", "redefinirSenha", "alterarFuncionario", "criarVeiculo", "alterarVeiculo", "criarProduto", "alterarProduto", "excluirVeiculo", "excluirProduto",
     "notas", "criarNota", "importarNotas", "cancelarNota", "enviarFoto", "urlFoto", "fotoExemplo", "registrarConferencia", "sincronizar", "pendentes", "conferencias", "contexto",
     "saldos", "movimentos", "lancarMovimento", "contagens", "pedirContagem", "concluirContagem", "aplicarAjuste", "descartarContagem", "alertas", "marcarLidos", "resolverAlerta", "preferencias", "salvarPreferencias", "config", "salvarConfig",
     "pushSuportado", "pushAssinar", "pushRemover", "pushTestar", "iaDisponivel", "iaPerguntar", "iaLerNota", "trocarPerfil", "reiniciar"];
