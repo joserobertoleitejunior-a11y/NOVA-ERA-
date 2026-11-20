@@ -21,7 +21,7 @@
    "id": "01-entrar",
    "titulo": "Como entrar",
    "pontos": [],
-   "fala": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. A primeira tela que você vê é a fila de notas.",
+   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar. Você cai na fila de notas.",
    "pre": {
     "perfil": null,
     "reiniciar": true
@@ -54,7 +54,7 @@
     "Toque na nota que vai sair",
     "Sem nota na fila? Conferir uma carga"
    ],
-   "fala": "Essa é a fila: as notas que estão esperando conferência. Quando o caminhão for carregado, é só tocar na nota. E se chegou carga sem nota na fila, use o botão grande: conferir uma carga.",
+   "fala": "Aqui ficam as notas esperando conferência. Com o caminhão carregado, toque na nota.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
@@ -78,7 +78,7 @@
     "Tudo confere? Toque no botão verde",
     "Foto da carga e foto da placa"
    ],
-   "fala": "Vamos conferir uma carga, passo a passo. Toque na nota. Escolha o caminhão que vai sair. Agora olhe a carga: se cada peça confere com a nota, toque em tudo confere. Depois, tire a foto do caminhão carregado, e a foto da placa. E confirme. Pronto! A conferência fica registrada, com a hora e as fotos.",
+   "fala": "Escolha o caminhão. Se cada peça confere, toque em tudo confere. Tire a foto da carga e da placa, e confirme.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
@@ -142,7 +142,7 @@
     "Diga quantas peças subiram",
     "Informe o motivo no fim"
    ],
-   "fala": "E se alguma peça não confere? Sem problema. Toque em diferente, naquele item, e diga quantas peças subiram no caminhão. O aplicativo mostra se foi a mais, ou a menos. No fim, você escolhe o motivo. E a administração é avisada na hora.",
+   "fala": "Se uma peça não confere, toque em diferente e diga quantas subiram. A administração é avisada na hora.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
@@ -184,7 +184,7 @@
     "Aponte a câmera para o QR",
     "O app conta peça por peça"
    ],
-   "fala": "Quer conferir mais rápido? Use contar lendo as etiquetas. Aponte a câmera pro QR de cada peça, e o aplicativo conta sozinho. Se a etiqueta for de outra nota, ele avisa.",
+   "fala": "Pra conferir mais rápido, aponte a câmera para o QR de cada peça. O aplicativo conta sozinho.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
@@ -216,7 +216,7 @@
     "Depois as peças soltas",
     "Não precisa saber o saldo"
    ],
-   "fala": "Quando pedirem, ou quando você tiver um tempinho, faça a contagem do dia. O aplicativo escolhe os produtos mais importantes. Conte as pilhas e as peças soltas, sem olhar o número do sistema. Leva uns três minutos.",
+   "fala": "Na contagem do dia, conte as pilhas e as peças soltas, sem ver o número do sistema. Leva uns três minutos.",
    "pre": {
     "perfil": "conferente",
     "rota": "estoque"
@@ -251,7 +251,7 @@
    "id": "07-avisos",
    "titulo": "Os avisos",
    "pontos": [],
-   "fala": "O sino mostra os seus avisos: nota nova na fila, e pedido de contagem. Ligue os avisos do celular, e você recebe tudo sem precisar abrir o aplicativo.",
+   "fala": "O sino mostra os seus avisos. Ligue os avisos do celular pra receber sem abrir o aplicativo.",
    "pre": {
     "perfil": "conferente",
     "rota": "alertas"
@@ -271,7 +271,7 @@
    "id": "08-ajuda",
    "titulo": "Se tiver dúvida",
    "pontos": [],
-   "fala": "Ficou com dúvida? Em qualquer tela, toque em ajuda, lá no alto. O aplicativo mostra o que fazer ali. E se travar, chame a expedição. Bom trabalho!",
+   "fala": "Com dúvida, toque em ajuda, no alto da tela. Bom trabalho!",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"

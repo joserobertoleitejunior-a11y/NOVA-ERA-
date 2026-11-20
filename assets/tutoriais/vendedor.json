@@ -21,7 +21,7 @@
    "id": "01-entrar",
    "titulo": "Como entrar",
    "pontos": [],
-   "fala": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Aqui você vê as notas e as cargas, e manda o rastreio pro cliente.",
+   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar.",
    "pre": {
     "perfil": null,
     "reiniciar": true
@@ -51,7 +51,7 @@
    "id": "02-inicio",
    "titulo": "A tela inicial",
    "pontos": [],
-   "fala": "Na tela inicial, uma frase mostra se está tudo certo. E embaixo ficam os botões do que você faz: lançar uma nota, e ver as cargas.",
+   "fala": "A tela inicial mostra se está tudo certo, e os botões do que você faz: lançar nota e ver as cargas.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "inicio"
@@ -71,7 +71,7 @@
    "id": "03-nota",
    "titulo": "Lançar uma nota",
    "pontos": [],
-   "fala": "Pra lançar uma nota: escolha como ela chegou, digite o número e o cliente, escolha os produtos, e confirme. Ela entra na fila, e os conferentes são avisados.",
+   "fala": "Pra lançar uma nota: como chegou, número e cliente, produtos, e confirmar. Os conferentes são avisados.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "inicio"
@@ -128,7 +128,7 @@
    "id": "04-cargas",
    "titulo": "Ver as cargas",
    "pontos": [],
-   "fala": "Na aba cargas, você vê tudo que já saiu. Toque numa carga pra ver os itens, as fotos, e se teve diferença.",
+   "fala": "Na aba cargas, toque numa carga pra ver itens, fotos e diferenças.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "cargas"
@@ -148,7 +148,7 @@
    "id": "05-rastreio",
    "titulo": "Mandar o rastreio ao cliente",
    "pontos": [],
-   "fala": "Agora, o melhor pro seu cliente. Dentro da carga, toque em enviar ao cliente, e escolha o WhatsApp dele. Ele recebe um link com o horário de saída, o que foi carregado, e a foto da carga. Menos ligação, mais confiança.",
+   "fala": "Dentro da carga, toque em enviar ao cliente e escolha o WhatsApp dele. Ele acompanha tudo por um link.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "cargas"
@@ -175,7 +175,7 @@
    "id": "06-avisos",
    "titulo": "Os avisos",
    "pontos": [],
-   "fala": "Os avisos chegam no sino e no celular: nota conferida, diferença na carga, e outros recados da operação.",
+   "fala": "Os avisos chegam no sino e no celular.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "alertas"

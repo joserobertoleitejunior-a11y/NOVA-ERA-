@@ -21,7 +21,7 @@
    "id": "01-entrar",
    "titulo": "Como entrar",
    "pontos": [],
-   "fala": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você vai acompanhar a fila e os avisos.",
+   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar.",
    "pre": {
     "perfil": null,
     "reiniciar": true
@@ -54,7 +54,7 @@
     "Veja se a sua carga já está na fila",
     "Quem confere é o conferente"
    ],
-   "fala": "A sua tela mostra as notas que estão esperando conferência. Você não precisa conferir nada: quem confere a carga é o conferente. Quando a conferência termina, o caminhão está liberado pra sair.",
+   "fala": "Aqui você vê as notas esperando conferência. Quem confere é o conferente. Quando termina, o caminhão está liberado.",
    "pre": {
     "perfil": "motorista",
     "rota": "notas"
@@ -70,7 +70,7 @@
    "id": "03-avisos",
    "titulo": "Os avisos",
    "pontos": [],
-   "fala": "Fique de olho no sino. Quando tiver algum aviso pra você, ele aparece ali. E também no celular, se você ligar os avisos.",
+   "fala": "Fique de olho no sino: os avisos pra você aparecem ali.",
    "pre": {
     "perfil": "motorista",
     "rota": "alertas"
@@ -90,7 +90,7 @@
    "id": "04-cliente",
    "titulo": "O cliente acompanha a entrega",
    "pontos": [],
-   "fala": "Depois da conferência, o vendedor manda um link pro cliente. Ele vê a hora em que você saiu, o que foi carregado, e a foto da carga. Por isso: só saia do pátio depois que a carga for conferida.",
+   "fala": "O cliente acompanha a sua saída por um link. Por isso, só saia do pátio com a carga conferida.",
    "pre": {
     "perfil": "motorista",
     "rota": "notas"

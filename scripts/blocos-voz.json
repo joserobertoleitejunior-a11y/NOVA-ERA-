@@ -38,13 +38,7 @@
    {
     "alvo": "apresentacao",
     "id": "09-avisos"
-   }
-  ]
- },
- {
-  "bloco": 2,
-  "arquivo": "bloco-02.mp3",
-  "cenas": [
+   },
    {
     "alvo": "apresentacao",
     "id": "10-estoque"
@@ -80,8 +74,8 @@
   ]
  },
  {
-  "bloco": 3,
-  "arquivo": "bloco-03.mp3",
+  "bloco": 2,
+  "arquivo": "bloco-02.mp3",
   "cenas": [
    {
     "alvo": "conferente",
@@ -130,13 +124,7 @@
    {
     "alvo": "motorista",
     "id": "04-cliente"
-   }
-  ]
- },
- {
-  "bloco": 4,
-  "arquivo": "bloco-04.mp3",
-  "cenas": [
+   },
    {
     "alvo": "vendedor",
     "id": "01-entrar"
@@ -160,7 +148,13 @@
    {
     "alvo": "vendedor",
     "id": "06-avisos"
-   },
+   }
+  ]
+ },
+ {
+  "bloco": 3,
+  "arquivo": "bloco-03.mp3",
+  "cenas": [
    {
     "alvo": "expedicao",
     "id": "01-entrar"
@@ -188,13 +182,7 @@
    {
     "alvo": "expedicao",
     "id": "07-avisos"
-   }
-  ]
- },
- {
-  "bloco": 5,
-  "arquivo": "bloco-05.mp3",
-  "cenas": [
+   },
    {
     "alvo": "administrativo",
     "id": "01-entrar"

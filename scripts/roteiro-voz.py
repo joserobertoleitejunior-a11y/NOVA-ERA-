@@ -20,11 +20,9 @@ PRONUNCIA = [("QR code", "quiú érre côde"), ("QR", "quiú érre"), ("XML", "x
 
 # Cada bloco = uma geração no ElevenLabs (cabe no limite de caracteres por geração)
 BLOCOS = [
-    ("Apresentação · parte 1", [("apresentacao", f"{i:02d}") for i in range(1, 10)]),
-    ("Apresentação · parte 2", [("apresentacao", f"{i:02d}") for i in range(10, 18)]),
-    ("Tutoriais · conferente e motorista", [("conferente", None), ("motorista", None)]),
-    ("Tutoriais · vendedor e expedição", [("vendedor", None), ("expedicao", None)]),
-    ("Tutoriais · administrativo e diretoria", [("administrativo", None), ("diretoria", None)]),
+    ("Apresentação", [("apresentacao", f"{i:02d}") for i in range(1, 18)]),
+    ("Tutoriais · conferente, motorista e vendedor", [("conferente", None), ("motorista", None), ("vendedor", None)]),
+    ("Tutoriais · expedição, administrativo e diretoria", [("expedicao", None), ("administrativo", None), ("diretoria", None)]),
 ]
 
 
@@ -65,7 +63,7 @@ def gerar():
     linhas = [
         "# Roteiro de voz — Confere Carga (apresentação + 6 tutoriais)",
         "",
-        "Um único arquivo com **tudo o que precisa ser narrado**. São 5 blocos: gere **um áudio por bloco** no ElevenLabs.",
+        "Um único arquivo com **tudo o que precisa ser narrado**. São 3 blocos: gere **um áudio por bloco** no ElevenLabs.",
         "Eu corto cada bloco em cenas e coloco no lugar certo.",
         "",
         "## Antes de gerar (1 vez só)",
@@ -73,20 +71,20 @@ def gerar():
         "2. Escolha uma **voz brasileira natural**. Dica: ouça 3 vozes lendo a abertura do Bloco 1 e fique com a mais calorosa, não a mais “locutor”.",
         "3. Ajustes da voz (ícone de engrenagem): **Stability 40%**, **Similarity 75%**, **Style 40%**, **Speaker boost ligado**, velocidade **1.0**.",
         "   Mais estabilidade deixa a voz mais seca; menos deixa mais viva. Se ficar teatral demais, suba a Stability para 50%.",
-        "4. Use a **mesma voz e os mesmos ajustes nos 5 blocos**, para a apresentação toda soar como a mesma pessoa.",
+        "4. Use a **mesma voz e os mesmos ajustes nos 3 blocos**, para a apresentação toda soar como a mesma pessoa.",
         "",
         "## Como gerar cada bloco",
         "- Copie **só o texto dentro da caixa** do bloco (o botão de copiar da caixa serve) e cole no ElevenLabs, sem mudar nada.",
         "- As marcas `<break time=\"3.0s\" />` são as pausas **entre cenas**. É nelas que eu corto: não apague.",
-        "- Gere, ouça tudo, e baixe em mp3. Nomeie **bloco-01.mp3, bloco-02.mp3 ... bloco-05.mp3**.",
+        "- Gere, ouça tudo, e baixe em mp3. Nomeie **bloco-01.mp3, bloco-02.mp3 e bloco-03.mp3**.",
         "- Se uma frase ficou estranha, **gere o bloco de novo** (cada geração sai um pouco diferente). Se persistir, me diga a cena e eu ajusto o texto.",
         "- Se uma palavra sair com o sotaque errado, me diga qual: eu troco a grafia no roteiro.",
         "",
         "## Enviar os áudios",
-        "Coloque os 5 mp3 na pasta **gravacoes/** do repositório (GitHub → Add file → Upload files, na branch `claude/nova-era-app-6pqjx1`) e me avise.",
+        "Coloque os 3 mp3 na pasta **gravacoes/** do repositório (GitHub → Add file → Upload files, na branch `claude/nova-era-app-6pqjx1`) e me avise.",
         "Eu confiro, corto por cena e ligo na apresentação e nos tutoriais.",
         "",
-        "> Custo: o ElevenLabs cobra por caractere. O total abaixo é a soma dos 5 blocos; refazer um bloco gasta de novo aquele bloco.",
+        "> Custo: o ElevenLabs cobra por caractere. O total abaixo é a soma dos 3 blocos; refazer um bloco gasta de novo aquele bloco.",
         "",
     ]
     total = 0
@@ -101,7 +99,7 @@ def gerar():
             "Cenas, em ordem: " + " · ".join(f"{a}/{c}" if a == 'apresentacao' else f"{a}/{c}" for a, c, _ in cenas),
             "", "```text", texto, "```", "",
         ]
-    linhas.insert(linhas.index("> Custo: o ElevenLabs cobra por caractere. O total abaixo é a soma dos 5 blocos; refazer um bloco gasta de novo aquele bloco.") + 1, f"> **Total dos 5 blocos: {total} caracteres.**")
+    linhas.insert(linhas.index("> Custo: o ElevenLabs cobra por caractere. O total abaixo é a soma dos 3 blocos; refazer um bloco gasta de novo aquele bloco.") + 1, f"> **Total dos 3 blocos: {total} caracteres.**")
     (RAIZ / "assets/apresentacao/ROTEIRO-VOZ.md").write_text("\n".join(linhas) + "\n", encoding="utf8")
     (RAIZ / "scripts/blocos-voz.json").write_text(json.dumps(manifesto, ensure_ascii=False, indent=1) + "\n", encoding="utf8")
     print(f"ROTEIRO-VOZ.md gerado: {len(BLOCOS)} blocos, {total} caracteres no total.")

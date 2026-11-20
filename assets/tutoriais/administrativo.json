@@ -21,7 +21,7 @@
    "id": "01-entrar",
    "titulo": "Como entrar",
    "pontos": [],
-   "fala": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você cuida dos cadastros: notas, equipe, frota e produtos.",
+   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar. Você cuida dos cadastros.",
    "pre": {
     "perfil": null,
     "reiniciar": true
@@ -51,7 +51,7 @@
    "id": "02-inicio",
    "titulo": "A tela inicial",
    "pontos": [],
-   "fala": "Na tela inicial, uma frase mostra se está tudo certo, e botões simples levam a cada tarefa. Tem também o botão pra ver o resumo completo.",
+   "fala": "A tela inicial mostra se está tudo certo, e botões simples levam a cada tarefa.",
    "pre": {
     "perfil": "adminadministrativo",
     "rota": "inicio"
@@ -75,7 +75,7 @@
    "id": "03-xml",
    "titulo": "Notas por XML",
    "pontos": [],
-   "fala": "Pra lançar várias notas de uma vez, use o arquivo XML. Escolha os arquivos, confira o que foi lido, e envie. Os produtos que ainda não existem são cadastrados sozinhos.",
+   "fala": "Pra várias notas de uma vez, use o arquivo XML: escolha, confira e envie.",
    "pre": {
     "perfil": "adminadministrativo",
     "rota": "guia",
@@ -94,7 +94,7 @@
    "id": "04-equipe",
    "titulo": "Equipe",
    "pontos": [],
-   "fala": "Na aba mais, equipe: cadastre pessoas, mude o WhatsApp, a foto ou a função, e gere uma senha nova pra quem esqueceu.",
+   "fala": "Em mais, equipe: cadastre pessoas e gere uma senha nova pra quem esqueceu.",
    "pre": {
     "perfil": "adminadministrativo",
     "rota": "equipe"
@@ -118,7 +118,7 @@
    "id": "05-frota",
    "titulo": "Frota e produtos",
    "pontos": [],
-   "fala": "Cadastre os caminhões com placa, dados e fotos. E os produtos, com estoque mínimo e peças por pilha. Isso deixa o aplicativo bem mais esperto.",
+   "fala": "Cadastre os caminhões com fotos, e os produtos com estoque mínimo.",
    "pre": {
     "perfil": "adminadministrativo",
     "rota": "cadastros",
@@ -148,7 +148,7 @@
    "id": "06-avisos",
    "titulo": "Os avisos",
    "pontos": [],
-   "fala": "Os avisos mostram o que precisa de atenção. Quem esquece a senha manda um pedido, e ele aparece aqui, pra você.",
+   "fala": "Os avisos mostram o que precisa de atenção, inclusive pedidos de senha.",
    "pre": {
     "perfil": "adminadministrativo",
     "rota": "alertas"

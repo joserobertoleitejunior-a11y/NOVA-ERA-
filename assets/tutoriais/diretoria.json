@@ -21,7 +21,7 @@
    "id": "01-entrar",
    "titulo": "Como entrar",
    "pontos": [],
-   "fala": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você vê a empresa inteira em uma tela.",
+   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar. Você vê a empresa inteira em uma tela.",
    "pre": {
     "perfil": null,
     "reiniciar": true
@@ -51,7 +51,7 @@
    "id": "02-inicio",
    "titulo": "Como está a empresa",
    "pontos": [],
-   "fala": "A tela inicial mostra, em uma frase, como está a empresa agora. Verde: tudo certo. Amarelo ou vermelho: toque em resolver agora.",
+   "fala": "A tela inicial mostra como está a empresa. Verde, tudo certo. Amarelo ou vermelho, toque em resolver agora.",
    "pre": {
     "perfil": "admindiretoria",
     "rota": "inicio"
@@ -71,7 +71,7 @@
    "id": "03-resumo",
    "titulo": "O resumo completo",
    "pontos": [],
-   "fala": "O resumo completo traz os números do dia, da semana e do mês: quantas cargas, quantas com diferença, onde mais erra, e como está a equipe. E cada recado leva direto à tela pra resolver.",
+   "fala": "O resumo completo traz os números do dia, da semana e do mês, e onde a operação mais erra.",
    "pre": {
     "perfil": "admindiretoria",
     "rota": "resumo"
@@ -98,7 +98,7 @@
    "id": "04-ia",
    "titulo": "O assistente de inteligência artificial",
    "pontos": [],
-   "fala": "Na versão completa, você pergunta pro assistente de inteligência artificial: resumo do dia, o que saiu a mais, estoque baixo, notas paradas. Ele responde com os dados reais, explica o painel, e só fala da Nova Era.",
+   "fala": "Na versão completa, pergunte ao assistente de inteligência artificial. Ele responde com os dados reais, e só fala da Nova Era.",
    "pre": {
     "perfil": "admindiretoria",
     "rota": "inicio"
@@ -122,7 +122,7 @@
    "id": "05-equipe",
    "titulo": "Quem cadastrou quem",
    "pontos": [],
-   "fala": "Na equipe, cada pessoa mostra qual administrador a cadastrou, e quando. É o registro de quem deu acesso.",
+   "fala": "Na equipe, cada pessoa mostra qual administrador a cadastrou, e quando.",
    "pre": {
     "perfil": "admindiretoria",
     "rota": "equipe"
@@ -138,7 +138,7 @@
    "id": "06-avisos",
    "titulo": "Os avisos",
    "pontos": [],
-   "fala": "Os avisos críticos chegam no sino e no seu celular, com um botão pra chamar no WhatsApp quem precisa resolver.",
+   "fala": "Os avisos críticos chegam no sino e no celular, com botão pra chamar no WhatsApp.",
    "pre": {
     "perfil": "admindiretoria",
     "rota": "alertas"

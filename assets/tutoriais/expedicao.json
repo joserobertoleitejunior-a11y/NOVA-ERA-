@@ -21,7 +21,7 @@
    "id": "01-entrar",
    "titulo": "Como entrar",
    "pontos": [],
-   "fala": "Pra entrar, abra o endereço do aplicativo, digite o usuário e a senha que aparecem na sua tela de boas-vindas, e toque em entrar. Você comanda a operação: notas, cargas, estoque e equipe.",
+   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar. Você comanda a operação.",
    "pre": {
     "perfil": null,
     "reiniciar": true
@@ -51,7 +51,7 @@
    "id": "02-inicio",
    "titulo": "A tela inicial",
    "pontos": [],
-   "fala": "Na tela inicial, uma frase diz se está tudo certo. Se tiver problema, toque em resolver agora. E embaixo, os botões do que você quer fazer.",
+   "fala": "A tela inicial diz se está tudo certo. Se tiver problema, toque em resolver agora.",
    "pre": {
     "perfil": "adminexpedicao",
     "rota": "inicio"
@@ -75,7 +75,7 @@
    "id": "03-nota",
    "titulo": "Lançar notas",
    "pontos": [],
-   "fala": "Pra lançar uma nota, escolha como ela chegou: arquivo XML, foto, ou digitando. Depois, número, cliente, itens, e confirmar. Se você tiver o XML, o aplicativo lê tudo sozinho.",
+   "fala": "Pra lançar uma nota, escolha: arquivo XML, foto, ou digitando. Com o XML, o aplicativo lê tudo sozinho.",
    "pre": {
     "perfil": "adminexpedicao",
     "rota": "inicio"
@@ -106,7 +106,7 @@
    "id": "04-cargas",
    "titulo": "Cargas e diferenças",
    "pontos": [],
-   "fala": "Na aba cargas, você vê tudo que saiu. Dá pra filtrar só as que tiveram diferença. Toque numa carga pra ver as fotos, os itens, e imprimir as etiquetas.",
+   "fala": "Na aba cargas, veja o que saiu, filtre as diferenças, e imprima as etiquetas.",
    "pre": {
     "perfil": "adminexpedicao",
     "rota": "cargas"
@@ -133,7 +133,7 @@
    "id": "05-estoque",
    "titulo": "Estoque e contagem",
    "pontos": [],
-   "fala": "O estoque se atualiza sozinho, a cada carga conferida. Pra corrigir, a equipe faz a contagem do dia, e você decide: corrigir o estoque, ou contar de novo.",
+   "fala": "O estoque se atualiza sozinho. Se a contagem não bater, você decide: corrigir, ou contar de novo.",
    "pre": {
     "perfil": "adminexpedicao",
     "rota": "estoque"
@@ -157,7 +157,7 @@
    "id": "06-equipe",
    "titulo": "Cadastrar a equipe",
    "pontos": [],
-   "fala": "Pra cadastrar uma pessoa: nome, função, WhatsApp e foto, um passo de cada vez. O aplicativo cria o usuário e a senha, e manda no WhatsApp dela um link com o acesso, e o vídeo tutorial da função.",
+   "fala": "Pra cadastrar alguém: nome, função, WhatsApp e foto, um passo por vez. O aplicativo manda o acesso e o vídeo tutorial no WhatsApp dela.",
    "pre": {
     "perfil": "adminexpedicao",
     "rota": "equipe"
@@ -188,7 +188,7 @@
    "id": "07-avisos",
    "titulo": "Os avisos",
    "pontos": [],
-   "fala": "O aplicativo avisa você na hora: peça a mais na carga, estoque baixo, nota parada na fila, conferência fora do horário, e pedido de ajuda de senha. Tudo no sino, e no celular.",
+   "fala": "Peça a mais, estoque baixo, nota parada, pedido de senha: tudo chega no sino e no celular.",
    "pre": {
     "perfil": "adminexpedicao",
     "rota": "alertas"
