@@ -365,3 +365,29 @@ html[data-qualidade="baixa"] .site-topo.rolou .site-topo-dentro { background: rg
 
 .maq-cena { transform: rotateX(-24deg) scale(.88); }
 @media (max-width: 420px) { .maq-cena { transform: rotateX(-24deg) scale(.76); } }
+
+
+/* ── Maquete pequena, ao lado da foto; gestos só nela ── */
+.produto-midia { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; align-items: stretch; }
+.produto-midia .produto-foto { aspect-ratio: auto; height: 100%; min-height: 172px; }
+.produto-maquete { min-height: 172px; margin: 0; background: radial-gradient(80% 70% at 50% 62%, rgba(26, 31, 143, .09), transparent 72%), linear-gradient(180deg, #f4f6fb, #e8ecf6); }
+.produto-texto { padding: 18px 22px 0; }
+.maq { position: absolute; inset: 0; height: auto; overflow: hidden; touch-action: none; overscroll-behavior: contain; cursor: grab; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+.maq.agarrada { cursor: grabbing; }
+.maq-sombra { width: 130px; height: 22px; bottom: 16px; filter: blur(3px); }
+.maq-cena { top: 56%; transform: rotateX(-24deg) scale(.5); }
+.maq-mao { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; }
+.maq.mexendo .maq-giro { animation-play-state: paused; }
+.maq-giro { animation-duration: 36s; }
+.maq-botoes { position: absolute; right: 6px; bottom: 6px; display: grid; gap: 4px; z-index: 2; }
+.maq-zoom { width: 28px; height: 28px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .88); color: var(--marinho-2, #1a1f8f); font: 700 17px/1 system-ui; cursor: pointer; box-shadow: 0 1px 4px rgba(11, 16, 56, .2); }
+@media (max-width: 420px) { .produto-midia .produto-foto, .produto-maquete { min-height: 150px; } .maq-cena { transform: rotateX(-24deg) scale(.44); } }
+.maq-cena { top: 54%; transform: rotateX(-24deg) scale(.37); }
+.produto-midia .produto-foto, .produto-maquete { min-height: 184px; }
+.maq-sombra { width: 110px; }
+@media (max-width: 420px) { .maq-cena { transform: rotateX(-24deg) scale(.33); } .produto-midia .produto-foto, .produto-maquete { min-height: 164px; } }
+.maq-cena { top: 57%; transform: rotateX(-26deg) scale(.47); }
+@media (max-width: 420px) { .maq-cena { transform: rotateX(-26deg) scale(.42); } }
+.maq-cena { top: 58%; transform: rotateX(-24deg) scale(.56); }
+@media (max-width: 420px) { .maq-cena { transform: rotateX(-24deg) scale(.5); } }
+.maq { perspective: 700px; perspective-origin: 50% 58%; }

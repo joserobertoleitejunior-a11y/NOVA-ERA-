@@ -130,8 +130,9 @@
   const cartoes = PRODUTOS.map((p) => {
     const host = el("div", { class: "produto-maquete", "data-slug": p.slug });
     return el("article", { class: "produto" },
-      el("img", { class: "produto-foto", src: `assets/img/produtos/${p.slug}-720.webp`, alt: p.alt, width: 720, height: 540, loading: "lazy", decoding: "async" }),
-      el("div", { class: "produto-texto" }, el("h3", {}, p.nome), el("p", {}, p.texto)), host,
+      el("div", { class: "produto-midia" },
+        el("img", { class: "produto-foto", src: `assets/img/produtos/${p.slug}-720.webp`, alt: p.alt, width: 720, height: 540, loading: "lazy", decoding: "async" }), host),
+      el("div", { class: "produto-texto" }, el("h3", {}, p.nome), el("p", {}, p.texto)),
       el("button", { type: "button", class: "produto-add", "aria-label": `Adicionar ${p.nome} à lista de orçamento`, onclick: () => adicionar(p.nome, 1, "peças") }, ic("mais"), el("span", {}, "Adicionar")));
   });
   $("#grade-produtos").append(...cartoes);
