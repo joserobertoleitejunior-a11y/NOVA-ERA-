@@ -16,12 +16,11 @@
       { alvo: "#btn-sino", titulo: "Avisos", texto: "O app avisa aqui quando chegar nota ou pedirem contagem." },
     ],
     painel: [
-      { alvo: ".semaforo", titulo: "Como está a empresa", texto: "Verde: tudo certo. Amarelo: atenção. Vermelho: precisa de você." },
-      { alvo: ".kpis", titulo: "Números do dia", texto: "Toque num número para ver os detalhes." },
-      { alvo: ".recado", titulo: "O que precisa de você", texto: "Cada recado leva direto à tela para resolver." },
+      { alvo: ".status-simples", titulo: "Como está a empresa", texto: "Verde: tudo certo. Amarelo ou vermelho: toque em \"Resolver agora\"." },
+      { alvo: "#tile-nota", titulo: "O que você quer fazer?", texto: "Cada botão abre um passo a passo. É só seguir as telas." },
       { alvo: "#nav-inferior", titulo: "Menu", texto: "Notas, estoque, cargas e o resto em Mais." },
       { alvo: "#btn-sino", titulo: "Avisos", texto: "Problemas chegam aqui na hora, e no celular." },
-      { alvo: "#fab-ia", titulo: "Assistente", texto: "Pergunte qualquer coisa: o que saiu a mais, estoque, notas paradas." },
+      { alvo: "#fab-ia", titulo: "Assistente", texto: "Pergunte qualquer coisa sobre a empresa." },
     ],
   };
 

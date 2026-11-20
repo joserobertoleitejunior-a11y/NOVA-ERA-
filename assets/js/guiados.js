@@ -1,0 +1,243 @@
+// OPERAÇÕES GUIADAS: toda tarefa da administração é um passo a passo.
+// Regras de didática: uma decisão por tela · pergunta em português simples · exemplo na própria tela ·
+// botão grande · o app diz exatamente o que falta · no fim, diz o que aconteceu e qual o próximo passo.
+(() => {
+  const NE = window.NE;
+  const D = window.NEDominio;
+  const C = window.NOVA_ERA || {};
+  const { el, ic } = NE;
+  const G = (NE.guiados = {});
+  const VENDEDORES = ["Wesley", "Fábio"];
+  const titulo = (t) => t.toLowerCase().replace(/(^|\s)\S/g, (m) => m.toUpperCase());
+  const ligar = (itens, produtos) => itens.map((i) => { const m = D.casarProduto(i, produtos); return { ...i, produto_id: m.produto ? m.produto.id : null, descricao: m.produto ? m.produto.nome : i.descricao }; });
+  const dica = (t) => el("p", { class: "guia-dica" }, t);
+
+  NE.rotas.guia = (raiz, params, app) => { const f = G[params.fluxo]; if (!f) return app.ir("inicio", {}, { substituir: true }); f(raiz, app, params); };
+
+  // ───────────────────────── 1. Lançar uma nota ─────────────────────────
+  G.nota = async (raiz, app) => {
+    const produtos = await NE.dados.produtos();
+    const n = { como: "", numero: "", cliente: "", vendedor: "", itens: [], fotos: [] };
+    NE.assistente({
+      raiz, rotuloFinal: "Colocar na fila", aoCancelar: () => app.voltar(),
+      passos: [
+        { titulo: "Como a nota chegou?", icone: "nota", ajuda: "Escolha o jeito mais fácil para você.",
+          tela: (r) => NE.escolhaUnica([
+            { valor: "xml", rotulo: "Tenho o arquivo XML", dica: "O mais rápido: lê várias notas de uma vez" },
+            { valor: "foto", rotulo: "Tenho a foto da nota", dica: C.premiumIA ? "O assistente lê o número e os itens (Premium)" : "Eu tiro a foto e digito os dados" },
+            { valor: "digitar", rotulo: "Vou digitar", dica: "Número, cliente e itens" }], n.como, (v) => { if (v === "xml") return app.ir("guia", { fluxo: "xml" }, { substituir: true }); n.como = v; r(); }),
+          validar: () => (!n.como ? "Toque em uma das três opções." : null) },
+        { titulo: "Número e cliente", icone: "conferir", ajuda: "O número fica no alto da nota, ao lado de \"Nº\".",
+          tela: (r) => el("div", {},
+            n.como === "foto" && el("div", {}, NE.seletorFoto({ titulo: "Foto da nota", dica: "Pegue a nota inteira, sem sombra.", lista: n.fotos, varias: false, aoMudar: r }),
+              C.premiumIA && n.fotos.length > 0 && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ler-foto", style: "margin-bottom:14px", onclick: (ev) => NE.comCarregando(ev.currentTarget, async () => {
+                const res = await NE.dados.iaLerNota(n.fotos[0].blob); n.numero = res.numero || n.numero; n.cliente = res.cliente || n.cliente;
+                n.itens = ligar((res.itens || []).map((i) => ({ descricao: i.descricao, quantidade: i.quantidade, codigo: i.codigo })), produtos).map((i) => ({ produto_id: i.produto_id, descricao: i.descricao, quantidade: i.quantidade }));
+                NE.aviso("Pronto! Confira os dados nos próximos passos.", "ok"); r();
+              }) }, ic("faisca"), "Ler a nota para mim · Premium")),
+            NE.campoTexto("Número da nota", { id: "nn-numero", inputmode: "numeric", value: n.numero, placeholder: "Ex.: 48213" }, (v) => { n.numero = v.trim(); }),
+            NE.campoTexto("Nome do cliente (opcional)", { id: "nn-cliente", value: n.cliente, placeholder: "Ex.: Construtora Alfa" }, (v) => { n.cliente = v; }),
+            el("div", { class: "campo" }, el("label", {}, "Vendedor (opcional)"), el("div", { class: "chips" }, VENDEDORES.map((v) => el("button", { type: "button", class: "chip", "aria-pressed": String(n.vendedor === v), onclick: () => { n.vendedor = n.vendedor === v ? "" : v; r(); } }, v))))),
+          validar: () => (!n.numero ? "Digite o número da nota." : null) },
+        { titulo: "O que tem na nota?", icone: "caixas", ajuda: "Toque no produto para adicionar e ajuste a quantidade.",
+          tela: (r) => {
+            const tem = new Set(n.itens.map((i) => i.produto_id).filter(Boolean));
+            return el("div", {},
+              n.itens.length ? n.itens.map((i, k) => el("div", { class: "item" }, el("div", { class: "item-topo" }, el("strong", {}, i.descricao), el("button", { type: "button", class: "link-acao", onclick: () => { n.itens.splice(k, 1); r(); } }, ic("fechar"), "Tirar")), NE.contador(i.quantidade, (v) => { i.quantidade = v; }, `nn-q-${k}`))) : [dica("Nenhum produto ainda. Toque em um produto abaixo.")],
+              el("h2", { class: "secao-titulo" }, "Toque para adicionar"), el("div", { class: "grade-escolha" }, produtos.filter((p) => !tem.has(p.id)).map((p) => el("button", { type: "button", class: "escolha", onclick: () => { n.itens.push({ produto_id: p.id, descricao: p.nome, quantidade: p.por_pilha || 1 }); r(); } }, el("strong", {}, p.nome), el("span", {}, "Adicionar")))));
+          },
+          validar: () => (!n.itens.length ? "Adicione pelo menos um produto." : n.itens.some((i) => !(i.quantidade > 0)) ? "Toda quantidade precisa ser maior que zero." : null) },
+        { titulo: "Conferiu? Então envie", icone: "check", ajuda: "Ao confirmar, a nota entra na fila e os conferentes são avisados.",
+          tela: () => el("div", { class: "resumo" }, NE.linhaResumo("Nota", n.numero), NE.linhaResumo("Cliente", n.cliente || "—"), NE.linhaResumo("Vendedor", n.vendedor || "—"), n.itens.map((i) => NE.linhaResumo(i.descricao, NE.num(i.quantidade)))) },
+      ],
+      async aoConcluir() {
+        await NE.dados.criarNota({ numero: n.numero, cliente: n.cliente, vendedor: n.vendedor, itens: n.itens.map((i) => ({ produto_id: i.produto_id || null, descricao: i.descricao, quantidade: i.quantidade })) });
+        NE.telaFim(raiz, { titulo: "Nota na fila", texto: `A nota ${n.numero} já aparece para os conferentes. Quando o caminhão for carregado, eles conferem e você é avisado se algo não bater.`,
+          botoes: [{ rotulo: "Lançar outra nota", icone: "mais", acao: () => G.nota(raiz, app) }, { rotulo: "Ver a fila", acao: () => app.ir("notas", {}, { substituir: true }) }] });
+      },
+    });
+  };
+
+  // ───────────────────────── 2. Importar XML ─────────────────────────
+  G.xml = async (raiz, app) => {
+    let achadas = [], criar = true; const entrada = el("input", { type: "file", accept: ".xml,text/xml,application/xml", multiple: true, "aria-label": "Arquivos XML" });
+    NE.assistente({
+      raiz, rotuloFinal: "Colocar na fila", aoCancelar: () => app.voltar(),
+      passos: [
+        { titulo: "Escolha os arquivos XML", icone: "baixar", ajuda: "São os arquivos da nota que o escritório já tem. Pode escolher vários de uma vez.",
+          tela: (r) => {
+            entrada.onchange = async () => { const prod = await NE.dados.produtos(true); const res = []; for (const arq of [...entrada.files]) { try { const x = await NE.nfeXml.lerArquivo(arq); res.push({ ok: true, arq: arq.name, ...x, itens: ligar(x.itens, prod) }); } catch (e) { res.push({ ok: false, arq: arq.name, erro: e.message }); } } achadas = res; r(); };
+            return el("div", {}, el("label", { class: "btn btn-azul btn-bloco btn-gigante botao-camera", id: "btn-escolher-xml" }, ic("baixar"), achadas.length ? "Escolher outros arquivos" : "Escolher arquivos XML", entrada),
+              achadas.length ? el("div", { style: "margin-top:14px" }, achadas.map((x) => el("div", { class: `aviso ${x.ok ? "ok" : "erro"}` }, ic(x.ok ? "check" : "alerta"), el("span", {}, x.ok ? `Nota ${x.numero} lida (${D.plural(x.itens.length, "item", "itens")})` : `${x.arq}: ${x.erro}`)))) : dica("Nenhum arquivo escolhido ainda."));
+          },
+          validar: () => (!achadas.some((x) => x.ok) ? "Escolha pelo menos um arquivo XML de nota fiscal." : null) },
+        { titulo: "Confira o que foi lido", icone: "conferir", ajuda: "O sistema ligou cada item ao seu produto cadastrado.",
+          tela: (r) => { const boas = achadas.filter((x) => x.ok); const sem = new Set(boas.flatMap((x) => x.itens.filter((i) => !i.produto_id).map((i) => i.descricao)));
+            return el("div", {}, boas.map((x) => el("div", { class: "linha-cartao ok", role: "group" }, el("strong", {}, `Nota ${x.numero}${x.cliente ? " · " + x.cliente : ""}`), el("span", { class: "meta" }, x.itens.map((i) => `${i.descricao} ×${NE.num(i.quantidade)}${i.produto_id ? "" : " ⚠"}`).join(" · ")))),
+              sem.size ? el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, `${D.plural(sem.size, "produto ainda não está", "produtos ainda não estão")} cadastrado: ${D.lista([...sem], 3)}.`), NE.chave(criar, "Cadastrar sozinho", (v) => { criar = v; })) : null); } },
+        { titulo: "Pronto para enviar", icone: "check", ajuda: "As notas entram na fila de conferência.", tela: () => el("div", { class: "resumo" }, NE.linhaResumo("Notas", String(achadas.filter((x) => x.ok).length))) },
+      ],
+      async aoConcluir() {
+        const boas = achadas.filter((x) => x.ok); let produtos = await NE.dados.produtos(true);
+        const sem = new Set(boas.flatMap((x) => x.itens.filter((i) => !i.produto_id).map((i) => i.descricao)));
+        if (criar && sem.size) { for (const nome of sem) { try { await NE.dados.criarProduto({ nome: titulo(nome), unidade: "un", minimo: 0 }); } catch { /* já existe */ } } produtos = await NE.dados.produtos(true); }
+        const r = await NE.dados.importarNotas(boas.map((x) => ({ numero: x.numero, cliente: x.cliente, chave_nfe: x.chave_nfe, itens: ligar(x.itens, produtos).map((i) => ({ produto_id: i.produto_id, descricao: i.descricao, codigo: i.codigo, quantidade: i.quantidade })) })));
+        const ok = r.filter((x) => x.ok).length, falhas = r.filter((x) => !x.ok);
+        NE.telaFim(raiz, { tipo: falhas.length ? "alerta" : "ok", titulo: `${D.plural(ok, "nota entrou", "notas entraram")} na fila`, texto: falhas.length ? `${falhas.length} não entrou: ${falhas[0].erro}` : "Os conferentes já podem conferir.",
+          botoes: [{ rotulo: "Ver a fila", acao: () => app.ir("notas", {}, { substituir: true }) }, { rotulo: "Importar mais", icone: "mais", acao: () => G.xml(raiz, app) }] });
+      },
+    });
+  };
+
+  // ───────────────────────── 3. Lançar entrada ou perda de estoque ─────────────────────────
+  G.mov = async (raiz, app, params) => {
+    const produtos = (await NE.dados.produtos()).filter((p) => p.ativo); const m = { produto_id: params.produto_id || "", tipo: "", quantidade: 1, motivo: "" };
+    const nome = () => (produtos.find((p) => p.id === m.produto_id) || {}).nome || "";
+    NE.assistente({
+      raiz, rotuloFinal: "Registrar", aoCancelar: () => app.voltar(),
+      passos: [
+        { titulo: "De qual produto?", icone: "caixas", ajuda: "Toque no produto.", tela: (r) => el("div", { class: "grade-escolha" }, produtos.map((p) => el("button", { type: "button", class: "escolha", "aria-pressed": String(m.produto_id === p.id), onclick: () => { m.produto_id = p.id; r(); } }, el("strong", {}, p.nome)))), validar: () => (!m.produto_id ? "Toque no produto." : null) },
+        { titulo: "O que aconteceu?", icone: "conferir", ajuda: "Isso corrige o saldo do estoque.", tela: (r) => NE.escolhaUnica([{ valor: "entrada", rotulo: "Entrou peça nova", dica: "Ex.: a fábrica produziu hoje" }, { valor: "perda", rotulo: "Perdeu peça", dica: "Ex.: quebrou ou foi descartada" }], m.tipo, (v) => { m.tipo = v; r(); }), validar: () => (!m.tipo ? "Escolha o que aconteceu." : null) },
+        { titulo: "Quantas peças?", icone: "mais", ajuda: "Use os botões + e − ou digite o número.", tela: () => el("div", {}, NE.contador(m.quantidade, (v) => { m.quantidade = v; }, "lc-q"), NE.campoTexto("Observação (opcional)", { id: "lc-motivo", value: m.motivo, placeholder: m.tipo === "entrada" ? "Ex.: produção do turno" : "Ex.: peça trincada" }, (v) => { m.motivo = v; })), validar: () => (!(m.quantidade > 0) ? "A quantidade precisa ser maior que zero." : null) },
+        { titulo: "Confirme", icone: "check", ajuda: "O saldo do estoque será corrigido agora.", tela: () => el("div", { class: "resumo" }, NE.linhaResumo("Produto", nome()), NE.linhaResumo("O que aconteceu", m.tipo === "entrada" ? "Entrou" : "Perdeu"), NE.linhaResumo("Quantidade", String(m.quantidade))) },
+      ],
+      async aoConcluir() { await NE.dados.lancarMovimento({ produto_id: m.produto_id, tipo: m.tipo, quantidade: m.quantidade, motivo: m.motivo }); NE.telaFim(raiz, { titulo: "Estoque atualizado", texto: `${nome()}: ${m.tipo === "entrada" ? "+" : "−"}${m.quantidade}.`, botoes: [{ rotulo: "Ver o estoque", acao: () => app.ir("estoque", {}, { substituir: true }) }, { rotulo: "Lançar outro", icone: "mais", acao: () => G.mov(raiz, app, {}) }] }); },
+    });
+  };
+
+  // ───────────────────────── 4. Pedir contagem à equipe ─────────────────────────
+  G.contagem = async (raiz, app) => {
+    const produtos = (await NE.dados.produtos()).filter((p) => p.ativo); const sel = new Set();
+    NE.assistente({
+      raiz, rotuloFinal: "Avisar a equipe", aoCancelar: () => app.voltar(),
+      passos: [
+        { titulo: "O que a equipe deve contar?", icone: "raio", ajuda: "Toque em todos os produtos que quiser. Eles recebem um aviso no celular.", tela: (r) => el("div", { class: "grade-escolha" }, produtos.map((p) => el("button", { type: "button", class: "escolha", "aria-pressed": String(sel.has(p.id)), onclick: () => { sel.has(p.id) ? sel.delete(p.id) : sel.add(p.id); r(); } }, el("strong", {}, p.nome)))), validar: () => (!sel.size ? "Toque em pelo menos um produto." : null) },
+        { titulo: "Confirme", icone: "check", ajuda: "A equipe conta sem ver o saldo do sistema e você decide o ajuste depois.", tela: () => el("div", { class: "resumo" }, NE.linhaResumo("Contar", D.lista(produtos.filter((p) => sel.has(p.id)).map((p) => p.nome), 6))) },
+      ],
+      async aoConcluir() { await NE.dados.pedirContagem([...sel]); NE.telaFim(raiz, { titulo: "Equipe avisada", texto: "Quando a contagem chegar, você recebe um aviso para decidir o ajuste.", botoes: [{ rotulo: "Voltar ao estoque", acao: () => app.ir("estoque", {}, { substituir: true }) }] }); },
+    });
+  };
+
+  // ───────────────────────── 5. Decidir uma contagem com diferença ─────────────────────────
+  G.resolver = async (raiz, app, params) => {
+    const [cs, produtos] = await Promise.all([NE.dados.contagens(), NE.dados.produtos(true)]);
+    const c = cs.find((x) => x.id === params.id); const nome = (id) => (produtos.find((p) => p.id === id) || {}).nome || "Produto";
+    if (!c || c.status !== "aguardando_aprovacao") return NE.telaFim(raiz, { titulo: "Esta contagem já foi resolvida", botoes: [{ rotulo: "Voltar ao estoque", acao: () => app.ir("estoque", {}, { substituir: true }) }] });
+    const dif = c.itens.filter((i) => Number(i.diferenca) !== 0);
+    const decide = (rotulo, icone, classe, texto, fn) => el("button", { type: "button", class: `btn btn-bloco ${classe}`, onclick: (ev) => NE.comCarregando(ev.currentTarget, fn) }, ic(icone), rotulo);
+    raiz.replaceChildren(el("section", { class: "tela" },
+      el("div", { class: "tela-titulo" }, el("div", { class: "icone-grande", html: NE.icone.alerta }), el("div", {}, el("h1", {}, "A contagem não bateu"), el("p", {}, "O sistema achava que tinha um número e a equipe contou outro. Veja e decida."))),
+      el("div", { class: "resumo" }, dif.map((i) => el("div", { class: "resumo-linha" }, el("span", {}, nome(i.produto_id)), el("strong", {}, `Sistema ${D.fmt(i.esperado)} → Contado ${D.fmt(i.contado)}`)))),
+      dica("Se a contagem estiver certa, corrija o estoque (ele passa a valer o número contado). Se você duvida, peça para contar de novo."),
+      el("div", { style: "display:grid;gap:10px;margin-top:16px" },
+        decide("Corrigir o estoque", "check", "btn-principal btn-gigante", "", async () => { await NE.dados.aplicarAjuste(c.id); NE.app.atualizarSino(); NE.telaFim(raiz, { titulo: "Estoque corrigido", texto: "O saldo agora é o que a equipe contou.", botoes: [{ rotulo: "Ver o estoque", acao: () => app.ir("estoque", {}, { substituir: true }) }] }); }),
+        decide("Pedir para contar de novo", "raio", "btn-azul", "", async () => { await NE.dados.descartarContagem(c.id); await NE.dados.pedirContagem(dif.map((i) => i.produto_id)); NE.app.atualizarSino(); NE.telaFim(raiz, { titulo: "Nova contagem pedida", texto: "A equipe foi avisada.", botoes: [{ rotulo: "Voltar ao estoque", acao: () => app.ir("estoque", {}, { substituir: true }) }] }); }),
+        el("button", { type: "button", class: "btn btn-secundario btn-bloco", onclick: () => app.voltar() }, "Decidir depois"))));
+  };
+
+  // ───────────────────────── 6. Cadastrar várias pessoas ─────────────────────────
+  G.lote = async (raiz, app) => {
+    const U = NE.equipeUtil; const d = { funcao: "conferente", texto: "" };
+    const lerNomes = () => d.texto.split(/\n|;/).map((x) => x.trim()).filter((x) => x.length > 1).map((linha) => { const m = linha.match(/^(.*?)[\s,\-–]*((?:\(?\d{2}\)?[\s.-]*)?9?\d{4}[\s.-]?\d{4})\s*$/); return m && NE.soDigitos(m[2]).length >= 10 ? { nome: m[1].trim(), telefone: NE.soDigitos(m[2]) } : { nome: linha, telefone: null }; }).filter((x) => x.nome.length > 1);
+    NE.assistente({
+      raiz, rotuloFinal: "Cadastrar", aoCancelar: () => app.voltar(),
+      passos: [
+        { titulo: "Qual é a função?", icone: "usuario", ajuda: "Vale para todos que você cadastrar agora.", tela: (r) => el("div", { class: "chips" }, U.FUNCOES.map(([v, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(d.funcao === v), onclick: () => { d.funcao = v; r(); } }, nome))) },
+        { titulo: "Quem vai ser cadastrado?", icone: "pessoas", ajuda: "Escreva um nome por linha. O WhatsApp é opcional, no fim da linha.",
+          tela: () => { const a = el("textarea", { class: "entrada lote-area", id: "lote-nomes", placeholder: "Carlos Souza 15 99999-0001\nMarcos Lima\nJoão Pedro 15 98888-0002" }, d.texto); a.addEventListener("input", () => { d.texto = a.value; }); return el("div", {}, a, dica("Usuário e senha são criados sozinhos.")); },
+          validar: () => (!lerNomes().length ? "Escreva pelo menos um nome." : null) },
+        { titulo: "Confira a lista", icone: "check", ajuda: "Ao cadastrar, você recebe um cartão de acesso de cada pessoa.", tela: () => el("div", { class: "resumo" }, lerNomes().map((p) => NE.linhaResumo(p.nome, p.telefone ? NE.mascaraTelefone(p.telefone) : "sem WhatsApp"))) },
+      ],
+      async aoConcluir() {
+        const ns = lerNomes(); const existentes = new Set((await NE.dados.funcionarios()).map((p) => p.usuario)); const usados = new Set(existentes);
+        const lote = ns.map(({ nome, telefone }) => { let u = U.usuarioDe(nome) || "usuario"; let k = 2; const base = u; while (usados.has(u)) u = `${base}${k++}`; usados.add(u); return { nome, telefone, usuario: u, senha: U.senhaNova(), funcao: d.funcao, papel: U.papelDe(d.funcao) }; });
+        const r = await NE.dados.criarFuncionarios(lote); const falhas = r.filter((x) => !x.ok); if (falhas.length) NE.aviso(`${falhas.length} não foi cadastrado: ${falhas[0].erro}`, "alerta");
+        const criados = r.filter((x) => x.ok).map((x) => { const l = lote.find((y) => y.nome === x.nome || y.usuario === x.usuario) || {}; return { nome: x.nome || l.nome, usuario: x.usuario || l.usuario, senha: x.senha || l.senha, funcao: d.funcao, telefone: l.telefone }; });
+        if (criados.length) U.cartoes(criados, "Cartões de acesso", () => app.ir("equipe", {}, { substituir: true })); else app.ir("equipe", {}, { substituir: true });
+      },
+    });
+  };
+
+  // ───────────────────────── 7. Mudar algo de uma pessoa ─────────────────────────
+  G.pessoa = async (raiz, app, params) => {
+    const U = NE.equipeUtil; const p = (await NE.dados.funcionarios()).find((x) => x.id === params.id); if (!p) return app.ir("equipe", {}, { substituir: true });
+    const d = { oque: "", telefone: NE.mascaraTelefone(p.telefone), email_contato: p.email_contato || "", admissao: p.admissao || "", cnh_validade: p.cnh_validade || "", funcao: p.funcao, papel: p.papel, fotos: [], novaSenha: "" };
+    const opcoes = [{ valor: "contato", rotulo: "WhatsApp e contato", dica: "Telefone, e-mail" }, { valor: "foto", rotulo: "Foto de perfil", dica: "Aparece ao lado do nome" }, { valor: "funcao", rotulo: "Função e acesso", dica: "O que a pessoa pode ver" }, { valor: "senha", rotulo: "Nova senha", dica: "Para quem esqueceu" }];
+    NE.assistente({
+      raiz, rotuloFinal: "Salvar", aoCancelar: () => app.voltar(),
+      passos: [
+        { titulo: `O que mudar em ${p.nome.split(" ")[0]}?`, icone: "usuario", ajuda: "Escolha uma coisa de cada vez.", tela: (r) => NE.escolhaUnica(opcoes, d.oque, (v) => { d.oque = v; r(); }), validar: () => (!d.oque ? "Toque no que você quer mudar." : null) },
+        { titulo: (opcoes.find((o) => o.valor === d.oque) || {}).rotulo || "Alterar", icone: "conferir", ajuda: "Confira e toque em Salvar.",
+          tela: (r) => {
+            if (d.oque === "contato") { const zap = NE.linkWhatsApp(d.telefone); return el("div", {}, NE.campoTexto("WhatsApp / celular", { id: "ed-tel", value: d.telefone, inputmode: "tel", placeholder: "(15) 99999-9999" }, (v, i) => { d.telefone = NE.mascaraTelefone(v); if (i.value !== d.telefone) i.value = d.telefone; }), zap && el("a", { class: "btn btn-verde btn-bloco", href: zap, target: "_blank", rel: "noopener", style: "margin-bottom:12px" }, ic("whatsapp"), "Abrir conversa"), NE.campoTexto("E-mail", { id: "ed-email", value: d.email_contato, type: "email" }, (v) => { d.email_contato = v.trim(); })); }
+            if (d.oque === "foto") return NE.seletorFoto({ titulo: "Foto de perfil", dica: "Rosto de frente, com boa luz.", lista: d.fotos, varias: false, frontal: true, aoMudar: r });
+            if (d.oque === "funcao") return el("div", {}, el("div", { class: "campo" }, el("label", {}, "Função"), el("div", { class: "chips" }, U.FUNCOES.map(([v, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(d.funcao === v), onclick: () => { d.funcao = v; r(); } }, nome)))), NE.escolhaUnica([{ valor: "funcionario", rotulo: "Só conferência" }, { valor: "admin", rotulo: "Painel completo" }], d.papel, (v) => { d.papel = v; r(); }));
+            return dica("Vamos gerar uma senha nova e mostrar o cartão de acesso para você entregar. A senha antiga deixa de valer.");
+          },
+          validar: () => (d.oque === "contato" && d.telefone && NE.soDigitos(d.telefone).length < 10 ? "O telefone precisa ter DDD e número." : d.oque === "foto" && !d.fotos.length ? "Tire ou escolha uma foto." : null) },
+      ],
+      async aoConcluir() {
+        if (d.oque === "senha") { const r = await NE.dados.redefinirSenha(p.id); return U.cartoes([{ nome: p.nome, usuario: r.usuario || p.usuario, senha: r.senha, funcao: p.funcao, telefone: p.telefone }], "Nova senha", () => app.ir("equipe", {}, { substituir: true })); }
+        const campos = d.oque === "contato" ? { telefone: NE.soDigitos(d.telefone) || null, email_contato: d.email_contato || null } : d.oque === "foto" ? { foto: await NE.dados.enviarFoto(d.fotos[0].blob, app.perfil.id) } : { funcao: d.funcao, papel: d.papel };
+        await NE.dados.alterarFuncionario(p.id, campos); NE.telaFim(raiz, { titulo: "Pronto!", texto: `Os dados de ${p.nome.split(" ")[0]} foram atualizados.`, botoes: [{ rotulo: "Voltar à equipe", acao: () => app.ir("equipe", {}, { substituir: true }) }] });
+      },
+    });
+  };
+
+  // ───────────────────────── 8. Mudar algo de um caminhão ─────────────────────────
+  G.veiculo = async (raiz, app, params) => {
+    const v = (await NE.dados.veiculos(true)).find((x) => x.id === params.id); if (!v) return app.ir("cadastros", { aba: "caminhoes" }, { substituir: true });
+    const NOMES = { frente: "Frente", lateral: "Lateral", traseira: "Traseira", placa: "Placa", outras: "Outras" };
+    const d = { oque: "", marca: v.marca || "", modelo: v.modelo || "", ano: v.ano ? String(v.ano) : "", cor: v.cor || "", capacidade_t: v.capacidade_t ? String(v.capacidade_t) : "", descricao: v.descricao || "", novas: { frente: [], lateral: [], traseira: [], placa: [], outras: [] } };
+    NE.assistente({
+      raiz, rotuloFinal: "Salvar", aoCancelar: () => app.voltar(),
+      passos: [
+        { titulo: `O que mudar em ${v.placa}?`, icone: "caminhao", ajuda: "Escolha uma coisa de cada vez.", tela: (r) => NE.escolhaUnica([{ valor: "dados", rotulo: "Dados do caminhão", dica: "Marca, modelo, ano, cor, capacidade" }, { valor: "fotos", rotulo: "Fotos", dica: `${(v.fotos || []).length} fotos hoje` }], d.oque, (x) => { d.oque = x; r(); }), validar: () => (!d.oque ? "Toque no que você quer mudar." : null) },
+        { titulo: d.oque === "fotos" ? "Fotos do caminhão" : "Dados do caminhão", icone: "conferir", ajuda: "Confira e toque em Salvar.",
+          tela: (r) => d.oque === "fotos" ? el("div", {}, (v.fotos || []).length ? el("div", { class: "galeria-frota" }, v.fotos.map((f) => { const b = el("button", { type: "button", "aria-label": `Ver foto: ${NOMES[f.tipo] || f.tipo}` }, el("span", {}, NOMES[f.tipo] || f.tipo)); NE.dados.urlFoto(f.caminho).then((u) => { if (u) b.prepend(el("img", { src: u, alt: "", loading: "lazy" })); }).catch(() => {}); return b; })) : dica("Sem fotos ainda."), el("h3", {}, "Adicionar"), ...Object.keys(NOMES).map((k) => NE.seletorFoto({ titulo: NOMES[k], lista: d.novas[k], varias: k === "outras", aoMudar: r })))
+            : el("div", {}, el("div", { class: "form-linha" }, NE.campoTexto("Marca", { id: "fv-marca", value: d.marca }, (x) => { d.marca = x; }), NE.campoTexto("Modelo", { id: "fv-modelo", value: d.modelo }, (x) => { d.modelo = x; })), el("div", { class: "form-linha" }, NE.campoTexto("Ano", { id: "fv-ano", value: d.ano, inputmode: "numeric", maxlength: "4" }, (x, i) => { d.ano = x.replace(/\D/g, "").slice(0, 4); if (i.value !== d.ano) i.value = d.ano; }), NE.campoTexto("Cor", { id: "fv-cor", value: d.cor }, (x) => { d.cor = x; })), NE.campoTexto("Capacidade (toneladas)", { id: "fv-cap", value: d.capacidade_t, inputmode: "decimal" }, (x, i) => { d.capacidade_t = x.replace(",", ".").replace(/[^0-9.]/g, ""); if (i.value !== d.capacidade_t) i.value = d.capacidade_t; }), NE.campoTexto("Observação", { id: "fv-obs", value: d.descricao }, (x) => { d.descricao = x; })),
+          validar: () => (d.oque === "dados" && d.ano && (Number(d.ano) < 1980 || Number(d.ano) > new Date().getFullYear() + 1) ? "Confira o ano do caminhão." : d.oque === "fotos" && !Object.values(d.novas).flat().length ? "Tire ou escolha pelo menos uma foto." : null) },
+      ],
+      async aoConcluir() {
+        let campos; if (d.oque === "fotos") { const fotos = [...(v.fotos || [])]; for (const [tipo, lista] of Object.entries(d.novas)) for (const f of lista) fotos.push({ tipo, caminho: await NE.dados.enviarFoto(f.blob, app.perfil.id) }); campos = { fotos }; }
+        else campos = { marca: d.marca.trim() || null, modelo: d.modelo.trim() || null, ano: d.ano ? Number(d.ano) : null, cor: d.cor.trim() || null, capacidade_t: d.capacidade_t ? Number(d.capacidade_t) : null, descricao: d.descricao.trim() || null };
+        await NE.dados.alterarVeiculo(v.id, campos); NE.telaFim(raiz, { titulo: "Pronto!", texto: `${v.placa} foi atualizado.`, botoes: [{ rotulo: "Voltar aos caminhões", acao: () => app.ir("cadastros", { aba: "caminhoes" }, { substituir: true }) }] });
+      },
+    });
+  };
+
+  // ───────────────────────── 9. Mudar algo de um produto ─────────────────────────
+  G.produto = async (raiz, app, params) => {
+    const p = (await NE.dados.produtos(true)).find((x) => x.id === params.id); if (!p) return app.ir("cadastros", { aba: "produtos" }, { substituir: true });
+    const d = { oque: "", minimo: Number(p.minimo || 0), por_pilha: Number(p.por_pilha || 0) };
+    NE.assistente({
+      raiz, rotuloFinal: "Salvar", aoCancelar: () => app.voltar(),
+      passos: [
+        { titulo: `O que mudar em ${p.nome}?`, icone: "caixas", ajuda: "Escolha uma coisa.", tela: (r) => NE.escolhaUnica([{ valor: "minimo", rotulo: "Estoque mínimo", dica: "Abaixo disso o app avisa" }, { valor: "pilha", rotulo: "Peças por pilha", dica: "Deixa a contagem mais rápida" }], d.oque, (x) => { d.oque = x; r(); }), validar: () => (!d.oque ? "Toque no que você quer mudar." : null) },
+        { titulo: d.oque === "pilha" ? "Quantas peças tem cada pilha?" : "Qual o estoque mínimo?", icone: "conferir", ajuda: d.oque === "pilha" ? "Assim a equipe conta pilhas, e não peça por peça. Use 0 se o produto não fica em pilha." : "Quando o saldo ficar abaixo desse número, a expedição recebe um aviso.", tela: () => (d.oque === "pilha" ? NE.contador(d.por_pilha, (v) => { d.por_pilha = v; }, "ep-pilha") : NE.contador(d.minimo, (v) => { d.minimo = v; }, "ep-min")) },
+      ],
+      async aoConcluir() { await NE.dados.alterarProduto(p.id, d.oque === "pilha" ? { por_pilha: d.por_pilha || null } : { minimo: d.minimo }); NE.telaFim(raiz, { titulo: "Pronto!", texto: `${p.nome} foi atualizado.`, botoes: [{ rotulo: "Voltar aos produtos", acao: () => app.ir("cadastros", { aba: "produtos" }, { substituir: true }) }] }); },
+    });
+  };
+
+  // Cadastros completos (um por vez) — o passo a passo já existe em cadastros.js; aqui só entram na rota "guia" (sem a barra de baixo)
+  G.novaPessoa = (raiz, app) => NE.cadastros.funcionario(raiz, () => app.ir("equipe", {}, { substituir: true }));
+  G.novoVeiculo = (raiz, app) => NE.cadastros.caminhao(raiz, () => app.ir("cadastros", { aba: "caminhoes" }, { substituir: true }));
+  G.novoProduto = (raiz, app) => NE.cadastros.produto(raiz, () => app.ir("cadastros", { aba: "produtos" }, { substituir: true }));
+
+  // ───────────────────────── 10. Ajustes: quando o app deve avisar ─────────────────────────
+  G.ajustes = async (raiz, app) => {
+    const c = await NE.dados.config(); const nomesDia = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    NE.assistente({
+      raiz, rotuloFinal: "Salvar ajustes", aoCancelar: () => app.voltar(),
+      passos: [
+        { titulo: "Quando a empresa trabalha?", icone: "relogio", ajuda: "Conferência fora desse horário gera um aviso.", tela: (r) => {
+          const hora = (rot, ch, id) => { const i = el("input", { class: "entrada", type: "time", id, value: c.expediente[ch] }); i.addEventListener("change", () => { c.expediente[ch] = i.value; }); return el("div", { class: "campo" }, el("label", { for: id }, rot), i); };
+          return el("div", {}, el("div", { class: "chips" }, nomesDia.map((n, i) => el("button", { type: "button", class: "chip", "aria-pressed": String(c.expediente.dias.includes(i)), onclick: () => { const s = new Set(c.expediente.dias); s.has(i) ? s.delete(i) : s.add(i); c.expediente.dias = [...s].sort(); r(); } }, n))), el("div", { class: "form-linha", style: "margin-top:14px" }, hora("Começa", "inicio", "cf-ini"), hora("Termina", "fim", "cf-fim"))); } },
+        { titulo: "Quando o app deve avisar?", icone: "sino", ajuda: "Você pode deixar como está.", tela: () => el("div", {}, el("div", { class: "campo" }, el("label", { for: "cf-parada" }, "Nota esperando conferência há mais de (minutos)"), NE.contador(c.limiteNotaParadaMin, (v) => { c.limiteNotaParadaMin = Math.max(10, v); }, "cf-parada")), el("div", { class: "campo" }, el("label", { for: "cf-contagem" }, "Produto sem contar há mais de (dias)"), NE.contador(c.diasContagem, (v) => { c.diasContagem = Math.max(1, v); }, "cf-contagem"))) },
+        { titulo: "Resumo do dia", icone: "check", ajuda: "Todo dia, nesse horário, o app manda um resumo para a administração.", tela: () => { const i = el("input", { class: "entrada", type: "time", id: "cf-resumo", value: c.resumoDiarioHora }); i.addEventListener("change", () => { c.resumoDiarioHora = i.value; }); return el("div", { class: "campo" }, el("label", { for: "cf-resumo" }, "Hora do resumo"), i); } },
+      ],
+      async aoConcluir() { await NE.dados.salvarConfig(c); NE.telaFim(raiz, { titulo: "Ajustes salvos", texto: "O app já usa os novos horários e prazos.", botoes: [{ rotulo: "Voltar", acao: () => app.ir("mais", {}, { substituir: true }) }] }); },
+    });
+  };
+})();

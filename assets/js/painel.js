@@ -81,7 +81,7 @@
         !app.perm.limitado && item("pessoas", "Equipe", "Funcionários e acesso", () => app.ir("equipe")),
         !app.perm.limitado && item("caminhao", "Caminhões", "Placas da frota", () => app.ir("cadastros", { aba: "caminhoes" })),
         !app.perm.limitado && item("caixas", "Produtos", "Mínimo e pilha", () => app.ir("cadastros", { aba: "produtos" })),
-        !app.perm.limitado && item("engrenagem", "Ajustes", "Horário e prazos", () => app.ir("config")),
+        !app.perm.limitado && item("engrenagem", "Ajustes", "Horário e prazos", () => app.ir("guia", { fluxo: "ajustes" })),
         item("ajuda", "Tutorial", "Aprender em 1 minuto", () => NE.iniciarTour("painel", { verDicas: () => NE.abrirGuia("painel", raiz, () => app.ir("mais"), { novaConferencia: () => app.ir("conferir") }) }), "mais-tutorial"),
         item("baixar", "Planilha de cargas", "30 dias em CSV", async () => baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA })))),
         item("mapa", "Ver o site", "Como o cliente vê", () => { location.href = "index.html"; })));
@@ -98,66 +98,19 @@
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Cadastros"))), barra, conteudo);
     const lista = el("div", { class: "lista-simples" }, el("div", { class: "esqueleto" }));
     if (aba === "caminhoes") {
-      conteudo.replaceChildren(cabecalhoAba("Caminhões", "Aparecem na hora de escolher o caminhão.", "Cadastrar caminhão", () => abrir("caminhao")), lista);
+      conteudo.replaceChildren(cabecalhoAba("Caminhões", "Aparecem na hora de escolher o caminhão.", "Cadastrar caminhão", () => app.ir("guia", { fluxo: "novoVeiculo" })), lista);
       NE.dados.veiculos(true).then((vs) => lista.replaceChildren(...(vs.length ? vs.map((v) => {
         const detalhes = [[v.marca, v.modelo, v.ano].filter(Boolean).join(" "), v.cor, v.capacidade_t ? `${D.fmt(v.capacidade_t)} t` : ""].filter(Boolean).join(" · ");
         const miniatura = el("span", { class: "veiculo-miniatura", html: NE.icone.caminhao }); const f0 = (v.fotos || [])[0]; if (f0) NE.dados.urlFoto(f0.caminho).then((u) => { if (u) miniatura.replaceChildren(el("img", { src: u, alt: "" })); }).catch(() => {});
-        return el("div", {}, el("button", { type: "button", class: "pessoa-linha link-acao", style: "text-align:left;font-weight:inherit", onclick: () => fichaVeiculo(v, app) }, miniatura,
+        return el("div", {}, el("button", { type: "button", class: "pessoa-linha link-acao", style: "text-align:left;font-weight:inherit", onclick: () => app.ir("guia", { fluxo: "veiculo", id: v.id }) }, miniatura,
           el("div", {}, el("span", { class: "placa-br" }, v.placa), el("div", { class: "meta" }, `${NE.tiposVeiculo[v.tipo] || v.tipo}${detalhes ? " · " + detalhes : ""}`), (v.fotos || []).length ? el("div", { class: "meta" }, `${D.plural(v.fotos.length, "foto", "fotos")}`) : null)),
           NE.chave(v.ativo, "Em uso", (x) => NE.dados.alterarVeiculo(v.id, { ativo: x })));
       }) : [vazio("Nenhum caminhão ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
     } else {
-      conteudo.replaceChildren(cabecalhoAba("Produtos", "Mínimo e peças por pilha deixam o estoque e a contagem mais inteligentes.", "Cadastrar produto", () => abrir("produto")), lista);
-      NE.dados.produtos(true).then((ps) => lista.replaceChildren(...(ps.length ? ps.map((p) => el("div", {}, el("button", { type: "button", class: "link-acao", style: "text-align:left;display:block", onclick: () => editarProduto(p, app) }, el("strong", {}, p.nome), el("div", { class: "meta" }, `mínimo ${D.fmt(p.minimo || 0)}${p.por_pilha ? ` · ${p.por_pilha} por pilha` : ""} · toque para ajustar`)), NE.chave(p.ativo, "Em uso", (x) => NE.dados.alterarProduto(p.id, { ativo: x })))) : [vazio("Nenhum produto ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
+      conteudo.replaceChildren(cabecalhoAba("Produtos", "Mínimo e peças por pilha deixam o estoque e a contagem mais inteligentes.", "Cadastrar produto", () => app.ir("guia", { fluxo: "novoProduto" })), lista);
+      NE.dados.produtos(true).then((ps) => lista.replaceChildren(...(ps.length ? ps.map((p) => el("div", {}, el("button", { type: "button", class: "link-acao", style: "text-align:left;display:block", onclick: () => app.ir("guia", { fluxo: "produto", id: p.id }) }, el("strong", {}, p.nome), el("div", { class: "meta" }, `mínimo ${D.fmt(p.minimo || 0)}${p.por_pilha ? ` · ${p.por_pilha} por pilha` : ""} · toque para ajustar`)), NE.chave(p.ativo, "Em uso", (x) => NE.dados.alterarProduto(p.id, { ativo: x })))) : [vazio("Nenhum produto ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
     }
   };
-  // Ficha do caminhão: dados, galeria de fotos (toque para ampliar) e fotos novas
-  function fichaVeiculo(v, app) {
-    const d = { marca: v.marca || "", modelo: v.modelo || "", ano: v.ano ? String(v.ano) : "", cor: v.cor || "", capacidade_t: v.capacidade_t ? String(v.capacidade_t) : "", descricao: v.descricao || "", novas: { frente: [], lateral: [], traseira: [], placa: [], outras: [] } };
-    const NOMES = { frente: "Frente", lateral: "Lateral", traseira: "Traseira", placa: "Placa", outras: "Outras" }; const corpo = el("div", {}); let j;
-    const galeria = el("div", { class: "galeria-frota" });
-    (v.fotos || []).forEach((f) => { const b = el("button", { type: "button", "aria-label": `Ver foto: ${NOMES[f.tipo] || f.tipo}` }, el("span", {}, NOMES[f.tipo] || f.tipo)); b.addEventListener("click", async () => { const u = await NE.dados.urlFoto(f.caminho); if (u) window.open(u, "_blank", "noopener"); }); NE.dados.urlFoto(f.caminho).then((u) => { if (u) b.prepend(el("img", { src: u, alt: "", loading: "lazy" })); }).catch(() => {}); galeria.append(b); });
-    const desenhar = () => corpo.replaceChildren(el("div", { class: "resumo" }, NE.linhaResumo("Tipo", NE.tiposVeiculo[v.tipo] || v.tipo)),
-      (v.fotos || []).length ? el("div", {}, el("h3", {}, `Fotos (${v.fotos.length})`), galeria) : el("p", { class: "vazio" }, "Sem fotos ainda. Adicione abaixo."),
-      el("div", { class: "form-linha", style: "margin-top:14px" }, NE.campoTexto("Marca", { id: "fv-marca", value: d.marca }, (x) => { d.marca = x; }), NE.campoTexto("Modelo", { id: "fv-modelo", value: d.modelo }, (x) => { d.modelo = x; })),
-      el("div", { class: "form-linha" }, NE.campoTexto("Ano", { id: "fv-ano", value: d.ano, inputmode: "numeric", maxlength: "4" }, (x, i) => { d.ano = x.replace(/\D/g, "").slice(0, 4); if (i.value !== d.ano) i.value = d.ano; }), NE.campoTexto("Cor", { id: "fv-cor", value: d.cor }, (x) => { d.cor = x; })),
-      NE.campoTexto("Capacidade (toneladas)", { id: "fv-cap", value: d.capacidade_t, inputmode: "decimal" }, (x, i) => { d.capacidade_t = x.replace(",", ".").replace(/[^0-9.]/g, ""); if (i.value !== d.capacidade_t) i.value = d.capacidade_t; }),
-      NE.campoTexto("Observação", { id: "fv-obs", value: d.descricao }, (x) => { d.descricao = x; }),
-      el("h3", {}, "Adicionar fotos"), ...Object.keys(NOMES).map((k) => NE.seletorFoto({ titulo: NOMES[k], lista: d.novas[k], varias: k === "outras", aoMudar: desenhar })));
-    desenhar();
-    const salvar = el("button", { type: "button", class: "btn btn-principal", id: "btn-salvar-veiculo" }, ic("check"), "Salvar");
-    salvar.addEventListener("click", () => NE.comCarregando(salvar, async () => {
-      const fotos = [...(v.fotos || [])]; for (const [tipo, lista] of Object.entries(d.novas)) for (const f of lista) fotos.push({ tipo, caminho: await NE.dados.enviarFoto(f.blob, app.perfil.id) });
-      await NE.dados.alterarVeiculo(v.id, { marca: d.marca.trim() || null, modelo: d.modelo.trim() || null, ano: d.ano ? Number(d.ano) : null, cor: d.cor.trim() || null, capacidade_t: d.capacidade_t ? Number(d.capacidade_t) : null, descricao: d.descricao.trim() || null, fotos });
-      j.fechar(); NE.aviso("Caminhão atualizado.", "ok"); app.recarregar();
-    }));
-    j = NE.janelaSimples({ etiqueta: NE.tiposVeiculo[v.tipo] || "Frota", titulo: v.placa, corpo, rodape: [salvar] });
-  }
-
-  function editarProduto(p, app) {
-    const e = { minimo: Number(p.minimo || 0), por_pilha: Number(p.por_pilha || 0) }; let j;
-    const ok = el("button", { type: "button", class: "btn btn-principal", onclick: () => NE.comCarregando(ok, async () => { await NE.dados.alterarProduto(p.id, { minimo: e.minimo, por_pilha: e.por_pilha || null }); j.fechar(); NE.aviso("Produto atualizado.", "ok"); app.recarregar(); }) }, ic("check"), "Salvar");
-    j = NE.janelaSimples({ etiqueta: "Produto", titulo: p.nome, corpo: el("div", {}, el("div", { class: "campo" }, el("label", { for: "ep-min" }, "Estoque mínimo"), el("span", { class: "dica" }, "Abaixo disso o app avisa a expedição."), NE.contador(e.minimo, (v) => { e.minimo = v; }, "ep-min")),
-      el("div", { class: "campo" }, el("label", { for: "ep-pilha" }, "Peças por pilha"), el("span", { class: "dica" }, "Deixa a contagem mais rápida: conta pilhas, não peça por peça. 0 = não usa pilha."), NE.contador(e.por_pilha, (v) => { e.por_pilha = v; }, "ep-pilha"))), rodape: [ok] });
-  }
-
   // ───────────────────────── CONFIGURAÇÕES ─────────────────────────
-  NE.rotas.config = async (raiz, params, app) => {
-    const c = await NE.dados.config(); const nomesDia = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]; const aviso = el("div", {});
-    const caixa = el("div", {});
-    const desenhar = () => {
-      const dias = el("div", { class: "chips" }, nomesDia.map((n, i) => el("button", { type: "button", class: "chip", "aria-pressed": String(c.expediente.dias.includes(i)), onclick: () => { const s = new Set(c.expediente.dias); s.has(i) ? s.delete(i) : s.add(i); c.expediente.dias = [...s].sort(); desenhar(); } }, n)));
-      const hora = (rot, chave, id) => { const inp = el("input", { class: "entrada", type: "time", id, value: c.expediente[chave] }); inp.addEventListener("change", () => { c.expediente[chave] = inp.value; }); return el("div", { class: "campo" }, el("label", { for: id }, rot), inp); };
-      const resumo = el("input", { class: "entrada", type: "time", id: "cf-resumo", value: c.resumoDiarioHora }); resumo.addEventListener("change", () => { c.resumoDiarioHora = resumo.value; });
-      caixa.replaceChildren(aviso, el("div", { class: "cartao" }, el("h2", {}, "Expediente"), el("p", { class: "suave" }, "Conferência fora desse horário gera um aviso."), dias, el("div", { class: "form-linha", style: "margin-top:12px" }, hora("Começa", "inicio", "cf-ini"), hora("Termina", "fim", "cf-fim"))),
-        el("div", { style: "height:12px" }), el("div", { class: "cartao" }, el("h2", {}, "Prazos"),
-          el("div", { class: "campo" }, el("label", { for: "cf-parada" }, "Nota parada na fila depois de (minutos)"), NE.contador(c.limiteNotaParadaMin, (v) => { c.limiteNotaParadaMin = Math.max(10, v); }, "cf-parada")),
-          el("div", { class: "campo" }, el("label", { for: "cf-contagem" }, "Pedir contagem de produto parado há (dias)"), NE.contador(c.diasContagem, (v) => { c.diasContagem = Math.max(1, v); }, "cf-contagem")),
-          el("div", { class: "campo" }, el("label", { for: "cf-resumo" }, "Hora do resumo do dia"), resumo)));
-    };
-    const salvar = el("button", { type: "button", class: "btn btn-principal btn-bloco", id: "btn-salvar-config" }, ic("check"), "Salvar ajustes");
-    salvar.addEventListener("click", () => NE.comCarregando(salvar, async () => { await NE.dados.salvarConfig(c); NE.aviso("Ajustes salvos.", "ok"); }));
-    raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Ajustes"), el("p", {}, "Quando o app deve avisar."))), caixa, el("div", { style: "height:14px" }), salvar);
-    desenhar();
-  };
+  NE.rotas.config = (raiz, params, app) => app.ir("guia", { fluxo: "ajustes" }, { substituir: true });
 })();

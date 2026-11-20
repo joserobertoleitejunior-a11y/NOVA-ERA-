@@ -11,8 +11,8 @@
 
   const NAV_ADMIN = [["inicio", "Início", "casa"], ["notas", "Notas", "nota"], ["estoque", "Estoque", "caixas"], ["cargas", "Cargas", "caminhao"], ["mais", "Mais", "mais_menu"]];
   const NAV_FUNC = [["notas", "Fila", "nota"], ["estoque", "Estoque", "caixas"], ["alertas", "Avisos", "sino"]];
-  const SEM_NAV = new Set(["conferir", "contar", "leitor"]);
-  const PAI_NAV = { alertas: "mais", equipe: "mais", cadastros: "mais", config: "mais", exportar: "mais" };
+  const SEM_NAV = new Set(["conferir", "contar", "leitor", "guia"]);
+  const PAI_NAV = { resumo: "inicio", alertas: "mais", equipe: "mais", cadastros: "mais", config: "mais", exportar: "mais" };
   const ehAdmin = () => perfil?.papel === "admin";
   // O que cada função enxerga. Sem regra aqui, vale o padrão do papel (administração = tudo; funcionário = conferência).
   const REGRAS = {
@@ -41,7 +41,7 @@
     const { rota, params } = atual;
     const sem = SEM_NAV.has(rota);
     document.body.classList.toggle("com-nav", !sem);
-    $("main").className = ["inicio", "cargas", "estoque", "notas", "equipe", "cadastros", "config", "exportar"].includes(rota) && ehAdmin() ? "largo" : "";
+    $("main").className = ["resumo", "cargas", "estoque", "notas", "equipe", "cadastros", "config", "exportar"].includes(rota) && ehAdmin() ? "largo" : "";
     nav(rota, sem); botaoIA(sem);
     const f = NE.rotas[rota] || NE.rotas[inicial()];
     window.scrollTo({ top: 0 });

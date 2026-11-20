@@ -58,24 +58,10 @@
     const tab = el("div", { class: "tabela-wrap resumo" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", {}, "Quando"), el("th", {}, "O quê"), el("th", { class: "num" }, "Qtd"))),
       el("tbody", {}, movs.map((m) => el("tr", {}, el("td", {}, NE.dataHora(m.criado_em)), el("td", {}, m.motivo || m.tipo), el("td", { class: "num" }, m.quantidade > 0 ? `+${fmt(m.quantidade)}` : fmt(m.quantidade)))))));
     j = NE.janelaSimples({ etiqueta: "Estoque", titulo: s.nome, corpo: el("div", {}, el("div", { class: "resumo" }, NE.linhaResumo("Saldo no sistema", `${fmt(s.saldo)} ${s.unidade}`), NE.linhaResumo("Mínimo", fmt(s.minimo)), NE.linhaResumo("Última contagem", s.ultima_contagem ? NE.dataHora(s.ultima_contagem) : "nunca")), el("h3", {}, "Últimos movimentos"), movs.length ? tab : el("p", { class: "vazio" }, "Sem movimentos.")),
-      rodape: [el("button", { type: "button", class: "btn btn-azul", onclick: () => { j.fechar(); lancar(produtos, app, s.produto_id); } }, ic("mais"), "Lançar"), el("button", { type: "button", class: "btn btn-secundario", onclick: async () => { await NE.dados.pedirContagem([s.produto_id]); j.fechar(); NE.aviso("Pedido de contagem enviado à equipe.", "ok"); } }, ic("raio"), "Pedir contagem")] });
+      rodape: [el("button", { type: "button", class: "btn btn-azul", onclick: () => { j.fechar(); lancar(produtos, app, s.produto_id); } }, ic("mais"), "Lançar"), el("button", { type: "button", class: "btn btn-secundario", onclick: async () => { await NE.dados.pedirContagem([s.produto_id]); j.fechar(); NE.aviso("A equipe foi avisada para contar este produto.", "ok"); } }, ic("raio"), "Pedir para contar")] });
   }
 
-  function lancar(produtos, app, produtoInicial) {
-    const e = { produto_id: produtoInicial || "", tipo: "entrada", quantidade: 1, motivo: "" }; const aviso = el("div", {}); const corpo = el("div", {}); let j;
-    const desenhar = () => corpo.replaceChildren(aviso,
-      el("div", { class: "campo" }, el("label", {}, "Produto"), el("div", { class: "chips rolagem" }, produtos.filter((p) => p.ativo).map((p) => el("button", { type: "button", class: "chip", "aria-pressed": String(e.produto_id === p.id), onclick: () => { e.produto_id = p.id; desenhar(); } }, p.nome)))),
-      el("div", { class: "campo" }, el("label", {}, "O que aconteceu"), NE.escolhaUnica([{ valor: "entrada", rotulo: "Entrada", dica: "Produção ou compra" }, { valor: "perda", rotulo: "Perda", dica: "Quebra ou descarte" }], e.tipo, (v) => { e.tipo = v; desenhar(); })),
-      el("div", { class: "campo" }, el("label", { for: "lc-q" }, "Quantidade"), NE.contador(e.quantidade, (v) => { e.quantidade = v; }, "lc-q")),
-      NE.campoTexto("Observação (opcional)", { id: "lc-motivo", value: e.motivo, placeholder: e.tipo === "entrada" ? "Ex.: produção do turno" : "Ex.: peça trincada" }, (v) => { e.motivo = v; }));
-    desenhar();
-    const ok = el("button", { type: "button", class: "btn btn-principal", id: "btn-lc-ok" }, ic("check"), "Registrar");
-    ok.addEventListener("click", () => NE.comCarregando(ok, async () => {
-      if (!e.produto_id) return NE.aviso("Escolha o produto.", "erro", aviso); if (!(e.quantidade > 0)) return NE.aviso("A quantidade precisa ser maior que zero.", "erro", aviso);
-      await NE.dados.lancarMovimento(e); j.fechar(); NE.aviso(`${e.tipo === "entrada" ? "Entrada" : "Perda"} registrada.`, "ok"); app.recarregar();
-    }));
-    j = NE.janelaSimples({ etiqueta: "Estoque", titulo: "Lançar movimento", corpo, rodape: [ok] });
-  }
+  const lancar = (produtos, app, produtoId) => app.ir("guia", { fluxo: "mov", produto_id: produtoId || "" });
 
   function contagens(caixa, ctx, produtos, app) {
     const lista = ctx.contagens.filter((c) => c.status !== "descartada");
@@ -85,18 +71,11 @@
         const rot = { aguardando_aprovacao: ["Aguardando você", "alerta"], aplicada: ["Aplicada", "ok"], solicitada: ["Pedida", "azul"] }[c.status] || [c.status, ""];
         return el("div", { class: `alerta-item ${pend ? "atencao" : ""}` }, el("strong", {}, `${c.escopo || "Contagem"} · ${NE.dataHora(c.criado_em)}`, " ", el("span", { class: `etiqueta ${rot[1]}` }, rot[0])),
           el("p", {}, c.status === "solicitada" ? `Pedido para contar: ${D.lista((c.itens || []).map((i) => nomeDe(produtos, i.produto_id)), 4)}.` : dif.length ? dif.map((i) => `${nomeDe(produtos, i.produto_id)}: contado ${fmt(i.contado)} (sistema ${fmt(i.esperado)}, ${i.diferenca > 0 ? "+" : "−"}${fmt(Math.abs(i.diferenca))})`).join(" · ") : `${D.plural((c.itens || []).length, "produto contado", "produtos contados")}, tudo bateu.`),
-          pend && el("div", { class: "acoes-linha" }, el("button", { type: "button", class: "link-acao verde", onclick: async () => { await NE.dados.aplicarAjuste(c.id); NE.aviso("Ajuste aplicado ao estoque.", "ok"); app.recarregar(); NE.app.atualizarSino(); } }, ic("check"), "Aprovar ajuste"),
-            el("button", { type: "button", class: "link-acao", onclick: async () => { await NE.dados.descartarContagem(c.id); NE.aviso("Contagem descartada.", "ok"); app.recarregar(); } }, ic("fechar"), "Descartar")));
+          pend && el("button", { type: "button", class: "btn btn-principal", style: "margin-top:8px", id: "btn-decidir", onclick: () => app.ir("guia", { fluxo: "resolver", id: c.id }) }, ic("check"), "Resolver esta contagem"));
       }) : [el("div", { class: "vazio-grande" }, el("strong", {}, "Sem contagens ainda"), "Faça a Contagem do dia: leva uns 3 minutos.")]));
   }
 
-  function pedir(produtos, app) {
-    const sel = new Set(); const corpo = el("div", {}); let j;
-    const desenhar = () => corpo.replaceChildren(el("p", { style: "margin-top:0" }, "Escolha o que a equipe deve contar. Eles recebem um aviso."), el("div", { class: "chips" }, produtos.filter((p) => p.ativo).map((p) => el("button", { type: "button", class: "chip", "aria-pressed": String(sel.has(p.id)), onclick: () => { sel.has(p.id) ? sel.delete(p.id) : sel.add(p.id); desenhar(); } }, p.nome))));
-    desenhar();
-    const ok = el("button", { type: "button", class: "btn btn-principal", onclick: () => NE.comCarregando(ok, async () => { if (!sel.size) return NE.aviso("Escolha pelo menos um produto.", "erro"); await NE.dados.pedirContagem([...sel]); j.fechar(); NE.aviso("Pedido enviado à equipe.", "ok"); app.recarregar(); }) }, ic("enviar"), "Enviar pedido");
-    j = NE.janelaSimples({ etiqueta: "Contagem", titulo: "Pedir contagem", corpo, rodape: [ok] });
-  }
+  const pedir = (produtos, app) => app.ir("guia", { fluxo: "contagem" });
 
   function movimentos(caixa, ctx, produtos) {
     const ms = [...ctx.movimentos].sort((a, b) => D.aMs(b.criado_em) - D.aMs(a.criado_em)).slice(0, 80);

@@ -8,7 +8,7 @@
 
   const ICONE_SEMAFORO = { vermelho: "alerta", amarelo: "alerta", verde: "check" };
 
-  NE.rotas.inicio = (raiz, params, app) => {
+  NE.rotas.resumo = (raiz, params, app) => {
     raiz.replaceChildren(el("div", { class: "esqueleto", style: "height:90px" }), el("div", { class: "esqueleto", style: "height:140px" }), el("div", { class: "esqueleto", style: "height:200px" }));
     NE.dados.contexto().then((ctx) => desenhar(raiz, ctx, app)).catch((e) => { raiz.replaceChildren(); NE.aviso(NE.mensagemErro(e), "erro", raiz); });
   };
@@ -60,8 +60,39 @@
       atalho("raio", "Contagem do dia", "3 minutos, o que mais importa", ir("contar")),
       atalho("pessoas", "Cadastrar equipe", "Várias pessoas de uma vez", ir("equipe", { novo: "1" })));
 
-    raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, `Olá, ${primeiro}`), el("p", {}, new Date(ctx.agora).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })))),
+    raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Resumo completo"), el("p", {}, `${primeiro}, aqui está tudo em detalhe.`)), el("button", { type: "button", class: "link-acao", onclick: () => app.voltar() }, ic("voltar"), "Voltar")),
       chips, sem, kpis, blocoRecados, atalhos, grafico, blocoProdutos, blocoEquipe);
   }
   const atalho = (icone, titulo, sub, acao) => el("button", { type: "button", class: "cartao-guia", onclick: acao }, ic(icone), el("span", {}, titulo, el("small", { style: "display:block" }, sub)));
+
+  // ───────────────────────── INÍCIO SIMPLES: uma frase de situação + "o que você quer fazer?" ─────────────────────────
+  NE.rotas.inicio = async (raiz, params, app) => {
+    raiz.replaceChildren(el("div", { class: "esqueleto", style: "height:110px" }), el("div", { class: "esqueleto", style: "height:260px" }));
+    let ctx; try { ctx = await NE.dados.contexto(); } catch (e) { raiz.replaceChildren(); return NE.aviso(NE.mensagemErro(e), "erro", raiz); }
+    const r = D.resumoDoPeriodo(ctx, "hoje"); const primeiro = (app.perfil.nome || "").split(" ")[0]; const topo = r.insights.find((i) => i.nivel !== "ok");
+    const limitado = app.perm.limitado;
+    const irPara = (a) => (a.rota === "contagem" ? app.ir("contar", {}) : app.ir(a.rota, a.params || {}));
+    const status = el("section", { class: `status-simples ${r.semaforo.cor}`, "aria-live": "polite" },
+      el("div", { class: "luz", html: NE.icone[r.semaforo.cor === "verde" ? "check" : "alerta"] }),
+      el("div", { class: "status-texto" }, el("strong", {}, r.semaforo.cor === "verde" ? "Tudo certo por aqui" : r.semaforo.cor === "amarelo" ? "Tem algo para olhar" : "Precisa da sua atenção"),
+        el("p", {}, topo ? topo.titulo : "Nenhum problema agora. Quando algo der errado, o app avisa você."),
+        topo && topo.acao && el("button", { type: "button", class: "btn btn-principal", id: "btn-resolver", onclick: () => irPara(topo.acao) }, "Resolver agora")));
+    const numeros = el("div", { class: "numeros-simples" },
+      el("div", {}, el("b", {}, String(r.kpis.total)), el("span", {}, r.kpis.total === 1 ? "carga conferida hoje" : "cargas conferidas hoje")),
+      el("div", {}, el("b", {}, String(r.fila.total)), el("span", {}, r.fila.total === 1 ? "nota esperando" : "notas esperando")));
+    const T = [
+      ["nota", "Lançar uma nota", "A nota chegou? Coloque na fila", () => app.ir("guia", { fluxo: "nota" })],
+      ["raio", "Contar o estoque", "Leva uns 3 minutos", () => app.ir("contar", {})],
+      ["caminhao", "Ver as cargas", "O que já saiu", () => app.ir("cargas", {})],
+      ["caixas", "Ver o estoque", "Quanto tem de cada peça", () => app.ir("estoque", {})],
+      ["usuario", "Cadastrar uma pessoa", "Funcionário novo", () => app.ir("guia", { fluxo: "novaPessoa" })],
+      ["pessoas", "Cadastrar várias pessoas", "Só os nomes", () => app.ir("guia", { fluxo: "lote" })],
+      ["caminhao", "Cadastrar um caminhão", "Placa, fotos e dados", () => app.ir("guia", { fluxo: "novoVeiculo" })],
+    ].filter((t, i) => !limitado || i === 0 || i === 2);
+    const tiles = el("div", { class: "tiles" }, T.map(([icone, nome, sub, acao], i) => el("button", { type: "button", class: "tile", id: i === 0 ? "tile-nota" : null, onclick: acao }, el("span", { class: "tile-icone", html: NE.icone[icone] }), el("strong", {}, nome), el("small", {}, sub))));
+    raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, `Olá, ${primeiro}`), el("p", {}, new Date(ctx.agora).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })))),
+      status, numeros, el("h2", { class: "titulo-tiles" }, "O que você quer fazer?"), tiles,
+      el("div", { class: "links-fim" }, !limitado && el("button", { type: "button", class: "link-acao", id: "btn-resumo", onclick: () => app.ir("resumo", {}) }, ic("grafico"), "Ver o resumo completo"),
+        el("button", { type: "button", class: "link-acao", onclick: () => NE.iniciarTour("painel", { verDicas: () => NE.abrirGuia("painel", raiz, () => app.ir("inicio"), { novaConferencia: () => app.ir("conferir") }) }) }, ic("ajuda"), "Como usar o app (1 minuto)")));
+  };
 })();
