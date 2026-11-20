@@ -39,7 +39,7 @@
         el("div", { class: "foto-acoes" },
           el("label", { class: "btn btn-azul botao-camera" }, ic("camera"), "Tirar foto", entrada(true)),
           el("label", { class: "btn btn-secundario botao-camera" }, ic("galeria"), "Galeria", entrada(false))),
-        NE.modoDemo && el("button", { type: "button", class: "link-acao", onclick: async () => ler(await NE.nfe.gerarExemplo()) }, "Treinar com nota de exemplo"),
+        NE.modoTeste && el("button", { type: "button", class: "link-acao", onclick: async () => ler(await NE.nfe.gerarExemplo()) }, "Treinar com nota de teste"),
         fb);
     },
 

@@ -1,1 +1,32 @@
-{"name":"Confere Carga · Nova Era","short_name":"Confere Carga","start_url":"./app.html","display":"standalone","background_color":"#f1efed","theme_color":"#c8202a","lang":"pt-BR"}
+{
+ "name": "Confere Carga · Nova Era",
+ "short_name": "Confere Carga",
+ "description": "Conferência de carga, estoque e avisos da Nova Era.",
+ "start_url": "./app.html",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#f1efed",
+ "theme_color": "#d9141e",
+ "lang": "pt-BR",
+ "icons": [
+  {
+   "src": "assets/img/icone-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "assets/img/icone-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "assets/img/icone-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ]
+}

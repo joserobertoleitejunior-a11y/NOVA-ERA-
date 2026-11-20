@@ -2,8 +2,8 @@
 // confere o dígito verificador e extrai número, série e CNPJ do emitente. Sem internet de IA, sem custo.
 (() => {
   const NE = window.NE;
-  const ZXING = "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";
-  const JSBARCODE = "https://cdn.jsdelivr.net/npm/jsbarcode@3.12.1/dist/JsBarcode.all.min.js";
+  const ZXING = "assets/vendor/zxing.min.js";
+  const JSBARCODE = "assets/vendor/jsbarcode.js";
 
   // Chave: cUF(2) AAMM(4) CNPJ(14) modelo(2) série(3) número(9) tpEmis(1) código(8) DV(1)
   const dvChave = (d43) => {

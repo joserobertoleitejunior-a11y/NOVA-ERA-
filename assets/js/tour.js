@@ -10,15 +10,18 @@
       { alvo: "#btn-seguir", titulo: "Continuar", texto: "Terminou? Toque aqui. Se faltar algo, o app avisa." },
     ],
     conferente: [
-      { alvo: "#btn-nova", titulo: "Nova conferência", texto: "Toque aqui quando um caminhão for sair." },
-      { alvo: "#lista-minhas", titulo: "Suas conferências", texto: "Toque numa para ver tudo." },
-      { alvo: "#btn-ajuda", titulo: "Ajuda", texto: "Dúvida? Toque aqui." },
+      { alvo: "#btn-nova", titulo: "Conferir uma carga", texto: "Sem nota na fila? Toque aqui para conferir do zero." },
+      { alvo: "#lista-minhas", titulo: "Fila de carga", texto: "Notas esperando conferência. Toque numa para conferir." },
+      { alvo: "#nav-inferior", titulo: "Menu", texto: "Fila, estoque (conte rápido) e avisos." },
+      { alvo: "#btn-sino", titulo: "Avisos", texto: "O app avisa aqui quando chegar nota ou pedirem contagem." },
     ],
     painel: [
-      { alvo: ".numeros", titulo: "Resumo do dia", texto: "Laranja é carga com diferença." },
-      { alvo: ".filtros", titulo: "Buscar e filtrar", texto: "Troque o dia, busque a nota ou veja só as diferenças." },
-      { alvo: ".conf", titulo: "Abrir conferência", texto: "Itens, fotos, etiquetas e link para o cliente." },
-      { alvo: ".abas", titulo: "Cadastros", texto: "Funcionários, caminhões e produtos." },
+      { alvo: ".semaforo", titulo: "Como está a empresa", texto: "Verde: tudo certo. Amarelo: atenção. Vermelho: precisa de você." },
+      { alvo: ".kpis", titulo: "Números do dia", texto: "Toque num número para ver os detalhes." },
+      { alvo: ".recado", titulo: "O que precisa de você", texto: "Cada recado leva direto à tela para resolver." },
+      { alvo: "#nav-inferior", titulo: "Menu", texto: "Notas, estoque, cargas e o resto em Mais." },
+      { alvo: "#btn-sino", titulo: "Avisos", texto: "Problemas chegam aqui na hora, e no celular." },
+      { alvo: "#fab-ia", titulo: "Assistente", texto: "Pergunte qualquer coisa: o que saiu a mais, estoque, notas paradas." },
     ],
   };
 
@@ -62,7 +65,7 @@
       const alvo = document.querySelector(p.alvo);
       // rola só por conta do tutorial (a pessoa não consegue rolar)
       document.documentElement.classList.remove("sem-rolagem");
-      if (!alvo.closest(".topo, .acoes, .flutuantes")) alvo.scrollIntoView({ block: "center", behavior: "instant" });
+      if (!alvo.closest(".topo, .acoes, .flutuantes, .nav-inferior, .fab-ia")) alvo.scrollIntoView({ block: "center", behavior: "instant" });
       document.documentElement.classList.add("sem-rolagem");
       const ultimo = i === passos.length - 1;
       balao.replaceChildren(

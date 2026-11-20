@@ -13,14 +13,16 @@
   ];
   const MOTIVOS = ["Nota vai ser corrigida", "Peça extra autorizada pelo responsável", "Peça faltando no estoque", "Outro motivo"];
 
-  let estado, perfil, catalogo, aoTerminar;
+  let estado, perfil, catalogo, aoTerminar, aberta = {};
 
   function novoEstado() {
-    return { veiculo: null, placa: "", motorista: "", numero_nota: "", chave_nfe: "", leitura: null, itens: [], fotos: { nota: [], carga: [], placa: [], avaria: [] }, motivo: "", observacao: "" };
+    return { veiculo: null, placa: "", motorista: "", numero_nota: "", chave_nfe: "", leitura: null, itens: [], fotos: { nota: [], carga: [], placa: [], avaria: [] }, motivo: "", observacao: "",
+      nota: null, cliente: "", inicio: Date.now(), client_id: (crypto.randomUUID ? crypto.randomUUID() : `c-${Date.now()}-${Math.random()}`), metodo: "passo_a_passo" };
   }
 
-  NE.iniciarConferencia = async (perfilAtual, raiz, voltarInicio) => {
-    perfil = perfilAtual; aoTerminar = voltarInicio;
+  // opcoes.nota_id: conferir uma nota da fila (itens já vêm da nota: só falta olhar o caminhão)
+  NE.iniciarConferencia = async (perfilAtual, raiz, voltarInicio, opcoes = {}) => {
+    perfil = perfilAtual; aoTerminar = voltarInicio; aberta = opcoes;
     estado = novoEstado();
     // Abre na hora com a lista guardada no aparelho; atualiza em segundo plano
     const cv = NE.dados.emCache("veiculos"), cp = NE.dados.emCache("produtos");
@@ -34,9 +36,18 @@
         catalogo = { veiculos, produtos };
       } catch (e) { NE.aviso(NE.mensagemErro(e)); catalogo = { veiculos: [], produtos: [] }; }
     }
+    if (opcoes.nota_id) {
+      try {
+        const nota = (await NE.dados.notas({ status: ["pendente", "em_conferencia"] })).find((n) => n.id === opcoes.nota_id);
+        if (!nota) { NE.aviso("Essa nota não está mais na fila.", "alerta"); return voltarInicio(); }
+        estado.nota = nota; estado.numero_nota = nota.numero; estado.cliente = nota.cliente || ""; estado.chave_nfe = nota.chave_nfe || "";
+        estado.itens = (nota.itens || []).map((i) => ({ produto_id: i.produto_id || null, descricao: i.descricao, qtd_nota: Number(i.quantidade ?? i.qtd_nota), qtd_carregada: Number(i.quantidade ?? i.qtd_nota), situacao: null }));
+      } catch (e) { NE.aviso(NE.mensagemErro(e)); return voltarInicio(); }
+    }
+    const lista = estado.nota ? PASSOS.filter((p) => !["nota", "itens"].includes(p.id)) : PASSOS;
     NE.assistente({
       raiz,
-      passos: PASSOS.map((p) => ({ ...p, tela: TELAS[p.id], validar: VALIDAR[p.id] })),
+      passos: lista.map((p) => ({ ...p, tela: TELAS[p.id], validar: VALIDAR[p.id] })),
       rotuloFinal: "Registrar conferência",
       aoConcluir: () => registrar(raiz),
       aoCancelar: () => aoTerminar(),
@@ -120,7 +131,12 @@
     },
 
     conferir(redesenhar) {
-      return el("div", {}, estado.itens.map((it, i) => {
+      const tudo = el("button", { type: "button", class: "btn btn-verde btn-bloco btn-gigante", id: "btn-tudo-confere" }, ic("check"), "Tudo confere");
+      tudo.addEventListener("click", () => { estado.itens.forEach((it) => { it.situacao = "confere"; it.qtd_carregada = it.qtd_nota; }); redesenhar(); });
+      const ler = estado.nota && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ler-etiquetas", onclick: () => lerEtiquetas(redesenhar) }, ic("qr"), "Contar lendo as etiquetas");
+      const todosOk = estado.itens.length > 0 && estado.itens.every((i) => i.situacao === "confere");
+      return el("div", {}, el("div", { style: "display:grid;gap:10px;margin-bottom:16px" }, todosOk ? el("div", { class: "aviso ok" }, ic("check"), el("span", {}, "Tudo marcado como conferido. Toque em Continuar, ou ajuste algum item abaixo.")) : tudo, ler),
+        ...estado.itens.map((it, i) => {
         const dif = it.situacao === "diferente" ? Number(it.qtd_carregada) - Number(it.qtd_nota) : 0;
         const bConf = el("button", { type: "button", class: "opcao confere", "aria-pressed": String(it.situacao === "confere") }, ic("check"), "Confere");
         const bDif = el("button", { type: "button", class: "opcao diferente", "aria-pressed": String(it.situacao === "diferente") }, ic("alerta"), "Diferente");
@@ -229,8 +245,8 @@
     const feita = lista.length > 0;
     const obrig = exigencia === "Obrigatória";
     const rotuloCamera = feita ? (varias ? "Mais uma" : "Tirar outra") : "Tirar foto";
-    const exemplo = NE.dados.fotoExemplo && el("button", { type: "button", class: "link-acao", style: "justify-self:center",
-      onclick: async () => adicionar([tipo === "nota" ? await NE.nfe.gerarExemplo() : await NE.dados.fotoExemplo(titulo)]) }, "Usar foto de exemplo (demonstração)");
+    const exemplo = NE.modoTeste && el("button", { type: "button", class: "link-acao", style: "justify-self:center",
+      onclick: async () => adicionar([tipo === "nota" ? await NE.nfe.gerarExemplo() : await NE.dados.fotoExemplo(titulo)]) }, "Usar foto de teste");
     return el("div", { class: `foto-bloco${feita ? " feita" : ""}` },
       el("div", { class: "foto-bloco-topo" }, el("strong", {}, titulo),
         el("span", { class: `etiqueta ${feita ? "ok" : obrig ? "obrigatoria" : ""}` }, feita ? `${lista.length} foto${lista.length > 1 ? "s" : ""}` : exigencia)),
@@ -243,6 +259,29 @@
         el("label", { class: `btn ${!feita && obrig ? "btn-azul" : "btn-secundario"} botao-camera` }, ic("camera"), rotuloCamera, entrada(true, "Tirar foto")),
         el("label", { class: "btn btn-secundario botao-camera" }, ic("galeria"), "Galeria", entrada(false, "Escolher da galeria"))),
       exemplo);
+  }
+
+  // Contagem lendo o QR de cada peça: aponta a câmera e o app conta sozinho (e avisa se for etiqueta de outra nota)
+  function lerEtiquetas(redesenhar) {
+    const lidas = new Set(); const contagem = estado.itens.map(() => 0); const lista = el("div", { class: "progresso-pecas" }); const msg = el("div", { "aria-live": "polite" }); const onde = el("div", {}); let leitor;
+    const desenhar = () => lista.replaceChildren(...estado.itens.map((it, i) => el("div", { class: "linha" }, el("strong", {}, it.descricao), el("span", { class: `etiqueta ${contagem[i] === Number(it.qtd_nota) ? "ok" : contagem[i] > Number(it.qtd_nota) ? "alerta" : ""}` }, `${contagem[i]} de ${NE.num(it.qtd_nota)}`))));
+    const aoLer = (texto) => {
+      let u; try { u = new URL(texto); } catch { return; }
+      const token = u.searchParams.get("c"); const p = u.searchParams.get("p");
+      if (estado.nota?.token_publico && token !== estado.nota.token_publico) { NE.aviso("Essa etiqueta é de outra nota.", "erro", msg); return; }
+      if (!p) { NE.aviso("Etiqueta sem número de peça (é a etiqueta por produto).", "alerta", msg); return; }
+      if (lidas.has(p)) return; const [idx] = p.split("-").map(Number); if (!(idx in contagem)) return;
+      lidas.add(p); contagem[idx]++; msg.replaceChildren(); desenhar();
+    };
+    const usar = el("button", { type: "button", class: "btn btn-principal", id: "btn-usar-contagem" }, ic("check"), "Usar esta contagem");
+    const j = NE.janelaSimples({ etiqueta: "Etiquetas", titulo: "Contar com a câmera", corpo: el("div", {}, onde, msg, lista), rodape: [usar] });
+    const encerrar = () => leitor?.parar();
+    j.fundo.addEventListener("remove", encerrar); new MutationObserver((_, o) => { if (!document.body.contains(j.fundo)) { encerrar(); o.disconnect(); } }).observe(document.body, { childList: true });
+    usar.addEventListener("click", () => {
+      estado.itens.forEach((it, i) => { if (contagem[i] > 0) { it.qtd_carregada = contagem[i]; it.situacao = contagem[i] === Number(it.qtd_nota) ? "confere" : "diferente"; } });
+      estado.metodo = "scanner"; encerrar(); j.fechar(); redesenhar();
+    });
+    desenhar(); NE.scanner(onde, aoLer).then((l) => { leitor = l; });
   }
 
   function statusLeitura() {
@@ -262,31 +301,36 @@
   // ── Registro ──────────────────────────────────────────
   async function registrar(raiz) {
     const pos = await NE.posicao();
-    const fotos = [];
-    for (const [tipo, lista] of Object.entries(estado.fotos)) {
-      for (const f of lista) fotos.push({ tipo, caminho: await NE.dados.enviarFoto(f.blob, perfil.id) });
-    }
-    await NE.dados.registrarConferencia({
-      numero_nota: estado.numero_nota, chave_nfe: estado.chave_nfe, veiculo_id: estado.veiculo?.id || "", placa: estado.placa, motorista: estado.motorista,
-      motivo_divergencia: estado.motivo, observacao: estado.observacao, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null,
-      itens: estado.itens.map((i) => ({ produto_id: i.produto_id || "", descricao: i.descricao, qtd_nota: Number(i.qtd_nota), qtd_carregada: Number(i.qtd_carregada) })),
-      fotos,
+    const fotos = []; for (const [tipo, lista] of Object.entries(estado.fotos)) for (const f of lista) fotos.push({ tipo, blob: f.blob });
+    const temDif = estado.itens.some((i) => Number(i.qtd_carregada) !== Number(i.qtd_nota));
+    const r = await NE.dados.registrarConferencia({
+      client_id: estado.client_id, nota_id: estado.nota?.id || null, numero_nota: estado.numero_nota, cliente: estado.cliente, chave_nfe: estado.chave_nfe, veiculo_id: estado.veiculo?.id || "", placa: estado.placa, motorista: estado.motorista,
+      motivo_divergencia: estado.motivo, observacao: estado.observacao, latitude: pos?.latitude ?? null, longitude: pos?.longitude ?? null, duracao_s: Math.round((Date.now() - estado.inicio) / 1000), metodo: estado.metodo,
+      itens: estado.itens.map((i) => ({ produto_id: i.produto_id || "", descricao: i.descricao, qtd_nota: Number(i.qtd_nota), qtd_carregada: Number(i.qtd_carregada) })), fotos,
     });
-    telaFim(raiz, estado.itens.some((i) => Number(i.qtd_carregada) !== Number(i.qtd_nota)));
+    telaFim(raiz, temDif, !!r?.pendente);
   }
 
-  function telaFim(raiz, temDif) {
+  function telaFim(raiz, temDif, pendente) {
     Object.values(estado.fotos).flat().forEach((f) => URL.revokeObjectURL(f.url));
     NE.telaFim(raiz, {
       tipo: temDif ? "alerta" : "ok",
       titulo: temDif ? "Registrada com diferença" : "Carga conferida",
-      texto: temDif
-        ? `Nota ${estado.numero_nota} · ${estado.placa}. A diferença e o motivo ficaram registrados para a expedição.`
+      texto: pendente ? `Sem sinal agora: a conferência da nota ${estado.numero_nota} ficou guardada no aparelho e sobe sozinha quando a internet voltar.`
+        : temDif
+        ? `Nota ${estado.numero_nota} · ${estado.placa}. A expedição foi avisada da diferença e do motivo.`
         : `Nota ${estado.numero_nota} · ${estado.placa}. Tudo confere. O caminhão pode sair.`,
       botoes: [
-        { rotulo: "Nova conferência", icone: "mais", acao: () => NE.iniciarConferencia(perfil, raiz, aoTerminar) },
-        { rotulo: "Voltar ao início", acao: () => aoTerminar() },
+        { rotulo: "Próxima nota da fila", icone: "mais", acao: () => aoTerminar() },
+        { rotulo: "Conferir carga sem nota", acao: () => NE.iniciarConferencia(perfil, raiz, aoTerminar) },
       ],
     });
   }
+})();
+
+// Rota: conferir uma nota da fila (params.nota_id) ou uma carga sem nota
+(() => {
+  const NE = window.NE;
+  NE.rotas = NE.rotas || {};
+  NE.rotas.conferir = (raiz, params, app) => NE.iniciarConferencia(app.perfil, raiz, () => app.ir("notas", {}, { substituir: true }), { nota_id: params.nota_id });
 })();

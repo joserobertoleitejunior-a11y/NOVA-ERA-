@@ -8,7 +8,6 @@
 
   // Endereço do link que o vendedor manda
   NE.urlRastreio = (token) => {
-    if (NE.modoDemo) return `https://SEU-ENDERECO/rastreio.html?c=${token}`;
     const base = C.urlPublica || location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
     return `${base.replace(/\/?$/, "/")}rastreio.html?c=${token}`;
   };
@@ -51,10 +50,12 @@
   NE.iniciarRastreioPublico = async (raiz) => {
     const params = new URLSearchParams(location.search);
     const token = params.get("c") || "";
-    if (params.has("demo")) { // demonstração: mostra uma entrega de exemplo, sem consultar o banco
-      raiz.replaceChildren(NE.renderRastreio({ numero_nota: "48213", placa: "ABC1D23", conferido_em: new Date(Date.now() - 36e5).toISOString(), entregue_em: null,
-        itens: [{ descricao: "Meio-fio", quantidade: 40 }, { descricao: "Boca de lobo", quantidade: 4 }], foto_carga: null }));
-      return;
+    // Ambiente de teste (admin/admin): o link de uma nota de teste abre os dados de teste guardados neste aparelho
+    if (C.modoTeste) {
+      try {
+        const e = JSON.parse(localStorage.getItem("ne-teste-v2") || "null"); const conf = e && e.conferencias.find((c) => c.token_publico === token);
+        if (conf) { raiz.replaceChildren(NE.renderRastreio(NE.rastreioDe(conf, null))); return; }
+      } catch { /* segue para o banco */ }
     }
     raiz.replaceChildren(el("div", { class: "esqueleto", style: "height:120px" }), el("div", { class: "esqueleto", style: "height:220px" }));
     if (!/^[0-9a-f-]{36}$/i.test(token)) return falha(raiz, "Link incompleto. Peça um novo link ao seu vendedor.");
@@ -89,7 +90,7 @@
   NE.enviarRastreio = (c) => {
     const link = NE.urlRastreio(c.token_publico);
     const fone = el("input", { class: "entrada", id: "fone-cliente", inputmode: "tel", autocomplete: "off", placeholder: "(15) 99999-9999" });
-    const mensagem = () => `Olá! Aqui é da Nova Era. A carga da sua nota ${c.numero_nota} foi conferida e saiu do nosso pátio às ${NE.hora(c.criado_em)}. Acompanhe a entrega por aqui: ${link}`;
+    const mensagem = () => window.NEDominio.mensagemCliente({ nota: { numero: c.numero_nota, cliente: c.cliente }, conf: c, link });
     const abrir = el("a", { class: "btn btn-verde btn-bloco", target: "_blank", rel: "noopener" }, ic("whatsapp"), "Abrir no WhatsApp");
     const atualizar = () => {
       const n = fone.value.replace(/\D/g, "");
@@ -108,7 +109,7 @@
           el("div", { class: "campo" }, el("label", { for: "fone-cliente" }, "WhatsApp do cliente (opcional)"),
             el("span", { class: "dica" }, "Sem número, o WhatsApp abre para você escolher o contato."), fone),
           el("div", { class: "previa-mensagem" }, mensagem()),
-          NE.modoDemo && el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, "Demonstração: o link passa a funcionar quando o app estiver hospedado.")),
+          NE.modoTeste && el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, "Ambiente de teste: o link abre neste aparelho, com os dados de teste.")),
           el("div", { style: "display:grid;gap:10px" }, abrir, copiar,
             el("button", { type: "button", class: "link-acao", onclick: () => { tela.remove(); NE.verComoCliente(c); } }, ic("olho"), "Ver como o cliente vê")))));
     fechar.addEventListener("click", () => tela.remove());

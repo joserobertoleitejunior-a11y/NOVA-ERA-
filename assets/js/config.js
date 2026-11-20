@@ -4,6 +4,9 @@ window.NOVA_ERA = {
   supabaseUrl: "https://kfazxjertfzoeewfsime.supabase.co",
   supabaseAnonKey: "sb_publishable_yJEGtaiNkJiyHjh7KyYZ3g_z1NRnbyK",
   bucketFotos: "fotos-cargas",
+  // ★ MODO TESTE: com `true`, o login admin / admin abre um ambiente de TESTE, só neste aparelho, com dados de exemplo.
+  // Nada é gravado no banco de verdade. Antes de entregar ao cliente, troque para `false`.
+  modoTeste: true,
   urlPublica: "", // endereço do site quando for hospedado (ex.: "https://www.novaera.com.br/") — usado nos links de rastreio
 
   // Contato (aparece no site inteiro)
