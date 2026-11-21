@@ -20,10 +20,11 @@
     const chips = el("div", { class: "chips" });
     const nova = el("button", { class: "btn btn-principal btn-bloco btn-gigante", type: "button", id: "btn-nova" }, ic("caminhao"), "Conferir uma carga");
     nova.addEventListener("click", () => app.ir("conferir", {}));
-    const cab = el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, admin ? "Notas" : "Fila de carga"), el("p", {}, admin ? "O que está esperando conferência e o histórico." : app.perm.conferir ? "Toque numa nota para conferir. Sem nota? Use o botão abaixo." : "Notas esperando conferência.")),
-      admin && el("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+    const lanca = app.perm.lancaNota;
+    const cab = el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, lanca ? "Notas" : "Fila de carga"), el("p", {}, lanca ? "O que está esperando conferência e o histórico." : app.perm.conferir ? "Toque numa nota para conferir. Sem nota? Use o botão abaixo." : "Notas esperando conferência.")),
+      lanca && el("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
         el("button", { type: "button", class: "btn btn-azul", id: "btn-nota-nova", onclick: () => app.ir("guia", { fluxo: "nota" }) }, ic("mais"), "Nova nota"),
-        el("button", { type: "button", class: "btn btn-secundario", id: "btn-importar", onclick: () => app.ir("guia", { fluxo: "xml" }) }, ic("baixar"), "Importar XML")));
+        (app.perm.fluxos === null || (app.perm.fluxos || []).includes("xml")) && el("button", { type: "button", class: "btn btn-secundario", id: "btn-importar", onclick: () => app.ir("guia", { fluxo: "xml" }) }, ic("baixar"), "Importar XML")));
     raiz.replaceChildren(cab, app.perm.conferir ? nova : null, el("div", { style: "height:14px" }), admin && chips, box);
     let todas = [];
     const desenharChips = () => chips.replaceChildren(...[["fila", "Na fila"], ["todas", "Todas"]].map(([id, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(aba === id), onclick: () => { aba = id; desenharChips(); desenharLista(); } }, nome)));

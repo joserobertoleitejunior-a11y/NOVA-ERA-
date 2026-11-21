@@ -44,7 +44,8 @@
 
   function linha({ s, sit, cob }, app, ctx, produtos) {
     const [rot, cls] = ESTADO[sit.estado]; const teto = Math.max(s.minimo * 2, s.saldo, 1);
-    const b = el("button", { type: "button", class: `linha-cartao ${sit.estado === "negativo" ? "critico" : sit.estado === "baixo" ? "atencao" : ""}` },
+    // quem não abre o detalhe não ganha um botão que não faz nada: vira só uma linha de leitura
+    const b = el(app.admin ? "button" : "div", { type: app.admin ? "button" : null, class: `linha-cartao ${app.admin ? "" : "so-leitura "}${sit.estado === "negativo" ? "critico" : sit.estado === "baixo" ? "atencao" : ""}` },
       el("strong", {}, s.nome),
       el("span", { class: "meta" }, `mínimo ${fmt(s.minimo)} · ${s.ultima_contagem ? `contado ${D.tempoRelativo(s.ultima_contagem, ctx.agora)}` : "nunca contado"}${cob ? ` · dura ~${fmt(cob)} dias` : ""}`),
       el("span", { class: "lado" }, `${fmt(s.saldo)}`, el("small", {}, el("span", { class: `etiqueta ${cls === "erro" ? "erro" : cls}` }, rot))),

@@ -65,36 +65,142 @@
   }
   const atalho = (icone, titulo, sub, acao) => el("button", { type: "button", class: "cartao-guia", onclick: acao }, ic(icone), el("span", {}, titulo, el("small", { style: "display:block" }, sub)));
 
-  // ───────────────────────── INÍCIO SIMPLES: uma frase de situação + "o que você quer fazer?" ─────────────────────────
+  // ───────────────────────── INÍCIO: cada função tem o seu painel ─────────────────────────
+  // Todos leem os mesmos dados; muda o que importa para quem está olhando.
+  // A nota que o vendedor lança cai na fila do conferente; o que o conferente confere vira número aqui.
+
+  // O que mostrar em cada painel: título da situação, os dois números e os botões grandes.
+  function montarPainel(tipo, { r, ctx, app, cadastros }) {
+    const ir = (rota, p) => () => app.ir(rota, p || {});
+    const guia = (fluxo) => () => app.ir("guia", { fluxo });
+    const N = (valor, um, varios) => ({ valor: String(valor), texto: valor === 1 ? um : varios });
+    const est = r.estoque; const nEst = est.negativos.length + est.baixos.length;
+
+    if (tipo === "empresa") return {                       // diretoria: a empresa de cima
+      saudacao: "Como está a empresa hoje",
+      numeros: [N(r.kpis.total, "carga conferida hoje", "cargas conferidas hoje"), N(r.kpis.divergentes, "carga com diferença", "cargas com diferença")],
+      pergunta: "O que você quer ver?",
+      tiles: [
+        ["grafico", "Resumo completo", "Números do dia, da semana e do mês", ir("resumo")],
+        ["caminhao", "As cargas que saíram", "Com foto e conferência", ir("cargas")],
+        ["caixas", "O estoque agora", `${nEst ? `${nEst} produto${nEst > 1 ? "s" : ""} pedindo atenção` : "Tudo dentro do mínimo"}`, ir("estoque")],
+        ["pessoas", "A equipe", "Quem confere e quanto erra", ir("equipe")],
+      ],
+    };
+    if (tipo === "patio") return {                         // expedição: o pátio agora
+      saudacao: "O pátio agora",
+      numeros: [N(r.fila.total, "nota esperando conferência", "notas esperando conferência"), N(r.kpis.total, "carga já saiu hoje", "cargas já saíram hoje")],
+      pergunta: "O que você quer fazer?",
+      tiles: [
+        ["nota", "Lançar uma nota", "A nota chegou? Coloque na fila", guia("nota")],
+        ["baixar", "Importar XML", "Várias notas de uma vez", guia("xml")],
+        ["conferir", "Conferir uma carga", "Caminhão carregado", ir("conferir")],
+        ["raio", "Pedir a contagem do dia", "Leva uns 3 minutos", ir("contar")],
+        ["caminhao", "Ver as cargas", "O que já saiu", ir("cargas")],
+        ["caixas", "Ver o estoque", "Quanto tem de cada peça", ir("estoque")],
+      ],
+    };
+    if (tipo === "escritorio") return {                    // administrativo: cadastros e papelada
+      saudacao: "Os cadastros e as notas",
+      numeros: [N(r.fila.total, "nota na fila", "notas na fila"), N(cadastros.pessoas, "pessoa cadastrada", "pessoas cadastradas")],
+      pergunta: "O que você quer fazer?",
+      tiles: [
+        ["baixar", "Importar XML", "Várias notas de uma vez", guia("xml")],
+        ["nota", "Lançar uma nota", "Digitando ou por foto", guia("nota")],
+        ["usuario", "Cadastrar uma pessoa", "Cria o acesso e manda no WhatsApp", guia("novaPessoa")],
+        ["caminhao", "Caminhões", `${cadastros.veiculos} na frota`, ir("cadastros", { aba: "caminhoes" })],
+        ["caixas", "Produtos", `${cadastros.produtos} cadastrados`, ir("cadastros", { aba: "produtos" })],
+        ["engrenagem", "Ajustes", "Horário e prazos", guia("ajustes")],
+      ],
+    };
+    if (tipo === "vendas") return {                        // vendedor: o que o cliente dele vê
+      saudacao: "Suas notas e entregas",
+      numeros: [N(r.fila.total, "nota esperando carregar", "notas esperando carregar"), N(r.kpis.total, "entrega saiu hoje", "entregas saíram hoje")],
+      pergunta: "O que você quer fazer?",
+      tiles: [
+        ["nota", "Lançar uma nota", "A venda fechou? Coloque na fila", guia("nota")],
+        ["caminhao", "Ver as cargas", "E mandar o rastreio ao cliente", ir("cargas")],
+      ],
+    };
+    if (tipo === "viagem") return {                        // motorista: posso sair?
+      saudacao: "Sua viagem de hoje",
+      numeros: [N(r.fila.total, "carga esperando conferência", "cargas esperando conferência"), N(r.kpis.total, "carga liberada hoje", "cargas liberadas hoje")],
+      pergunta: "O que você quer ver?",
+      tiles: [
+        ["nota", "A fila de carga", "O que está esperando conferência", ir("notas")],
+        ["sino", "Meus avisos", "O que chegou para você", ir("alertas")],
+      ],
+    };
+    return {                                               // conferente e ajudante
+      saudacao: "O que conferir agora",
+      numeros: [N(r.fila.total, "nota esperando você", "notas esperando você"), N(r.kpis.total, "carga conferida hoje", "cargas conferidas hoje")],
+      pergunta: "O que você quer fazer?",
+      tiles: [
+        ["conferir", "Conferir uma carga", "Caminhão carregado", ir("conferir")],
+        ["raio", "Contagem do dia", "Leva uns 3 minutos", ir("contar")],
+        ["nota", "Ver a fila", "Tudo que espera conferência", ir("notas")],
+      ],
+    };
+  }
+
+  // Frase de situação: só fala de problema que ESTA pessoa pode resolver.
+  // O motorista não resolve nada no app: para ele a frase diz se a carga está liberada.
+  function situacao(r, app) {
+    if (app.perm.painel === "viagem") {
+      const esperando = r.fila.total;
+      return { cor: esperando ? "amarelo" : "verde", fixo: true,
+        titulo: esperando ? "Ainda tem carga para conferir" : "Nenhuma carga esperando",
+        texto: esperando
+          ? `${esperando === 1 ? "Uma carga está" : `${esperando} cargas estão`} na fila. Só saia do pátio depois que o conferente liberar a sua.`
+          : "Tudo que está carregado já foi conferido. Boa viagem!" };
+    }
+    const podeVer = (rota) => (app.perm.telas || []).includes(rota === "contagem" ? "contar" : rota);
+    const meus = r.insights.filter((i) => i.nivel !== "ok" && (!i.acao || podeVer(i.acao.rota)));
+    const topo = meus[0];
+    const cor = !topo ? "verde" : meus.some((i) => i.nivel === "erro" || i.nivel === "critico") ? "vermelho" : "amarelo";
+    return { topo, cor };
+  }
+
   NE.rotas.inicio = async (raiz, params, app) => {
     raiz.replaceChildren(el("div", { class: "esqueleto", style: "height:110px" }), el("div", { class: "esqueleto", style: "height:260px" }));
     let ctx; try { ctx = await NE.dados.contexto(); } catch (e) { raiz.replaceChildren(); return NE.aviso(NE.mensagemErro(e), "erro", raiz); }
-    const r = D.resumoDoPeriodo(ctx, "hoje"); const primeiro = (app.perfil.nome || "").split(" ")[0]; const topo = r.insights.find((i) => i.nivel !== "ok");
-    const limitado = app.perm.limitado;
+    const r = D.resumoDoPeriodo(ctx, "hoje");
+    const primeiro = (app.perfil.nome || "").split(" ")[0];
+    const s = situacao(r, app); const cor = s.cor; const topo = s.topo;
     const irPara = (a) => (a.rota === "contagem" ? app.ir("contar", {}) : app.ir(a.rota, a.params || {}));
-    const status = el("section", { class: `status-simples ${r.semaforo.cor}`, "aria-live": "polite" },
-      el("div", { class: "luz", html: NE.icone[r.semaforo.cor === "verde" ? "check" : "alerta"] }),
-      el("div", { class: "status-texto" }, el("strong", {}, r.semaforo.cor === "verde" ? "Tudo certo por aqui" : r.semaforo.cor === "amarelo" ? "Tem algo para olhar" : "Precisa da sua atenção"),
-        el("p", {}, topo ? topo.titulo : "Nenhum problema agora. Quando algo der errado, o app avisa você."),
-        topo && topo.acao && el("button", { type: "button", class: "btn btn-principal", id: "btn-resolver", onclick: () => irPara(topo.acao) }, "Resolver agora")));
-    const numeros = el("div", { class: "numeros-simples" },
-      el("div", {}, el("b", {}, String(r.kpis.total)), el("span", {}, r.kpis.total === 1 ? "carga conferida hoje" : "cargas conferidas hoje")),
-      el("div", {}, el("b", {}, String(r.fila.total)), el("span", {}, r.fila.total === 1 ? "nota esperando" : "notas esperando")));
-    const [ps, vs] = await Promise.all([NE.dados.produtos(true), NE.dados.veiculos(true)]);
-    const passos = [[ps.length > 0, "Cadastre os produtos", "novoProduto"], [vs.length > 0, "Cadastre os caminhões", "novoVeiculo"], [(await NE.dados.funcionarios()).filter((x) => !/\(teste\)/.test(x.nome)).length > 0, "Cadastre a equipe", "novaPessoa"], [r.kpis.total > 0 || r.fila.total > 0, "Lance a primeira nota", "nota"]];
-    const comeco = !limitado && passos.some(([feito]) => !feito) ? el("section", { class: "primeiros-passos" }, el("h2", {}, "Comece por aqui"), el("p", {}, "Nada foi cadastrado ainda. Siga na ordem:"), passos.map(([feito, nome, fluxo], k) => el("button", { type: "button", class: `passo-comeco${feito ? " feito" : ""}`, onclick: () => app.ir("guia", { fluxo }) }, el("span", { class: "passo-num" }, feito ? "✓" : String(k + 1)), el("strong", {}, nome)))) : null;
-    const T = [
-      ["nota", "Lançar uma nota", "A nota chegou? Coloque na fila", () => app.ir("guia", { fluxo: "nota" })],
-      ["raio", "Contar o estoque", "Leva uns 3 minutos", () => app.ir("contar", {})],
-      ["caminhao", "Ver as cargas", "O que já saiu", () => app.ir("cargas", {})],
-      ["caixas", "Ver o estoque", "Quanto tem de cada peça", () => app.ir("estoque", {})],
-      ["usuario", "Cadastrar uma pessoa", "Funcionário novo", () => app.ir("guia", { fluxo: "novaPessoa" })],
-      ["caminhao", "Cadastrar um caminhão", "Placa, fotos e dados", () => app.ir("guia", { fluxo: "novoVeiculo" })],
-    ].filter((t, i) => !limitado || i === 0 || i === 2);
-    const tiles = el("div", { class: "tiles" }, T.map(([icone, nome, sub, acao], i) => el("button", { type: "button", class: "tile", id: i === 0 ? "tile-nota" : null, onclick: acao }, el("span", { class: "tile-icone", html: NE.icone[icone] }), el("strong", {}, nome), el("small", {}, sub))));
-    raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, `Olá, ${primeiro}`), el("p", {}, new Date(ctx.agora).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })))),
-      status, comeco, numeros, el("h2", { class: "titulo-tiles" }, "O que você quer fazer?"), tiles,
-      el("div", { class: "links-fim" }, !limitado && el("button", { type: "button", class: "link-acao", id: "btn-resumo", onclick: () => app.ir("resumo", {}) }, ic("grafico"), "Ver o resumo completo"),
+
+    const status = el("section", { class: `status-simples ${cor}`, "aria-live": "polite" },
+      el("div", { class: "luz", html: NE.icone[cor === "verde" ? "check" : "alerta"] }),
+      el("div", { class: "status-texto" },
+        el("strong", {}, s.fixo ? s.titulo : cor === "verde" ? "Tudo certo por aqui" : cor === "amarelo" ? "Tem algo para olhar" : "Precisa da sua atenção"),
+        el("p", {}, s.fixo ? s.texto : topo ? topo.titulo : "Nenhum problema agora. Quando algo precisar de você, o app avisa."),
+        !s.fixo && topo && topo.acao && el("button", { type: "button", class: "btn btn-principal", id: "btn-resolver", onclick: () => irPara(topo.acao) }, "Resolver agora")));
+
+    const cadastros = app.perm.cadastra
+      ? { produtos: (await NE.dados.produtos(true)).length, veiculos: (await NE.dados.veiculos(true)).length, pessoas: (await NE.dados.funcionarios()).length }
+      : { produtos: 0, veiculos: 0, pessoas: 0 };
+    const P = montarPainel(app.perm.painel, { r, ctx, app, cadastros });
+
+    const numeros = el("div", { class: "numeros-simples" }, P.numeros.map((n) => el("div", {}, el("b", {}, n.valor), el("span", {}, n.texto))));
+    const tiles = el("div", { class: "tiles" }, P.tiles.map(([icone, nome, sub, acao], i) =>
+      el("button", { type: "button", class: "tile", id: i === 0 ? "tile-nota" : null, onclick: acao }, el("span", { class: "tile-icone", html: NE.icone[icone] }), el("strong", {}, nome), el("small", {}, sub))));
+
+    // "Comece por aqui": só para quem cadastra, e só enquanto faltar cadastro
+    let comeco = null;
+    if (app.perm.cadastra) {
+      const passos = [[cadastros.produtos > 0, "Cadastre os produtos", "novoProduto"], [cadastros.veiculos > 0, "Cadastre os caminhões", "novoVeiculo"],
+        [cadastros.pessoas > 1, "Cadastre a equipe", "novaPessoa"], [r.kpis.total > 0 || r.fila.total > 0, "Lance a primeira nota", "nota"]];
+      if (passos.some(([feito]) => !feito)) comeco = el("section", { class: "primeiros-passos" }, el("h2", {}, "Comece por aqui"), el("p", {}, "Siga na ordem:"),
+        passos.map(([feito, nome, fluxo], k) => el("button", { type: "button", class: `passo-comeco${feito ? " feito" : ""}`, onclick: () => app.ir("guia", { fluxo }) }, el("span", { class: "passo-num" }, feito ? "✓" : String(k + 1)), el("strong", {}, nome))));
+    }
+
+    raiz.replaceChildren(
+      el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, `Olá, ${primeiro}`),
+        el("p", {}, `${NE.rotuloFuncao(app.perfil.funcao)} · ${new Date(ctx.agora).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" })}`))),
+      status, comeco, el("h2", { class: "titulo-tiles" }, P.saudacao), numeros,
+      el("h2", { class: "titulo-tiles" }, P.pergunta), tiles,
+      el("div", { class: "links-fim" },
+        (app.perm.telas || []).includes("resumo") && el("button", { type: "button", class: "link-acao", id: "btn-resumo", onclick: () => app.ir("resumo", {}) }, ic("grafico"), "Ver o resumo completo"),
         el("button", { type: "button", class: "link-acao", onclick: () => NE.iniciarTour("painel", { verDicas: () => NE.abrirGuia("painel", raiz, () => app.ir("inicio"), { novaConferencia: () => app.ir("conferir") }) }) }, ic("ajuda"), "Como usar o app (1 minuto)")));
   };
 })();

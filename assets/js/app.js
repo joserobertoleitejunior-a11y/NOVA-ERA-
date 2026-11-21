@@ -9,17 +9,40 @@
   let perfil = null, atual = { rota: null, params: {} }, sondando = null, vistos = new Set(), primeiraSondagem = true;
   NE.rotas = NE.rotas || {};
 
-  const NAV_ADMIN = [["inicio", "Início", "casa"], ["notas", "Notas", "nota"], ["estoque", "Estoque", "caixas"], ["cargas", "Cargas", "caminhao"], ["mais", "Mais", "mais_menu"]];
-  const NAV_FUNC = [["notas", "Fila", "nota"], ["estoque", "Estoque", "caixas"], ["alertas", "Avisos", "sino"]];
   const SEM_NAV = new Set(["conferir", "contar", "leitor", "guia"]);
   const PAI_NAV = { resumo: "inicio", alertas: "mais", equipe: "mais", cadastros: "mais", config: "mais", exportar: "mais" };
   const ehAdmin = () => perfil?.papel === "admin";
-  // O que cada função enxerga. Sem regra aqui, vale o padrão do papel (administração = tudo; funcionário = conferência).
-  const REGRAS = {
-    vendedor: { nav: ["inicio", "notas", "cargas", "mais"], conferir: false, ia: false, limitado: true },   // comercial: notas, cargas e rastreio ao cliente
-    motorista: { nav: ["notas", "alertas"], conferir: false, ia: false },                                    // vê a fila e os avisos; não confere
+
+  // ───────────────────────── o painel de cada função ─────────────────────────
+  // Cada função tem o seu menu, a sua tela inicial e a sua lista fechada de telas.
+  // "telas" vale também quando a pessoa digita o endereço na mão: o que não está aqui, não abre.
+  const NOMES_ABA = { inicio: ["Início", "casa"], notas: ["Notas", "nota"], fila: ["Fila", "nota"], estoque: ["Estoque", "caixas"], cargas: ["Cargas", "caminhao"], alertas: ["Avisos", "sino"], mais: ["Mais", "mais_menu"] };
+  const TODAS_ADMIN = ["inicio", "resumo", "notas", "estoque", "cargas", "mais", "alertas", "equipe", "cadastros", "config", "exportar", "guia", "contar"];
+  const PAPEIS = {
+    diretoria:      { nav: ["inicio", "cargas", "estoque", "mais"],                  painel: "empresa", telas: TODAS_ADMIN,                                                              conferir: false, ia: true,  cadastra: true,  lancaNota: false, fluxos: ["ajustes", "pessoa", "veiculo", "produto", "novaPessoa", "novoVeiculo", "novoProduto"] },
+    administrativo: { nav: ["inicio", "notas", "estoque", "mais"],                   painel: "escritorio", telas: TODAS_ADMIN,                                                           conferir: false, ia: true,  cadastra: true,  lancaNota: true,  fluxos: null },
+    expedicao:      { nav: ["inicio", "notas", "estoque", "cargas", "mais"],         painel: "patio",   telas: TODAS_ADMIN.concat("conferir"),                                           conferir: true,  ia: true,  cadastra: true,  lancaNota: true,  fluxos: null },
+    vendedor:       { nav: ["inicio", "notas", "cargas", "mais"],                    painel: "vendas",  telas: ["inicio", "notas", "cargas", "mais", "alertas", "guia"],                 conferir: false, ia: false, cadastra: false, lancaNota: true,  fluxos: ["nota", "xml"] },
+    conferente:     { nav: ["notas", "estoque", "alertas"],                          painel: "fila",    telas: ["notas", "estoque", "alertas", "conferir", "contar", "guia", "inicio"],  conferir: true,  ia: false, cadastra: false, lancaNota: false, fluxos: ["resolver"] },
+    ajudante:       { nav: ["notas", "estoque", "alertas"],                          painel: "fila",    telas: ["notas", "estoque", "alertas", "conferir", "contar", "guia", "inicio"],  conferir: true,  ia: false, cadastra: false, lancaNota: false, fluxos: ["resolver"] },
+    motorista:      { nav: ["inicio", "notas", "alertas"],                           painel: "viagem",  telas: ["inicio", "notas", "alertas"],                                           conferir: false, ia: false, cadastra: false, lancaNota: false, fluxos: [] },
   };
-  const perm = () => { const r = REGRAS[perfil?.funcao] || {}; return { nav: r.nav || null, conferir: r.conferir !== false, ia: r.ia !== undefined ? r.ia : ehAdmin(), limitado: !!r.limitado }; };
+  // Quem tiver uma função fora da lista cai no padrão do papel: administração vê tudo, funcionário confere.
+  const PADRAO_ADMIN = { nav: ["inicio", "notas", "estoque", "cargas", "mais"], painel: "patio", telas: TODAS_ADMIN.concat("conferir"), conferir: true, ia: true, cadastra: true, lancaNota: true, fluxos: null };
+  const PADRAO_FUNC = { nav: ["notas", "estoque", "alertas"], painel: "fila", telas: ["notas", "estoque", "alertas", "conferir", "contar", "guia", "inicio"], conferir: true, ia: false, cadastra: false, lancaNota: false, fluxos: ["resolver"] };
+  const papelDe = () => PAPEIS[perfil?.funcao] || (ehAdmin() ? PADRAO_ADMIN : PADRAO_FUNC);
+  const NOMES_FUNCAO = { diretoria: "Diretoria", administrativo: "Administrativo", expedicao: "Expedição", vendedor: "Vendedor", conferente: "Conferente", ajudante: "Ajudante", motorista: "Motorista" };
+  NE.rotuloFuncao = (f) => NOMES_FUNCAO[f] || "funcionário";
+  const perm = () => {
+    const r = papelDe();
+    return { nav: r.nav, painel: r.painel, telas: r.telas, fluxos: r.fluxos, conferir: r.conferir, ia: r.ia && ehAdmin(), cadastra: r.cadastra && ehAdmin(), lancaNota: r.lancaNota, limitado: !r.cadastra };
+  };
+  const podeAbrir = (rota, params = {}) => {
+    const r = papelDe();
+    if (!r.telas.includes(rota)) return false;
+    if (rota === "guia" && r.fluxos && params.fluxo && !r.fluxos.includes(params.fluxo)) return false;
+    return true;
+  };
 
   NE.app = {
     get perfil() { return perfil; },
@@ -34,7 +57,7 @@
     desenhar();
   }
   window.addEventListener("popstate", (e) => { if (!perfil) return; atual = e.state?.rota ? e.state : { rota: inicial(), params: {} }; desenhar(); });
-  const inicial = () => (ehAdmin() ? "inicio" : "notas");
+  const inicial = () => papelDe().nav[0];
 
   function desenhar() {
     NE.fecharJanela?.(); NE.fecharSimples?.(); document.querySelectorAll(".janela-fundo, .folha-fundo").forEach((x) => x.remove()); // trocar de tela fecha qualquer janela aberta
@@ -43,16 +66,29 @@
     document.body.classList.toggle("com-nav", !sem);
     $("main").className = ["resumo", "cargas", "estoque", "notas", "equipe", "cadastros", "config", "exportar"].includes(rota) && ehAdmin() ? "largo" : "";
     nav(rota, sem); botaoIA(sem);
-    const f = NE.rotas[rota] || NE.rotas[inicial()];
     window.scrollTo({ top: 0 });
+    if (!podeAbrir(rota, params)) return semPermissao(rota);   // digitou o endereço de uma tela de outra função
+    const f = NE.rotas[rota] || NE.rotas[inicial()];
     try { f(raiz(), params, NE.app); } catch (e) { console.error(e); raiz().replaceChildren(el("div", { class: "aviso erro" }, ic("alerta"), el("span", {}, "Esta tela não abriu. Volte e tente de novo."))); }
+  }
+
+  // Tela de outra função: explica e leva de volta, em vez de abrir pela metade.
+  function semPermissao() {
+    document.body.classList.add("com-nav"); nav(inicial(), false);
+    raiz().replaceChildren(el("div", { class: "vazio-grande" },
+      el("strong", {}, "Esta tela não é da sua função"),
+      el("p", {}, `Você entrou como ${NE.rotuloFuncao(perfil?.funcao)}. Peça à administração se precisar de acesso.`),
+      el("button", { type: "button", class: "btn btn-principal", onclick: () => ir(inicial(), {}, { substituir: true }) }, "Voltar para a minha tela")));
   }
 
   function nav(rota, esconder) {
     let barra = $("#nav-inferior"); if (barra) barra.remove();
     if (esconder || !perfil) return;
-    const itens = (ehAdmin() ? NAV_ADMIN : NAV_FUNC).filter(([id]) => !perm().nav || perm().nav.includes(id)); const ativo = PAI_NAV[rota] || rota;
-    barra = el("nav", { class: "nav-inferior", id: "nav-inferior", "aria-label": "Menu principal" }, el("div", { class: "nav-inferior-dentro" }, itens.map(([id, nome, icone]) => {
+    const ids = papelDe().nav; const ativo = PAI_NAV[rota] || rota;
+    // o conferente chama a tela de notas de "Fila": é o que ele vê lá
+    const rotulo = (id) => (id === "notas" && !perm().lancaNota ? NOMES_ABA.fila : NOMES_ABA[id]) || [id, "casa"];
+    barra = el("nav", { class: "nav-inferior", id: "nav-inferior", "aria-label": "Menu principal" }, el("div", { class: "nav-inferior-dentro" }, ids.map((id) => {
+      const [nome, icone] = rotulo(id);
       const b = el("button", { type: "button", class: "nav-item", "data-rota": id, "aria-current": ativo === id ? "page" : false }, ic(icone), el("span", {}, nome));
       b.addEventListener("click", () => ir(id));
       return b;

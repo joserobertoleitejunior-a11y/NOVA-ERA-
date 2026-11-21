@@ -92,16 +92,17 @@
   // ───────────────────────── MAIS ─────────────────────────
   NE.rotas.mais = (raiz, params, app) => {
     const item = (icone, titulo, sub, acao, id) => el("button", { type: "button", class: "cartao-guia", id, onclick: acao }, ic(icone), el("span", {}, titulo, el("small", { style: "display:block" }, sub)));
-    raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Mais"), el("p", {}, "Cadastros, ajustes e ajuda."))),
+    const pode = (r) => (app.perm.telas || []).includes(r);
+    raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Mais"), el("p", {}, `${NE.rotuloFuncao(app.perfil.funcao)} · o que mais você pode fazer aqui.`))),
       el("div", { class: "menu-grade" },
-        item("sino", "Avisos", "O que aconteceu", () => app.ir("alertas")),
-        !app.perm.limitado && item("pessoas", "Equipe", "Funcionários e acesso", () => app.ir("equipe")),
-        !app.perm.limitado && item("caminhao", "Caminhões", "Placas da frota", () => app.ir("cadastros", { aba: "caminhoes" })),
-        !app.perm.limitado && item("caixas", "Produtos", "Mínimo e pilha", () => app.ir("cadastros", { aba: "produtos" })),
-        !app.perm.limitado && item("engrenagem", "Ajustes", "Horário e prazos", () => app.ir("guia", { fluxo: "ajustes" })),
+        pode("alertas") && item("sino", "Avisos", "O que aconteceu", () => app.ir("alertas")),
+        pode("equipe") && app.perm.cadastra && item("pessoas", "Equipe", "Funcionários e acesso", () => app.ir("equipe")),
+        pode("cadastros") && app.perm.cadastra && item("caminhao", "Caminhões", "Placas da frota", () => app.ir("cadastros", { aba: "caminhoes" })),
+        pode("cadastros") && app.perm.cadastra && item("caixas", "Produtos", "Mínimo e pilha", () => app.ir("cadastros", { aba: "produtos" })),
+        pode("guia") && app.perm.cadastra && item("engrenagem", "Ajustes", "Horário e prazos", () => app.ir("guia", { fluxo: "ajustes" })),
         item("ajuda", "Tutorial", "Aprender em 1 minuto", () => NE.iniciarTour("painel", { verDicas: () => NE.abrirGuia("painel", raiz, () => app.ir("mais"), { novaConferencia: () => app.ir("conferir") }) }), "mais-tutorial"),
-        item("baixar", "Planilha de cargas", "30 dias em CSV", async () => baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA })))),
-        item("mapa", "Ver o site", "Como o cliente vê", () => { location.href = "index.html"; })));
+        pode("cargas") && item("baixar", "Planilha de cargas", "30 dias em CSV", async () => baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA })))),
+        item("mapa", "Ver o site", "Abre em outra aba", () => window.open("index.html", "_blank", "noopener"))));
   };
 
   // ───────────────────────── CADASTROS (caminhões e produtos) ─────────────────────────

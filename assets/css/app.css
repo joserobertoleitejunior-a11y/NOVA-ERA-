@@ -212,3 +212,5 @@ body.imprimindo-cartoes #area-cartoes { display: block !important; padding: 8mm;
 .btn-mini svg { width: 20px; height: 20px; }
 .btn-mini.perigo { color: var(--vermelho); }
 .btn-mini:active { transform: scale(.97); }
+/* Linha de estoque só para olhar (quem não é da administração não abre o detalhe) */
+.linha-cartao.so-leitura { cursor: default; }
