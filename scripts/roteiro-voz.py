@@ -16,9 +16,10 @@ PAUSA_CENA = '<break time="3.0s" />'   # separa as cenas: é nela que o corte ac
 PAUSA_FRASE = '<break time="0.4s" />'  # respiro depois de ! e ?
 
 # Como a voz deve falar (a legenda continua com a grafia normal)
-PRONUNCIA = [("QR code", "quiú érre côde"), ("QR", "quiú érre"), ("XML", "xis ême éle"), ("WhatsApp", "Uótsap"), ("três D", "três dê")]
+PRONUNCIA = [("QR code", "quiú érre côde"), ("XML", "xis ême éle"), ("3D", "três dê")]
 
 # Cada bloco = uma geração no ElevenLabs (cabe no limite de caracteres por geração)
+PARTES_APRES = [(1, 3), (4, 6), (7, 8), (9, 11), (12, 14), (15, 17)]  # cenas de cada geração
 BLOCOS = [
     ("Tudo: apresentação + 6 tutoriais", [("apresentacao", None), ("conferente", None), ("motorista", None), ("vendedor", None), ("expedicao", None), ("administrativo", None), ("diretoria", None)]),
 ]
@@ -58,47 +59,39 @@ def aplicar():
 
 
 def gerar():
+    sep = f"\n{PAUSA_CENA}\n"
+    ap = cenas_do_bloco([("apresentacao", None)])
     linhas = [
-        "# Roteiro de voz — Confere Carga (apresentação + 6 tutoriais)",
+        "# Roteiro de voz — Confere Carga",
         "",
-        "**Um único texto, uma única geração, um único mp3.** Eu corto em cenas e coloco cada uma no lugar certo.",
+        "## Configuração do ElevenLabs (igual em todas as partes)",
+        "- **Modelo:** Eleven Multilingual v2 (se aparecer o **Eleven v3** e você quiser testar: ele é mais expressivo, mas aí apague as linhas `<break>`).",
+        "- **Estabilidade:** 35%  ·  **Semelhança:** 75%  ·  **Exageração do estilo:** 45%  ·  **Reforço de voz:** ligado  ·  **Velocidade:** 1.0",
+        "- Voz que soa **robótica**: desça a Estabilidade (30%). Voz que **exagera** ou muda de jeito no meio: suba (45%).",
         "",
-        "## Configuração do ElevenLabs",
-        "- **Modelo:** Eleven Multilingual v2 (é ele que entende as pausas `<break>`).",
-        "- **Voz:** brasileira e calorosa. Teste 2 ou 3 lendo a primeira frase e fique com a mais natural, não a mais “locutor”.",
-        "- **Stability:** 40%  ·  **Similarity:** 75%  ·  **Style:** 40%  ·  **Speaker boost:** ligado  ·  **Speed:** 1.0",
-        "- Se soar teatral, suba a Stability para 50%. Se soar seca e monótona, desça para 30%.",
-        "",
-        "## Como gerar",
-        "1. Copie **todo o texto da caixa abaixo** e cole no Text to Speech, sem mudar nada.",
-        "2. **Não apague** as linhas `<break time=\"3.0s\" />`: são as pausas entre cenas e é nelas que eu corto.",
-        "3. Gere, ouça e baixe o mp3. Se uma parte ficou ruim, gere de novo (cada geração sai um pouco diferente).",
-        "4. Envie o arquivo para a pasta **gravacoes/** do repositório (GitHub → Add file → Upload files, branch `claude/nova-era-app-6pqjx1`) e me avise.",
-        "",
-        "**Se o ElevenLabs recusar por tamanho:** divida o texto em duas partes **numa linha de pausa** (por exemplo, logo depois de “Confere Carga: menos erro, menos prejuízo, mais controle. Obrigado.”), gere as duas e envie **parte-1.mp3** e **parte-2.mp3**. Eu junto na ordem.",
-        "",
-        "Eu corto, nivelo o volume de todas as cenas e confiro a contagem: se faltar ou sobrar uma cena, eu aviso antes de gravar qualquer coisa.",
-        "",
-        "> **CUSTO_AQUI**",
+        "## Como gerar: uma parte de cada vez",
+        "1. Cole **uma parte** por vez (o texto da caixa), gere e **ouça com atenção**.",
+        "2. Frase emendada, sem respiro, ou com jeito de leitura: **gere a mesma parte de novo**. Cada geração sai diferente, e como a parte é curta, refazer custa pouco.",
+        "3. Gostou? Baixe em MP3 e nomeie **parte-1.mp3**, **parte-2.mp3** ... até **parte-6.mp3**.",
+        "4. Não apague as linhas `<break time=\"3.0s\" />`: é nelas que eu corto as cenas dentro da parte.",
+        "5. Quando tiver as 6, suba todas na pasta **gravacoes/** do GitHub e me avise. Eu junto na ordem, nivelo o volume e encaixo em cada cena.",
         "",
     ]
     total = 0
-    manifesto = []
-    ap = cenas_do_bloco([("apresentacao", None)]); texto_ap = f"\n{PAUSA_CENA}\n".join(falado(f) for _, _, f in ap)
-    linhas += ["---", "", f"## TEXTO A — SÓ A APRESENTAÇÃO  ({len(ap)} cenas · {len(texto_ap)} caracteres)  ← comece por este", "", "```text", texto_ap, "```", "",
-               "Se gravar só este, envie o mp3 normalmente: eu reconheço as 17 cenas da apresentação. Os tutoriais ficam com a voz provisória até você gerar o texto B.", ""]
-    for n, (titulo, itens) in enumerate(BLOCOS, 1):
-        cenas = cenas_do_bloco(itens)
-        texto = f"\n{PAUSA_CENA}\n".join(falado(f) for _, _, f in cenas)
-        total += len(texto)
-        manifesto.append({"bloco": n, "cenas": [{"alvo": a, "id": c} for a, c, _ in cenas]})
-        linhas += [
-            "---", "", f"## TEXTO B — TUDO: apresentação + 6 tutoriais  ({len(cenas)} cenas · {len(texto)} caracteres)  ← para depois", "", "```text", texto, "```", "",
-        ]
-    linhas[linhas.index("> **CUSTO_AQUI**")] = f"> O ElevenLabs cobra por caractere: este texto tem **{total} caracteres**. Gerar de novo gasta de novo."
+    for k, (i, j) in enumerate(PARTES_APRES, 1):
+        cenas = ap[i - 1:j]
+        texto = sep.join(falado(f) for _, _, f in cenas); total += len(texto)
+        linhas += ["---", "", f"## PARTE {k} de {len(PARTES_APRES)}  (cenas {i} a {j} · {len(texto)} caracteres)", "", "```text", texto, "```", ""]
+    linhas.insert(linhas.index("## Como gerar: uma parte de cada vez"), f"> A apresentação inteira tem **{total} caracteres**, em {len(PARTES_APRES)} partes.\n")
+    # tutoriais (para depois): um texto por função
+    linhas += ["---", "", "# Tutoriais por função (para depois)", "", "Mesmo método: uma função por vez. Nomeie **tutorial-conferente.mp3**, **tutorial-motorista.mp3** etc.", ""]
+    manifesto = [{"bloco": 1, "cenas": [{"alvo": a, "id": c} for a, c, _ in cenas_do_bloco(BLOCOS[0][1])]}]
+    for alvo in ("conferente", "motorista", "vendedor", "expedicao", "administrativo", "diretoria"):
+        cs = cenas_do_bloco([(alvo, None)])
+        linhas += [f"## Tutorial: {alvo}  ({len(cs)} cenas)", "", "```text", sep.join(falado(f) for _, _, f in cs), "```", ""]
     (RAIZ / "assets/apresentacao/ROTEIRO-VOZ.md").write_text("\n".join(linhas) + "\n", encoding="utf8")
     (RAIZ / "scripts/blocos-voz.json").write_text(json.dumps(manifesto, ensure_ascii=False, indent=1) + "\n", encoding="utf8")
-    print(f"ROTEIRO-VOZ.md gerado: {len(BLOCOS)} blocos, {total} caracteres no total.")
+    print(f"ROTEIRO-VOZ.md gerado: apresentação em {len(PARTES_APRES)} partes ({total} caracteres) + 6 tutoriais.")
 
 
 def rodar(cmd):
@@ -178,4 +171,5 @@ if __name__ == "__main__":
         if "--silencio" in a: sil = float(a[a.index("--silencio") + 1])
         if "--ruido" in a: ruido = float(a[a.index("--ruido") + 1])
         arqs = [x for i, x in enumerate(a[1:], 1) if not x.startswith("--") and a[i - 1] not in ("--silencio", "--ruido")]
+        arqs.sort(key=lambda x: [int(n) for n in re.findall(r"\d+", Path(x).name)] or [0])  # parte-1, parte-2 ... na ordem certa, mesmo com parte-10
         cortar(arqs, sil, ruido, so)
