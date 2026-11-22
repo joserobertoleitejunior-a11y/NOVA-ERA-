@@ -27,7 +27,10 @@
 
   // ───────────────────────── REAL ─────────────────────────
   function real() {
-    const sb = window.supabase.createClient(C.supabaseUrl, C.supabaseAnonKey);
+    // A biblioteca guarda o login atrás de uma "fechadura" do navegador (navigator.locks) e espera por ela SEM LIMITE.
+    // Uma aba antiga travada segurava a fechadura e o app novo nem desenhava o login. Este app não precisa dela
+    // (uma pessoa, um aparelho), então a fechadura é dispensada: o login nunca fica esperando outra aba.
+    const sb = window.supabase.createClient(C.supabaseUrl, C.supabaseAnonKey, { auth: { lock: async (_nome, _tempo, fn) => fn() } });
     const semHistorico = ({ error }) => { if (error) { if (error.code === "23503" || /foreign key|violates/i.test(error.message)) throw Object.assign(new Error("Já tem histórico."), { emUso: true }); throw new Error(error.message); } };
     const ok = ({ data, error }) => { if (error) throw new Error(error.message); return data; };
     const cacheUrl = new Map();

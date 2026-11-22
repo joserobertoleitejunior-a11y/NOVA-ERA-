@@ -176,7 +176,9 @@
 
   // ───────────────────────── entrada ─────────────────────────
   async function iniciar() {
-    try { perfil = await NE.dados.perfil(); } catch { perfil = null; }
+    perfil = null; topo();   // o topo (logo) aparece NA HORA, antes de esperar o servidor
+    // Espera o servidor por no máximo 8 s. Sem resposta, mostra a tela de entrada em vez de ficar em branco.
+    try { perfil = await Promise.race([NE.dados.perfil(), new Promise((ok) => setTimeout(() => ok(undefined), 8000))]) || null; } catch { perfil = null; }
     topo();
     if (!perfil) { pararSondagem(); return telaEntrar(); }
     if (!perfil.ativo) { await NE.dados.sair(); perfil = null; topo(); return telaEntrar("Seu acesso está desativado. Fale com a expedição."); }
