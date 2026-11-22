@@ -1,223 +1,143 @@
-[
- {
-  "bloco": 1,
+{
+ "apresentacao-parte-1.mp3": {
+  "alvo": "apresentacao",
+  "audio": "assets/apresentacao/audio",
   "cenas": [
-   {
-    "alvo": "apresentacao",
-    "id": "01-abertura"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "02-problema"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "03-entrar"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "04-inicio"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "05-nota"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "06-xml-ia"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "07-conferencia"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "08-etiquetas"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "09-avisos"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "10-estoque"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "11-contagem"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "12-equipe"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "13-frota"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "14-assistente"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "15-rastreio"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "16-site"
-   },
-   {
-    "alvo": "apresentacao",
-    "id": "17-fechamento"
-   },
-   {
-    "alvo": "conferente",
-    "id": "01-entrar"
-   },
-   {
-    "alvo": "conferente",
-    "id": "02-fila"
-   },
-   {
-    "alvo": "conferente",
-    "id": "03-conferir"
-   },
-   {
-    "alvo": "conferente",
-    "id": "04-diferenca"
-   },
-   {
-    "alvo": "conferente",
-    "id": "05-etiquetas"
-   },
-   {
-    "alvo": "conferente",
-    "id": "06-contagem"
-   },
-   {
-    "alvo": "conferente",
-    "id": "07-avisos"
-   },
-   {
-    "alvo": "conferente",
-    "id": "08-ajuda"
-   },
-   {
-    "alvo": "motorista",
-    "id": "01-entrar"
-   },
-   {
-    "alvo": "motorista",
-    "id": "02-fila"
-   },
-   {
-    "alvo": "motorista",
-    "id": "03-avisos"
-   },
-   {
-    "alvo": "motorista",
-    "id": "04-cliente"
-   },
-   {
-    "alvo": "vendedor",
-    "id": "01-entrar"
-   },
-   {
-    "alvo": "vendedor",
-    "id": "02-inicio"
-   },
-   {
-    "alvo": "vendedor",
-    "id": "03-nota"
-   },
-   {
-    "alvo": "vendedor",
-    "id": "04-cargas"
-   },
-   {
-    "alvo": "vendedor",
-    "id": "05-rastreio"
-   },
-   {
-    "alvo": "vendedor",
-    "id": "06-avisos"
-   },
-   {
-    "alvo": "expedicao",
-    "id": "01-entrar"
-   },
-   {
-    "alvo": "expedicao",
-    "id": "02-inicio"
-   },
-   {
-    "alvo": "expedicao",
-    "id": "03-nota"
-   },
-   {
-    "alvo": "expedicao",
-    "id": "04-cargas"
-   },
-   {
-    "alvo": "expedicao",
-    "id": "05-estoque"
-   },
-   {
-    "alvo": "expedicao",
-    "id": "06-equipe"
-   },
-   {
-    "alvo": "expedicao",
-    "id": "07-avisos"
-   },
-   {
-    "alvo": "administrativo",
-    "id": "01-entrar"
-   },
-   {
-    "alvo": "administrativo",
-    "id": "02-inicio"
-   },
-   {
-    "alvo": "administrativo",
-    "id": "03-xml"
-   },
-   {
-    "alvo": "administrativo",
-    "id": "04-equipe"
-   },
-   {
-    "alvo": "administrativo",
-    "id": "05-frota"
-   },
-   {
-    "alvo": "administrativo",
-    "id": "06-avisos"
-   },
-   {
-    "alvo": "diretoria",
-    "id": "01-entrar"
-   },
-   {
-    "alvo": "diretoria",
-    "id": "02-inicio"
-   },
-   {
-    "alvo": "diretoria",
-    "id": "03-resumo"
-   },
-   {
-    "alvo": "diretoria",
-    "id": "04-ia"
-   },
-   {
-    "alvo": "diretoria",
-    "id": "05-equipe"
-   },
-   {
-    "alvo": "diretoria",
-    "id": "06-avisos"
-   }
+   "01-problema",
+   "02-solucao",
+   "03-conferencia"
+  ]
+ },
+ "apresentacao-parte-2.mp3": {
+  "alvo": "apresentacao",
+  "audio": "assets/apresentacao/audio",
+  "cenas": [
+   "04-diferenca",
+   "05-papeis",
+   "06-vendedor",
+   "07-expedicao"
+  ]
+ },
+ "apresentacao-parte-3.mp3": {
+  "alvo": "apresentacao",
+  "audio": "assets/apresentacao/audio",
+  "cenas": [
+   "08-avisos",
+   "09-estoque",
+   "10-diretoria"
+  ]
+ },
+ "apresentacao-parte-4.mp3": {
+  "alvo": "apresentacao",
+  "audio": "assets/apresentacao/audio",
+  "cenas": [
+   "11-fechamento"
+  ]
+ },
+ "conferente-parte-1.mp3": {
+  "alvo": "conferente",
+  "audio": "assets/tutoriais/audio/conferente",
+  "cenas": [
+   "01-entrar",
+   "02-fila",
+   "03-conferir"
+  ]
+ },
+ "conferente-parte-2.mp3": {
+  "alvo": "conferente",
+  "audio": "assets/tutoriais/audio/conferente",
+  "cenas": [
+   "04-diferenca",
+   "05-etiquetas",
+   "06-contagem"
+  ]
+ },
+ "conferente-parte-3.mp3": {
+  "alvo": "conferente",
+  "audio": "assets/tutoriais/audio/conferente",
+  "cenas": [
+   "07-avisos"
+  ]
+ },
+ "motorista-parte-1.mp3": {
+  "alvo": "motorista",
+  "audio": "assets/tutoriais/audio/motorista",
+  "cenas": [
+   "01-entrar",
+   "02-viagem",
+   "03-fila",
+   "04-avisos"
+  ]
+ },
+ "vendedor-parte-1.mp3": {
+  "alvo": "vendedor",
+  "audio": "assets/tutoriais/audio/vendedor",
+  "cenas": [
+   "01-entrar",
+   "02-inicio",
+   "03-nota",
+   "04-rastreio"
+  ]
+ },
+ "vendedor-parte-2.mp3": {
+  "alvo": "vendedor",
+  "audio": "assets/tutoriais/audio/vendedor",
+  "cenas": [
+   "05-avisos"
+  ]
+ },
+ "expedicao-parte-1.mp3": {
+  "alvo": "expedicao",
+  "audio": "assets/tutoriais/audio/expedicao",
+  "cenas": [
+   "01-entrar",
+   "02-patio",
+   "03-nota",
+   "04-xml"
+  ]
+ },
+ "expedicao-parte-2.mp3": {
+  "alvo": "expedicao",
+  "audio": "assets/tutoriais/audio/expedicao",
+  "cenas": [
+   "05-cargas",
+   "06-contagem",
+   "07-equipe"
+  ]
+ },
+ "administrativo-parte-1.mp3": {
+  "alvo": "administrativo",
+  "audio": "assets/tutoriais/audio/administrativo",
+  "cenas": [
+   "01-entrar",
+   "02-inicio",
+   "03-xml",
+   "04-pessoa"
+  ]
+ },
+ "administrativo-parte-2.mp3": {
+  "alvo": "administrativo",
+  "audio": "assets/tutoriais/audio/administrativo",
+  "cenas": [
+   "05-cadastros",
+   "06-ajustes"
+  ]
+ },
+ "diretoria-parte-1.mp3": {
+  "alvo": "diretoria",
+  "audio": "assets/tutoriais/audio/diretoria",
+  "cenas": [
+   "01-entrar",
+   "02-empresa",
+   "03-resumo",
+   "04-cargas"
+  ]
+ },
+ "diretoria-parte-2.mp3": {
+  "alvo": "diretoria",
+  "audio": "assets/tutoriais/audio/diretoria",
+  "cenas": [
+   "05-equipe"
   ]
  }
-]
+}

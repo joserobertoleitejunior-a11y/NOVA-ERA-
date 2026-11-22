@@ -52,7 +52,7 @@ a.link { color: var(--azul); font-weight: 800; }
     vendedor: { nome: "Vendedor", video: "vendedor", diario: ["Lance as notas dos seus clientes na fila", "Acompanhe as cargas que já saíram", "Mande o link de rastreio da entrega pelo WhatsApp do cliente"] },
     expedicao: { nome: "Expedição", video: "expedicao", diario: ["Acompanhe o painel: uma frase diz se está tudo certo", "Resolva os avisos: diferença de carga, estoque baixo, nota parada", "Decida o ajuste quando a contagem do estoque não bater"] },
     administrativo: { nome: "Administrativo", video: "administrativo", diario: ["Lance notas e importe o XML", "Cadastre equipe, caminhões e produtos", "Dê uma senha nova para quem esquecer"] },
-    diretoria: { nome: "Diretoria", video: "diretoria", diario: ["Veja a empresa em uma frase na tela inicial", "Abra o resumo completo quando quiser os detalhes", "Pergunte ao assistente de inteligência artificial"] },
+    diretoria: { nome: "Diretoria", video: "diretoria", diario: ["Veja a empresa em uma frase na tela inicial", "Abra o resumo completo quando quiser os detalhes", "Na versão completa, pergunte ao assistente de inteligência artificial"] },
   };
   const el = (t, a = {}, ...f) => { const n = document.createElement(t); for (const [k, v] of Object.entries(a)) { if (v == null || v === false) continue; k === "class" ? (n.className = v) : k === "html" ? (n.innerHTML = v) : k.startsWith("on") ? n.addEventListener(k.slice(2), v) : n.setAttribute(k, v); } f.flat().forEach((x) => x != null && n.append(x instanceof Node ? x : document.createTextNode(x))); return n; };
   const raiz = document.getElementById("conteudo");
