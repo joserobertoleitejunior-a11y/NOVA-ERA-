@@ -7,12 +7,32 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Confere Carga · Nova Era</title>
 <link rel="manifest" href="manifest.json">
-<script src="assets/js/ambiente.js?v=20261122c1"></script>
-<script src="assets/js/dispositivo.js?v=20261122c1"></script>
+<script>
+/* Rede de segurança (roda ANTES de tudo, então vale mesmo se um arquivo nunca terminar de baixar): se depois de alguns segundos a tela continuar em branco (arquivo velho misturado com novo, falha de rede...),
+   em vez de ficar muda mostra o que fazer. Some sozinha se o app abrir. */
+(function () {
+  var t0 = Date.now();
+  function desenhado() { return !!document.querySelector("#login-usuario, .nav-inferior, .vazio-grande") || ((document.getElementById("conteudo") || {}).innerText || "").trim().length > 20; }
+  var id = setInterval(function () {
+    var caixa = document.getElementById("socorro");
+    if (desenhado()) { if (caixa) caixa.remove(); if (Date.now() - t0 > 20000) clearInterval(id); return; }
+    if (Date.now() - t0 < 6000 || caixa) return;
+    caixa = document.createElement("div"); caixa.id = "socorro";
+    caixa.style.cssText = "position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:24px;background:rgba(244,245,250,.97);font-family:system-ui,Arial,sans-serif;color:#0b1038;text-align:center";
+    caixa.innerHTML = '<div style="max-width:420px"><h1 style="margin:0 0 8px;font-size:1.6rem;text-transform:uppercase">O aplicativo não abriu direito</h1>' +
+      '<p style="margin:0 0 18px;font-size:1.1rem;line-height:1.4;color:#565a78">Acontece logo depois de uma atualização. Toque no botão vermelho: ele conserta e abre de novo. Seu login e suas conferências guardadas não são apagados.</p>' +
+      '<a href="limpar.html" style="display:flex;align-items:center;justify-content:center;min-height:58px;border-radius:16px;background:#d9141e;color:#fff;font-weight:800;font-size:1.15rem;text-decoration:none">Consertar agora</a>' +
+      '<a href="" onclick="location.reload();return false" style="display:block;margin-top:14px;color:#1a1f8f;font-weight:800;font-size:1.05rem">Só tentar de novo</a></div>';
+    (document.body || document.documentElement).appendChild(caixa);
+  }, 1000);
+})();
+</script>
+<script src="assets/js/ambiente.js?v=20261122c2"></script>
+<script src="assets/js/dispositivo.js?v=20261122c2"></script>
 <link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/js/app.js?v=20261122c1" as="script">
-<link rel="stylesheet" href="assets/css/marca.css?v=20261122c1">
-<link rel="stylesheet" href="assets/css/app.css?v=20261122c1">
+<link rel="preload" href="assets/js/app.js?v=20261122c2" as="script">
+<link rel="stylesheet" href="assets/css/marca.css?v=20261122c2">
+<link rel="stylesheet" href="assets/css/app.css?v=20261122c2">
 </head>
 <body>
 <header class="topo">
@@ -24,33 +44,33 @@
 </header>
 <div class="faixa-teste" id="faixa-teste" hidden></div>
 <main><div id="conteudo"></div></main>
-<script src="assets/vendor/supabase.js?v=20261122c1"></script>
-<script src="assets/js/config.js?v=20261122c1"></script>
-<script src="assets/js/icones.js?v=20261122c1"></script>
-<script src="assets/js/dominio.js?v=20261122c1"></script>
-<script src="assets/js/ui.js?v=20261122c1"></script>
+<script src="assets/vendor/supabase.js?v=20261122c2"></script>
+<script src="assets/js/config.js?v=20261122c2"></script>
+<script src="assets/js/icones.js?v=20261122c2"></script>
+<script src="assets/js/dominio.js?v=20261122c2"></script>
+<script src="assets/js/ui.js?v=20261122c2"></script>
 <!-- O código da demonstração só é carregado quando o endereço pede ?demo= (e config.js permite). No app de verdade nem chega ao aparelho. -->
-<script>if (window.NE && NE.demo && NE.demo.ativo) document.write('<script src="assets/js/teste-local.js?v=20261122c1"><\/script>');</script>
-<script src="assets/js/dados.js?v=20261122c1"></script>
-<script src="assets/js/assistente.js?v=20261122c1"></script>
-<script src="assets/js/nfe.js?v=20261122c1"></script>
-<script src="assets/js/nfe-xml.js?v=20261122c1"></script>
-<script src="assets/js/scanner.js?v=20261122c1"></script>
-<script src="assets/js/conferir.js?v=20261122c1"></script>
-<script src="assets/js/janela.js?v=20261122c1"></script>
-<script src="assets/js/rastreio.js?v=20261122c1"></script>
-<script src="assets/js/etiquetas.js?v=20261122c1"></script>
-<script src="assets/js/tour.js?v=20261122c1"></script>
-<script src="assets/js/painel.js?v=20261122c1"></script>
-<script src="assets/js/cadastros.js?v=20261122c1"></script>
-<script src="assets/js/inicio.js?v=20261122c1"></script>
-<script src="assets/js/notas.js?v=20261122c1"></script>
-<script src="assets/js/estoque.js?v=20261122c1"></script>
-<script src="assets/js/alertas.js?v=20261122c1"></script>
-<script src="assets/js/equipe.js?v=20261122c1"></script>
-<script src="assets/js/guiados.js?v=20261122c1"></script>
-<script src="assets/js/ia.js?v=20261122c1"></script>
-<script src="assets/js/ajuda.js?v=20261122c1"></script>
-<script src="assets/js/app.js?v=20261122c1"></script>
+<script>if (window.NE && NE.demo && NE.demo.ativo) document.write('<script src="assets/js/teste-local.js?v=20261122c2"><\/script>');</script>
+<script src="assets/js/dados.js?v=20261122c2"></script>
+<script src="assets/js/assistente.js?v=20261122c2"></script>
+<script src="assets/js/nfe.js?v=20261122c2"></script>
+<script src="assets/js/nfe-xml.js?v=20261122c2"></script>
+<script src="assets/js/scanner.js?v=20261122c2"></script>
+<script src="assets/js/conferir.js?v=20261122c2"></script>
+<script src="assets/js/janela.js?v=20261122c2"></script>
+<script src="assets/js/rastreio.js?v=20261122c2"></script>
+<script src="assets/js/etiquetas.js?v=20261122c2"></script>
+<script src="assets/js/tour.js?v=20261122c2"></script>
+<script src="assets/js/painel.js?v=20261122c2"></script>
+<script src="assets/js/cadastros.js?v=20261122c2"></script>
+<script src="assets/js/inicio.js?v=20261122c2"></script>
+<script src="assets/js/notas.js?v=20261122c2"></script>
+<script src="assets/js/estoque.js?v=20261122c2"></script>
+<script src="assets/js/alertas.js?v=20261122c2"></script>
+<script src="assets/js/equipe.js?v=20261122c2"></script>
+<script src="assets/js/guiados.js?v=20261122c2"></script>
+<script src="assets/js/ia.js?v=20261122c2"></script>
+<script src="assets/js/ajuda.js?v=20261122c2"></script>
+<script src="assets/js/app.js?v=20261122c2"></script>
 </body>
 </html>

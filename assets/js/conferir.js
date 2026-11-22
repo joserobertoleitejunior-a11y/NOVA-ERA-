@@ -37,7 +37,7 @@
         catalogo = { veiculos, produtos };
       } catch (e) { NE.aviso(NE.mensagemErro(e)); catalogo = { veiculos: [], produtos: [] }; }
     }
-    iaOn = await NE.iaLigada().catch(() => false);   // o botão de ler a nota por IA só existe se a IA estiver ligada
+    iaOn = NE.iaLigada ? await NE.iaLigada().catch(() => false) : false;   // o botão de ler a nota por IA só existe se a IA estiver ligada
     if (opcoes.nota_id) {
       try {
         const nota = (await NE.dados.notas({ status: ["pendente", "em_conferencia"] })).find((n) => n.id === opcoes.nota_id);

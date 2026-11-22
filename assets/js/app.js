@@ -99,7 +99,7 @@
   // ───────────────────────── topo, sino, faixa de teste ─────────────────────────
   let ultimoPerfil = null;
   function topo() {
-    if ((perfil && perfil.id) !== ultimoPerfil) { ultimoPerfil = perfil && perfil.id; NE.iaReiniciar(); }   // outra pessoa: pergunta de novo se a IA está ligada
+    if ((perfil && perfil.id) !== ultimoPerfil) { ultimoPerfil = perfil && perfil.id; NE.iaReiniciar && NE.iaReiniciar(); }   // outra pessoa: pergunta de novo se a IA está ligada
     $("#logo").innerHTML = NE.logo;
     const area = $("#usuario"); area.replaceChildren();
     const faixa = $("#faixa-teste");
@@ -157,7 +157,7 @@
     const vez = ++tokenIA; $("#fab-ia")?.remove();
     if (esconder || !perfil || !perm().ia || !NE.abrirAssistente) return;
     // só aparece se a IA estiver ligada de verdade; o resultado vale para a última tela desenhada
-    NE.iaLigada().then((ligada) => {
+    (NE.iaLigada ? NE.iaLigada() : Promise.resolve(false)).then((ligada) => {
       if (!ligada || vez !== tokenIA || !perfil || $("#fab-ia")) return;
       const b = el("button", { type: "button", class: "fab-ia", id: "fab-ia" }, ic("faisca"), "Perguntar");
       b.addEventListener("click", () => NE.abrirAssistente()); document.body.append(b);
