@@ -25,7 +25,12 @@
    "pre": {
     "perfil": null
    },
-   "acoes": []
+   "acoes": [],
+   "pontos": [
+    "Peça a mais não é cobrada",
+    "Peça a menos vira reclamação",
+    "O estoque para de bater"
+   ]
   },
   {
    "id": "02-solucao",
@@ -44,6 +49,11 @@
      "destacar": ".linha-cartao",
      "at": 0.891
     }
+   ],
+   "pontos": [
+    "Nenhum caminhão sai sem conferência",
+    "A nota entra numa fila",
+    "Um minuto no celular"
    ]
   },
   {
@@ -99,6 +109,12 @@
      "clicar": "#btn-seguir",
      "at": 0.921
     }
+   ],
+   "pontos": [
+    "Toca na nota e no caminhão",
+    "Compara a carga com a nota",
+    "Foto da carga e da placa",
+    "Registro que ninguém apaga"
    ],
    "ritmo": 0.6
   },
@@ -172,6 +188,11 @@
      "at": 0.91
     }
    ],
+   "pontos": [
+    "Informa quantas peças subiram",
+    "Escolhe o motivo",
+    "A administração sabe na hora"
+   ],
    "ritmo": 0.6
   },
   {
@@ -191,6 +212,11 @@
      "destacar": ".nav-inferior",
      "at": 0.873
     }
+   ],
+   "pontos": [
+    "Cada função tem a sua tela",
+    "O motorista vê se pode sair",
+    "Nada que não é dele"
    ]
   },
   {
@@ -210,6 +236,11 @@
      "destacar": ".tiles",
      "at": 0.888
     }
+   ],
+   "pontos": [
+    "Vê as notas e as entregas",
+    "Manda o rastreio no WhatsApp",
+    "O cliente acompanha sozinho"
    ]
   },
   {
@@ -260,6 +291,11 @@
      "at": 0.884
     }
    ],
+   "pontos": [
+    "O pátio em tempo real",
+    "Nota em quatro passos",
+    "Ou o XML, sem digitar"
+   ],
    "ritmo": 0.6
   },
   {
@@ -279,6 +315,11 @@
      "rolar": ".alerta-item",
      "at": 0.937
     }
+   ],
+   "pontos": [
+    "Peça a mais, estoque negativo",
+    "Chega no celular, app fechado",
+    "Botão de chamar no WhatsApp"
    ]
   },
   {
@@ -302,6 +343,11 @@
      "destacar": ".linha-cartao",
      "at": 0.897
     }
+   ],
+   "pontos": [
+    "Desconta a cada conferência",
+    "Ok, baixo ou negativo",
+    "Contagem de três minutos"
    ]
   },
   {
@@ -329,6 +375,11 @@
      "rolar": ".barras",
      "at": 0.931
     }
+   ],
+   "pontos": [
+    "Dia, semana e mês",
+    "Onde a empresa mais erra",
+    "Como está cada pessoa"
    ]
   },
   {
@@ -344,6 +395,11 @@
      "destacar": ".status-simples",
      "at": 0.05
     }
+   ],
+   "pontos": [
+    "Qualquer celular, sem instalar",
+    "Funciona sem sinal no pátio",
+    "Toda carga com prova"
    ]
   }
  ]

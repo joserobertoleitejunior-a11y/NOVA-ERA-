@@ -46,6 +46,7 @@ def montar(cenas):
             if t > dur:
                 print(f"  ! {c['id']}: cursor passa {t - dur:.1f}s da fala (fala {dur:.0f}s)")
         nova = {"id": c["id"], "titulo": c["titulo"], "fala": c["fala"], "pre": c.get("pre", {}), "acoes": acoes}
+        if c.get("pontos"): nova["pontos"] = c["pontos"]
         if ritmo != 1.0: nova["ritmo"] = ritmo
         saida.append(nova)
     return saida
