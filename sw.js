@@ -1,11 +1,13 @@
 // Service worker: (1) abre o app na hora, mesmo com sinal fraco, usando os arquivos guardados no aparelho;
 // (2) recebe os AVISOS (Web Push) com o app fechado e abre a tela certa ao tocar.
 // Dados do Supabase NUNCA passam por aqui (sempre ao vivo e protegidos).
-const VERSAO = "confere-carga-20261122c2";
+const VERSAO = "confere-carga-20261122c3";
 const ESSENCIAIS = ["./app.html", "./manifest.json"];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(ESSENCIAIS)).then(() => self.skipWaiting()));
+  // Se a rede estiver ruim, o pré-carregamento falha em silêncio: o service worker novo entra do mesmo jeito
+  // (antes, uma falha aqui deixava o antigo no comando para sempre).
+  e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(ESSENCIAIS)).catch(() => {}).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSAO).map((k) => caches.delete(k)))).then(() => self.clients.claim()));

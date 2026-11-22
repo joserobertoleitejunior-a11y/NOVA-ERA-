@@ -27,37 +27,51 @@
 <main id="caixa">
   <div class="gira" id="gira" aria-hidden="true"></div>
   <h1 id="titulo">Limpando o aparelho…</h1>
+  <p id="passo" style="font-weight:700;color:#1a1f8f;min-height:1.3em"></p>
   <p id="texto">Tirando o que sobrou de testes. Seu acesso e as conferências que ainda não subiram <b>não são apagados</b>.</p>
 </main>
 <script>
 (async () => {
-  const feito = { chaves: 0, caches: 0, sw: 0 };
+  // Cada etapa tem limite de tempo: se o celular travar em uma, a limpeza segue e SEMPRE termina.
+  const feito = { chaves: 0, caches: 0, sw: 0, lentos: 0 }; let acabou = false;
+  const comLimite = async (promessa, ms) => {
+    const r = await Promise.race([Promise.resolve(promessa).catch(() => null), new Promise((ok) => setTimeout(() => ok("__tempo"), ms))]);
+    if (r === "__tempo") { feito.lentos++; return null; }
+    return r;
+  };
+  const texto = (t) => { const e = document.getElementById("passo"); if (e) e.textContent = t; };
+
+  function terminar() {
+    if (acabou) return; acabou = true;
+    const gira = document.getElementById("gira"); if (gira) gira.remove();
+    document.getElementById("titulo").textContent = feito.lentos ? "Quase pronto" : "Pronto!";
+    document.getElementById("texto").textContent = feito.lentos ? "Este aparelho demorou em uma etapa. O principal já foi feito." : "Agora o aplicativo abre do jeito certo, só com os dados de verdade.";
+    texto("");
+    const extra = feito.lentos ? `<p style="font-size:.95rem;text-align:left;background:#fff3cd;color:#5c4400;padding:10px 12px;border-radius:12px;line-height:1.45"><b>Se o aplicativo ainda não abrir:</b> no Chrome, toque no ícone à esquerda do endereço, depois em <b>Configurações do site</b> e em <b>Limpar e redefinir</b>. Depois é só entrar de novo com o seu usuário e senha.</p>` : "";
+    document.getElementById("caixa").insertAdjacentHTML("beforeend",
+      `<p class="ok">${feito.lentos ? "Limpeza feita." : "Aparelho limpo."}</p>
+       <ul><li><b>${feito.chaves}</b> marca(s) de teste apagada(s)</li><li><b>${feito.caches}</b> pacote(s) de arquivos antigos removido(s)</li><li>Seu login e as conferências guardadas continuam</li></ul>${extra}
+       <a class="botao" href="app.html?limpo=${Date.now()}">Abrir o aplicativo</a>`);
+  }
+  setTimeout(terminar, 9000);   // por mais que trave, em 9 segundos o resultado aparece
+
   // 1) marcas e dados de TESTE/demonstração e o que o tutorial antigo deixou. Fica de fora: a sessão de login (sb-…),
   //    a lista de orçamento do site e a fila de conferências guardadas sem sinal (IndexedDB), que nunca são tocadas aqui.
+  texto("Apagando marcas de teste…");
   try {
     const lixo = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (/^ne-(modo-teste|teste|demo|tour|guia|c-|limpeza)/.test(k)) lixo.push(k);
-    }
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^ne-(modo-teste|teste|demo|tour|guia|c-|limpeza)/.test(k)) lixo.push(k); }
     lixo.forEach((k) => localStorage.removeItem(k)); feito.chaves = lixo.length;
   } catch { /* sem armazenamento */ }
   try { Object.keys(sessionStorage).filter((k) => k.startsWith("ne-")).forEach((k) => sessionStorage.removeItem(k)); } catch { /* ok */ }
-  // 2) arquivos guardados pelo aplicativo (para baixar a versão nova) e o service worker antigo
-  try { if (window.caches) { const nomes = await caches.keys(); await Promise.all(nomes.map((n) => caches.delete(n))); feito.caches = nomes.length; } } catch { /* ok */ }
-  try { if (navigator.serviceWorker) { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map((r) => r.unregister())); feito.sw = regs.length; } } catch { /* ok */ }
 
-  document.getElementById("gira").remove();
-  document.getElementById("titulo").textContent = "Pronto!";
-  document.getElementById("caixa").insertAdjacentHTML("beforeend",
-    `<p class="ok">Aparelho limpo.</p>
-     <ul>
-       <li><b>${feito.chaves}</b> marca(s) de teste apagada(s)</li>
-       <li><b>${feito.caches}</b> pacote(s) de arquivos antigos removido(s)</li>
-       <li>Seu login e as conferências guardadas continuam</li>
-     </ul>
-     <a class="botao" href="app.html">Abrir o aplicativo</a>`);
-  document.getElementById("texto").textContent = "Agora o aplicativo abre do jeito certo, só com os dados de verdade.";
+  // 2) o service worker antigo PRIMEIRO (é ele que serve os arquivos velhos), depois os arquivos que ele guardou
+  texto("Desligando a versão antiga…");
+  try { if (navigator.serviceWorker) { const regs = (await comLimite(navigator.serviceWorker.getRegistrations(), 3000)) || []; for (const r of regs) { await comLimite(r.unregister(), 2500); feito.sw++; } } } catch { /* ok */ }
+  texto("Apagando arquivos antigos…");
+  try { if (window.caches) { const nomes = (await comLimite(caches.keys(), 3000)) || []; for (const n of nomes) { await comLimite(caches.delete(n), 2500); feito.caches++; } } } catch { /* ok */ }
+
+  terminar();
 })();
 </script>
 </body>
