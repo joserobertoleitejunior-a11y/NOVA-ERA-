@@ -158,5 +158,5 @@
     NE.memoria.gravar(`ne-guia-${tipo}`, true);
     NE.assistente({ raiz, passos, rotuloPasso: "Dica", rotuloFinal: "Entendi", aoConcluir: async () => aoFechar(), aoCancelar: aoFechar });
   };
-  NE.guiaJaVisto = (tipo) => !!NE.memoria.ler(`ne-guia-${tipo}`);
+  NE.guiaJaVisto = (tipo) => !!(NE.demo && NE.demo.ativo) || !!NE.memoria.ler(`ne-guia-${tipo}`);
 })();

@@ -434,8 +434,7 @@ drop trigger if exists perfis_travar_cadastro on public.perfis;
 create trigger perfis_travar_cadastro before update on public.perfis for each row execute function public.perfis_travar_cadastro();
 
 
--- ═══════════ LIMPEZA: nenhum dado de exemplo ═══════════
-delete from public.produtos;
+-- (Este arquivo NUNCA apaga nem cria dados: pode ser executado de novo, em qualquer momento, sem risco para o que já está cadastrado.)
 
 -- ═══════════ CONFERÊNCIA (deve listar as tabelas novas e mostrar contagens zeradas) ═══════════
 select

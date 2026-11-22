@@ -1,12 +1,11 @@
 // Camada de dados. Uma interface (NE.dados), duas implementações:
 //  - real: Supabase (Auth + Postgres com RLS + Storage privado + funções no servidor)
-//  - teste: ambiente local do login admin/admin (teste-local.js), isolado do banco de verdade
+//  - demonstração: ambiente local (teste-local.js), SÓ quando o endereço pede ?demo=. Nunca fica ligado no aparelho.
 // As telas nunca sabem qual está ativa.
 (() => {
   const NE = window.NE;
   const C = window.NOVA_ERA || {};
   const D = window.NEDominio;
-  const FLAG_TESTE = "ne-modo-teste";
   const emailDe = (usuario) => (usuario.includes("@") ? usuario.trim() : `${usuario.trim().toLowerCase()}@func.novaera.app`);
   const ehRede = (e) => /Failed to fetch|NetworkError|network|Load failed|fetch/i.test(String(e?.message || e));
 
@@ -184,17 +183,15 @@
   }
 
   // ───────────────────────── escolha da implementação ─────────────────────────
-  let ativa = null; let tentouTeste = false;
-  const testeAtivo = () => { try { return localStorage.getItem(FLAG_TESTE) === "1"; } catch { return false; } };
+  // A demonstração só existe com ?demo= no endereço (ver ambiente.js). Sem isso é SEMPRE o banco de verdade:
+  // não há marca guardada no aparelho que possa "ligar" a demonstração por engano.
+  let ativa = null;
+  const naDemo = () => !!(NE.demo && NE.demo.ativo && NE.criarTeste);
   const ligar = () => {
     if (ativa) return ativa;
-    if (C.modoTeste && testeAtivo()) { ativa = NE.criarTeste(); NE.modoTeste = true; }
+    if (naDemo()) { ativa = NE.criarTeste(); NE.modoTeste = true; }
     else { ativa = real(); NE.modoTeste = false; }
     return ativa;
-  };
-  const trocarPara = (teste) => {
-    try { teste ? localStorage.setItem(FLAG_TESTE, "1") : localStorage.removeItem(FLAG_TESTE); } catch { /* sem armazenamento: vale só nesta página */ }
-    ativa = null; tentouTeste = teste; ligar();
   };
 
   const USUARIOS_TESTE = ["admin", "adminvendas", "adminexpedicao", "admindiretoria", "adminadministrativo", "conferente", "ajudante", "motorista"];
@@ -202,24 +199,36 @@
     "notas", "criarNota", "importarNotas", "cancelarNota", "enviarFoto", "urlFoto", "fotoExemplo", "registrarConferencia", "sincronizar", "pendentes", "conferencias", "contexto",
     "saldos", "movimentos", "lancarMovimento", "contagens", "pedirContagem", "concluirContagem", "aplicarAjuste", "descartarContagem", "alertas", "marcarLidos", "resolverAlerta", "preferencias", "salvarPreferencias", "config", "salvarConfig",
     "pushSuportado", "pushAssinar", "pushRemover", "pushTestar", "iaDisponivel", "iaPerguntar", "iaLerNota", "trocarPerfil", "reiniciar"];
-  // Antes do login não há sessão: o pedido de senha dos usuários de teste vai para o ambiente de teste, os demais para o banco.
-  const pedirAjudaSenhaAntesLogin = (d) => (C.modoTeste && USUARIOS_TESTE.includes(String(d.usuario || "").trim().toLowerCase()) ? NE.criarTeste().pedirAjudaSenha(d) : (testeAtivo() ? NE.criarTeste().pedirAjudaSenha(d) : real_().pedirAjudaSenha(d)));
+  // Antes do login não há sessão: na demonstração o pedido fica na demonstração; fora dela vai ao banco de verdade.
+  const pedirAjudaSenhaAntesLogin = (d) => (naDemo() ? NE.criarTeste().pedirAjudaSenha(d) : real_().pedirAjudaSenha(d));
   const dados = {
     get modoTeste() { return !!ligar().modoTeste; },
-    // login: admin/admin abre o ambiente de teste (se estiver ligado em config.js); qualquer outro usuário vai ao banco de verdade
+    // Fora da demonstração qualquer login vai ao banco de verdade: "admin / admin" NÃO abre nada.
     async entrar(usuario, senha) {
-      if (C.modoTeste && senha === "admin" && USUARIOS_TESTE.includes(usuario.trim().toLowerCase())) { trocarPara(true); return ligar().entrar(usuario); }
-      trocarPara(false); return ligar().entrar(usuario, senha);
+      if (naDemo()) {
+        if (senha !== "admin" || !USUARIOS_TESTE.includes(usuario.trim().toLowerCase())) throw new Error("Usuário ou senha incorretos.");
+        return ligar().entrar(usuario);
+      }
+      return ligar().entrar(usuario, senha);
     },
-    async sair() { const a = ligar(); await a.sair(); if (a.modoTeste) trocarPara(false); },
+    async sair() { return ligar().sair(); },
   };
   let realSolto = null; const real_ = () => (realSolto = realSolto || real());
   dados.pedirAjudaSenha = (d) => pedirAjudaSenhaAntesLogin(d);
   for (const n of nomes) dados[n] = (...a) => { const f = ligar()[n]; if (!f) { if (n === "sincronizar" || n === "pendentes") return Promise.resolve(0); throw new Error("Isto não está disponível aqui."); } return f.apply(ligar(), a); };
   Object.defineProperty(dados, "aoMudarFila", { get: () => ligar().aoMudarFila, set: (f) => { ligar().aoMudarFila = f; } });
-  void tentouTeste;
 
   NE.dados = dados;
+
+  // A IA só aparece quando existe DE VERDADE: contratada (config.js → premiumIA) e a função do servidor respondendo.
+  // Na demonstração aparece para mostrar como é. Antes o botão aparecia sempre e levava a uma tela "ainda não foi ligada".
+  let iaCache = null;
+  NE.iaLigada = () => {
+    if (!iaCache) iaCache = (!C.premiumIA && !(NE.demo && NE.demo.ativo)) ? Promise.resolve(false)
+      : NE.dados.iaDisponivel().then((st) => !!(st && st.ativo)).catch(() => false);
+    return iaCache;
+  };
+  NE.iaReiniciar = () => { iaCache = null; };   // chamada quando a pessoa entra ou sai
   Object.defineProperty(NE, "modoTeste", { get: () => !!ligar().modoTeste, set() {}, configurable: true });
   NE.tiposVeiculo = { caminhao: "Caminhão", truck_munck: "Truck com munck", betoneira: "Betoneira", basculante: "Basculante", outro: "Outro" };
   NE.funcoes = { conferente: "Conferente", expedicao: "Expedição", vendedor: "Vendedor", motorista: "Motorista", ajudante: "Ajudante", diretoria: "Diretoria", administrativo: "Administrativo" };

@@ -21,6 +21,7 @@
   }
 
   // opcoes.nota_id: conferir uma nota da fila (itens já vêm da nota: só falta olhar o caminhão)
+  let iaOn = false;
   NE.iniciarConferencia = async (perfilAtual, raiz, voltarInicio, opcoes = {}) => {
     perfil = perfilAtual; aoTerminar = voltarInicio; aberta = opcoes;
     estado = novoEstado();
@@ -36,6 +37,7 @@
         catalogo = { veiculos, produtos };
       } catch (e) { NE.aviso(NE.mensagemErro(e)); catalogo = { veiculos: [], produtos: [] }; }
     }
+    iaOn = await NE.iaLigada().catch(() => false);   // o botão de ler a nota por IA só existe se a IA estiver ligada
     if (opcoes.nota_id) {
       try {
         const nota = (await NE.dados.notas({ status: ["pendente", "em_conferencia"] })).find((n) => n.id === opcoes.nota_id);
@@ -93,7 +95,7 @@
         else estado.leitura = { status: "falhou" };
         if (document.getElementById("numero-nota")) redesenhar(); // só redesenha se ainda estiver neste passo
       };
-      const ia = (window.NOVA_ERA || {}).premiumIA && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ia-nota", style: "margin-top:10px", onclick: (ev) => NE.comCarregando(ev.currentTarget, async () => {
+      const ia = iaOn && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ia-nota", style: "margin-top:10px", onclick: (ev) => NE.comCarregando(ev.currentTarget, async () => {
         const f = estado.fotos.nota[0]; if (!f) return NE.aviso("Tire a foto da nota primeiro.", "alerta");
         const r = await NE.dados.iaLerNota(f.blob); const prods = catalogo.produtos;
         estado.numero_nota = r.numero || estado.numero_nota; estado.cliente = r.cliente || estado.cliente;

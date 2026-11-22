@@ -50,10 +50,11 @@
   NE.iniciarRastreioPublico = async (raiz) => {
     const params = new URLSearchParams(location.search);
     const token = params.get("c") || "";
-    // Ambiente de teste (admin/admin): o link de uma nota de teste abre os dados de teste guardados neste aparelho
-    if (C.modoTeste) {
+    // Demonstração (?demo= no endereço): o link de uma nota da demonstração abre os dados dela, guardados só nesta aba.
+    // Fora da demonstração este caminho nem existe: o link é sempre consultado no banco de verdade.
+    if (NE.demo && NE.demo.ativo) {
       try {
-        const e = JSON.parse(localStorage.getItem("ne-teste-v6") || "null"); const conf = e && e.conferencias.find((c) => c.token_publico === token);
+        const e = NE.memoria.ler("ne-teste-v6"); const conf = e && e.conferencias.find((c) => c.token_publico === token);
         if (conf) { raiz.replaceChildren(NE.renderRastreio(NE.rastreioDe(conf, null))); return; }
       } catch { /* segue para o banco */ }
     }

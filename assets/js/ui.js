@@ -170,9 +170,14 @@
         NE.el("label", { class: "btn btn-secundario botao-camera" }, NE.ic("galeria"), pdfOk ? "Galeria ou PDF" : "Galeria", entrada(false, "Escolher da galeria"))));
   };
 
+  // Armazenamento do aparelho. Na demonstração (?demo= no endereço) tudo vai para sessionStorage, com prefixo próprio:
+  // some ao fechar a aba e nunca se mistura com o que o app de verdade guarda (ver ambiente.js).
+  const naDemo = () => !!(NE.demo && NE.demo.ativo);
+  const cofre = () => (naDemo() ? sessionStorage : localStorage);
+  const nome = (k) => (naDemo() ? `ne-demo-${k}` : k);
   NE.memoria = {
-    ler: (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
-    gravar: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* sem armazenamento: segue sem rascunho */ } },
-    apagar: (k) => { try { localStorage.removeItem(k); } catch { /* idem */ } },
+    ler: (k) => { try { return JSON.parse(cofre().getItem(nome(k))); } catch { return null; } },
+    gravar: (k, v) => { try { cofre().setItem(nome(k), JSON.stringify(v)); } catch { /* sem armazenamento: segue sem rascunho */ } },
+    apagar: (k) => { try { cofre().removeItem(nome(k)); } catch { /* idem */ } },
   };
 })();

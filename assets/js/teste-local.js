@@ -1,7 +1,7 @@
-// AMBIENTE DE TESTE (login: admin / admin).
-// Dados de exemplo guardados SÓ neste aparelho (localStorage). Não conversa com o banco de verdade e nunca grava nada nele.
-// Usa as mesmas regras do app real (dominio.js), então o que se vê aqui é o comportamento de verdade.
-// Para desligar antes de entregar ao cliente: config.js → modoTeste: false.
+// AMBIENTE DE DEMONSTRAÇÃO. Só é carregado quando o endereço pede ?demo=exemplo ou ?demo=vazio (logins de teste, senha admin).
+// Os dados ficam em sessionStorage (NE.memoria, com prefixo ne-demo-): somem ao fechar a aba e nunca tocam o app de verdade.
+// Não conversa com o banco e nunca grava nada nele. Usa as mesmas regras do app real (dominio.js).
+// Para entregar ao cliente sem a demonstração: config.js → demo: false.
 (() => {
   const NE = window.NE;
   const D = window.NEDominio;
@@ -23,8 +23,8 @@
       p("u-t-conf", "Conferente (teste)", "conferente", "conferente", "funcionario"), p("u-t-ajud", "Ajudante (teste)", "ajudante", "ajudante", "funcionario"), p("u-t-moto", "Motorista (teste)", "motorista", "motorista", "funcionario")];
     return { v: 6, criadoEm: agora, perfilId: "u-admin", perfis, veiculos: [], produtos: [], notas: [], conferencias: [], movimentos: [], contagens: [], alertas: [], config: { ...D.CONFIG_PADRAO }, vistoResumo: {} };
   }
-  const querDemo = () => { try { return localStorage.getItem("ne-teste-demo") === "1"; } catch { return false; } };
-  // Dados de exemplo (SÓ para a apresentação para os diretores): ligados por "ne-teste-demo".
+  const querDemo = () => !!(NE.demo && NE.demo.exemplo);   // ?demo=exemplo: com dados de exemplo · ?demo=vazio: sem nenhum
+  // Dados de exemplo (SÓ para os vídeos e para mostrar o app): ligados por ?demo=exemplo.
   function semear() {
     const r = prng(20261120); const agora = Date.now();
     const pick = (l) => l[Math.floor(r() * l.length)];
@@ -185,12 +185,13 @@
     const api = {
       modoTeste: true,
       emCache: () => null,
-      async entrar(usuario) { const p = e.perfis.find((x) => x.usuario === String(usuario || "admin").trim().toLowerCase()); if (!p) throw new Error("Usuário ou senha incorretos."); e.perfilId = p.id; salvar(); },
-      async sair() {},
-      async perfil() { return copia(eu()); },
+      // A demonstração também tem sessão: abre na tela de login e só entra quem digita um login de teste (e "Sair" volta ao login).
+      async entrar(usuario) { const p = e.perfis.find((x) => x.usuario === String(usuario || "admin").trim().toLowerCase()); if (!p) throw new Error("Usuário ou senha incorretos."); e.perfilId = p.id; e.logado = true; salvar(); },
+      async sair() { e.logado = false; salvar(); },
+      async perfil() { return e.logado ? copia(eu()) : null; },
       // Só no ambiente de teste: alternar entre administrador e conferente para ver os dois lados
       async trocarPerfil(id) { e.perfilId = id; salvar(); },
-      async reiniciar() { try { localStorage.removeItem("ne-teste-demo"); } catch { /* ok */ } NE.memoria.apagar(CHAVE); e = semearVazio(); salvar(); }, // apaga TUDO
+      async reiniciar() { NE.memoria.apagar(CHAVE); e = semearVazio(); salvar(); }, // apaga TUDO
       veiculos: async (todos) => copia(e.veiculos.filter((v) => todos || v.ativo)),
       produtos: async (todos) => copia(e.produtos.filter((p) => todos || p.ativo)),
       funcionarios: async () => copia(e.perfis),

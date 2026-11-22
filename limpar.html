@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#d9141e">
+<title>Limpar o aparelho · Confere Carga</title>
+<style>
+  :root { --vermelho: #d9141e; --azul: #1a1f8f; --marinho: #0b1038; --suave: #565a78; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif; color: var(--marinho);
+    background: radial-gradient(60vmax 40vmax at 0 0, rgba(217, 20, 30, .18), transparent 60%), radial-gradient(60vmax 50vmax at 100% 10%, rgba(26, 31, 143, .2), transparent 60%), linear-gradient(180deg, #f4f5fa, #e8ebf4); }
+  main { width: min(480px, 100%); background: #fff; border-radius: 24px; padding: 28px 22px; box-shadow: 0 14px 40px rgba(11, 16, 56, .16); text-align: center; }
+  h1 { margin: 0 0 8px; font-size: 1.7rem; line-height: 1.05; text-transform: uppercase; }
+  p { margin: 8px 0; font-size: 1.05rem; line-height: 1.4; color: var(--suave); }
+  .ok { color: #1f8f4e; font-weight: 800; font-size: 1.15rem; }
+  ul { list-style: none; margin: 16px 0; padding: 0; text-align: left; display: grid; gap: 8px; }
+  li { padding: 10px 12px; border-radius: 12px; background: #eef0f8; font-size: .98rem; font-weight: 600; }
+  li b { color: var(--azul); }
+  a.botao { display: flex; align-items: center; justify-content: center; min-height: 58px; margin-top: 18px; border-radius: 16px; background: linear-gradient(135deg, var(--vermelho), #ff4b55); color: #fff; font-weight: 800; font-size: 1.15rem; text-decoration: none; box-shadow: 0 8px 22px rgba(217, 20, 30, .35); }
+  .gira { width: 38px; height: 38px; margin: 6px auto 14px; border-radius: 50%; border: 5px solid #d8dbea; border-top-color: var(--vermelho); animation: g 1s linear infinite; }
+  @keyframes g { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<main id="caixa">
+  <div class="gira" id="gira" aria-hidden="true"></div>
+  <h1 id="titulo">Limpando o aparelho…</h1>
+  <p id="texto">Tirando o que sobrou de testes. Seu acesso e as conferências que ainda não subiram <b>não são apagados</b>.</p>
+</main>
+<script>
+(async () => {
+  const feito = { chaves: 0, caches: 0, sw: 0 };
+  // 1) marcas e dados de TESTE/demonstração e o que o tutorial antigo deixou. Fica de fora: a sessão de login (sb-…),
+  //    a lista de orçamento do site e a fila de conferências guardadas sem sinal (IndexedDB), que nunca são tocadas aqui.
+  try {
+    const lixo = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (/^ne-(modo-teste|teste|demo|tour|guia|c-|limpeza)/.test(k)) lixo.push(k);
+    }
+    lixo.forEach((k) => localStorage.removeItem(k)); feito.chaves = lixo.length;
+  } catch { /* sem armazenamento */ }
+  try { Object.keys(sessionStorage).filter((k) => k.startsWith("ne-")).forEach((k) => sessionStorage.removeItem(k)); } catch { /* ok */ }
+  // 2) arquivos guardados pelo aplicativo (para baixar a versão nova) e o service worker antigo
+  try { if (window.caches) { const nomes = await caches.keys(); await Promise.all(nomes.map((n) => caches.delete(n))); feito.caches = nomes.length; } } catch { /* ok */ }
+  try { if (navigator.serviceWorker) { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map((r) => r.unregister())); feito.sw = regs.length; } } catch { /* ok */ }
+
+  document.getElementById("gira").remove();
+  document.getElementById("titulo").textContent = "Pronto!";
+  document.getElementById("caixa").insertAdjacentHTML("beforeend",
+    `<p class="ok">Aparelho limpo.</p>
+     <ul>
+       <li><b>${feito.chaves}</b> marca(s) de teste apagada(s)</li>
+       <li><b>${feito.caches}</b> pacote(s) de arquivos antigos removido(s)</li>
+       <li>Seu login e as conferências guardadas continuam</li>
+     </ul>
+     <a class="botao" href="app.html">Abrir o aplicativo</a>`);
+  document.getElementById("texto").textContent = "Agora o aplicativo abre do jeito certo, só com os dados de verdade.";
+})();
+</script>
+</body>
+</html>

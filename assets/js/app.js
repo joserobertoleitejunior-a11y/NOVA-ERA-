@@ -97,7 +97,9 @@
   }
 
   // ───────────────────────── topo, sino, faixa de teste ─────────────────────────
+  let ultimoPerfil = null;
   function topo() {
+    if ((perfil && perfil.id) !== ultimoPerfil) { ultimoPerfil = perfil && perfil.id; NE.iaReiniciar(); }   // outra pessoa: pergunta de novo se a IA está ligada
     $("#logo").innerHTML = NE.logo;
     const area = $("#usuario"); area.replaceChildren();
     const faixa = $("#faixa-teste");
@@ -111,10 +113,13 @@
     area.append(ajuda, el("span", { class: "nome" }, perfil.nome.split(" ")[0]), sino, sair);
     faixaTeste(faixa);
   }
-  // Sem nenhuma mensagem de "teste" na tela: só um botãozinho discreto (canto esquerdo) com as ferramentas de demonstração.
+  // No app de verdade não existe nenhuma marca de teste. Na demonstração (?demo= no endereço) uma faixa avisa, sem deixar dúvida,
+  // que os dados são fictícios; e um botãozinho discreto (canto esquerdo) traz as ferramentas da demonstração.
   function faixaTeste(faixa) {
-    faixa.hidden = true; $("#fab-teste")?.remove(); $("#menu-teste")?.remove();
+    faixa.hidden = true; faixa.classList.remove("faixa-demo"); $("#fab-teste")?.remove(); $("#menu-teste")?.remove();
     if (!NE.modoTeste) return;
+    faixa.classList.add("faixa-demo"); faixa.hidden = false;
+    faixa.replaceChildren(el("b", {}, "DEMONSTRAÇÃO"), " · dados fictícios. Somem ao fechar esta aba.");
     const adm = ehAdmin();
     const b = el("button", { type: "button", class: "fab-teste", id: "fab-teste", "aria-label": "Alternar visão" }, ic("pessoas"));
     b.addEventListener("click", () => {
@@ -147,11 +152,16 @@
   function pararSondagem() { clearInterval(sondando); sondando = null; }
   document.addEventListener("visibilitychange", () => { if (!document.hidden && perfil) sondar(); });
 
+  let tokenIA = 0;
   function botaoIA(esconder) {
-    $("#fab-ia")?.remove();
+    const vez = ++tokenIA; $("#fab-ia")?.remove();
     if (esconder || !perfil || !perm().ia || !NE.abrirAssistente) return;
-    const b = el("button", { type: "button", class: "fab-ia", id: "fab-ia" }, ic("faisca"), "Perguntar");
-    b.addEventListener("click", () => NE.abrirAssistente()); document.body.append(b);
+    // só aparece se a IA estiver ligada de verdade; o resultado vale para a última tela desenhada
+    NE.iaLigada().then((ligada) => {
+      if (!ligada || vez !== tokenIA || !perfil || $("#fab-ia")) return;
+      const b = el("button", { type: "button", class: "fab-ia", id: "fab-ia" }, ic("faisca"), "Perguntar");
+      b.addEventListener("click", () => NE.abrirAssistente()); document.body.append(b);
+    });
   }
 
   // ───────────────────────── ajuda e tutorial ─────────────────────────

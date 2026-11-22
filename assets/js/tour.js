@@ -91,5 +91,6 @@
     document.body.append(camada);
     desenhar();
   };
-  NE.tourJaVisto = (tipo) => !!NE.memoria.ler(`ne-tour-${tipo}`);
+  // Na demonstração o tutorial não abre sozinho (os vídeos e as apresentações não podem ser interrompidos por ele)
+  NE.tourJaVisto = (tipo) => !!(NE.demo && NE.demo.ativo) || !!NE.memoria.ler(`ne-tour-${tipo}`);
 })();

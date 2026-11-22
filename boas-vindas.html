@@ -28,7 +28,7 @@ h2 { margin: 0 0 12px; font-size: 1.2rem; text-transform: uppercase; letter-spac
 .botoes { display: flex; gap: 6px; }
 .grande { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 62px; border-radius: 18px; border: 0; font: inherit; font-size: 1.2rem; font-weight: 800; color: #fff; text-decoration: none; background: linear-gradient(135deg, var(--vermelho), #ff4b55); box-shadow: 0 12px 28px rgba(217, 20, 30, .35); cursor: pointer; }
 .video { position: relative; width: 100%; aspect-ratio: 9 / 16; max-height: 78vh; border-radius: 20px; overflow: hidden; background: var(--marinho); box-shadow: 0 10px 30px rgba(11, 16, 56, .25); }
-.video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
 ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 li { display: flex; gap: 12px; align-items: flex-start; font-size: 1.08rem; line-height: 1.35; font-weight: 600; }
 li::before { content: ""; flex: none; width: 14px; height: 14px; margin-top: 5px; border-radius: 50%; background: linear-gradient(135deg, var(--vermelho), var(--azul)); }
@@ -46,13 +46,13 @@ a.link { color: var(--azul); font-weight: 800; }
 (() => {
   document.getElementById("logo").innerHTML = NE.logo;
   const FUNCOES = {
-    conferente: { nome: "Conferente", video: "conferente", diario: ["Abra a fila e toque na nota que vai sair", "Escolha o caminhão e confira cada peça com a nota", "Tire a foto da carga e da placa e confirme", "Se faltar ou sobrar peça, informe o motivo"] },
-    ajudante: { nome: "Ajudante", video: "conferente", diario: ["Ajude a separar e carregar as peças da nota", "Confira com o conferente antes de o caminhão sair", "Use a câmera para contar as etiquetas, se pedirem"] },
-    motorista: { nome: "Motorista", video: "motorista", diario: ["Veja na fila se a sua carga já foi conferida", "Saia do pátio só depois da conferência", "Fique de olho nos avisos do aplicativo"] },
-    vendedor: { nome: "Vendedor", video: "vendedor", diario: ["Lance as notas dos seus clientes na fila", "Acompanhe as cargas que já saíram", "Mande o link de rastreio da entrega pelo WhatsApp do cliente"] },
-    expedicao: { nome: "Expedição", video: "expedicao", diario: ["Acompanhe o painel: uma frase diz se está tudo certo", "Resolva os avisos: diferença de carga, estoque baixo, nota parada", "Decida o ajuste quando a contagem do estoque não bater"] },
-    administrativo: { nome: "Administrativo", video: "administrativo", diario: ["Lance notas e importe o XML", "Cadastre equipe, caminhões e produtos", "Dê uma senha nova para quem esquecer"] },
-    diretoria: { nome: "Diretoria", video: "diretoria", diario: ["Veja a empresa em uma frase na tela inicial", "Abra o resumo completo quando quiser os detalhes", "Na versão completa, pergunte ao assistente de inteligência artificial"] },
+    conferente: { dur: "2 min 20", nome: "Conferente", video: "conferente", diario: ["Abra a fila e toque na nota que vai sair", "Escolha o caminhão e confira cada peça com a nota", "Tire a foto da carga e da placa e confirme", "Se faltar ou sobrar peça, informe o motivo"] },
+    ajudante: { dur: "2 min 20", nome: "Ajudante", video: "conferente", diario: ["Ajude a separar e carregar as peças da nota", "Confira com o conferente antes de o caminhão sair", "Use a câmera para contar as etiquetas, se pedirem"] },
+    motorista: { dur: "1 min", nome: "Motorista", video: "motorista", diario: ["Veja na fila se a sua carga já foi conferida", "Saia do pátio só depois da conferência", "Fique de olho nos avisos do aplicativo"] },
+    vendedor: { dur: "1 min 20", nome: "Vendedor", video: "vendedor", diario: ["Lance as notas dos seus clientes na fila", "Acompanhe as cargas que já saíram", "Mande o link de rastreio da entrega pelo WhatsApp do cliente"] },
+    expedicao: { dur: "2 min", nome: "Expedição", video: "expedicao", diario: ["Acompanhe o painel: uma frase diz se está tudo certo", "Resolva os avisos: diferença de carga, estoque baixo, nota parada", "Decida o ajuste quando a contagem do estoque não bater"] },
+    administrativo: { dur: "1 min 40", nome: "Administrativo", video: "administrativo", diario: ["Lance notas e importe o XML", "Cadastre equipe, caminhões e produtos", "Dê uma senha nova para quem esquecer"] },
+    diretoria: { dur: "1 min 20", nome: "Diretoria", video: "diretoria", diario: ["Veja a empresa em uma frase na tela inicial", "Abra o resumo completo quando quiser os detalhes", "Na versão completa, pergunte ao assistente de inteligência artificial"] },
   };
   const el = (t, a = {}, ...f) => { const n = document.createElement(t); for (const [k, v] of Object.entries(a)) { if (v == null || v === false) continue; k === "class" ? (n.className = v) : k === "html" ? (n.innerHTML = v) : k.startsWith("on") ? n.addEventListener(k.slice(2), v) : n.setAttribute(k, v); } f.flat().forEach((x) => x != null && n.append(x instanceof Node ? x : document.createTextNode(x))); return n; };
   const raiz = document.getElementById("conteudo");
@@ -71,8 +71,10 @@ a.link { color: var(--azul); font-weight: 800; }
       el("div", { class: "campo" }, el("div", {}, el("small", {}, "Usuário"), el("b", {}, d.u)), cp("Usuário", d.u)),
       d.s ? el("div", { class: "campo" }, el("div", {}, el("small", {}, "Senha"), senha), el("div", { class: "botoes" }, ver, cp("Senha", d.s))) : null,
       el("a", { class: "grande", id: "abrir-app", href: `${app}#u=${encodeURIComponent(d.u)}` }, "Abrir o aplicativo")),
-    el("section", { class: "cartao" }, el("h2", {}, "Veja como usar (2 minutos)"), el("div", { class: "video" }, el("iframe", { src: `tutorial.html?f=${f.video}&embed=1`, title: `Vídeo tutorial: ${f.nome}`, allow: "autoplay; fullscreen", allowfullscreen: "", loading: "lazy" })),
-      el("p", { style: "margin:10px 0 0" }, el("a", { class: "link", href: `tutorial.html?f=${f.video}`, target: "_blank", rel: "noopener" }, "Abrir o vídeo em tela cheia"))),
+    el("section", { class: "cartao" }, el("h2", {}, `Veja como usar (${f.dur})`),
+      // Vídeo MP4 de verdade, da função da pessoa. Antes era um player ao vivo que deixava o app em "modo teste" no aparelho.
+      el("div", { class: "video" }, el("video", { controls: "", playsinline: "", preload: "metadata", poster: `videos/${f.video}-poster.jpg`, src: `videos/${f.video}-vertical.mp4`, "aria-label": `Vídeo tutorial: ${f.nome}` })),
+      el("p", { style: "margin:10px 0 0" }, el("a", { class: "link", href: `videos/${f.video}-vertical.mp4`, target: "_blank", rel: "noopener" }, "Abrir o vídeo em tela cheia"))),
     el("section", { class: "cartao" }, el("h2", {}, "No dia a dia"), el("ul", {}, f.diario.map((t) => el("li", {}, t)))),
     el("p", { class: "aviso" }, "Guarde este link: ele mostra seu acesso e o vídeo sempre que precisar. Não mande para ninguém: quem tem o link entra como você. Esqueceu a senha? Na tela de entrada toque em “Esqueci minha senha”.")
   );

@@ -17,6 +17,7 @@
   // ───────────────────────── 1. Lançar uma nota ─────────────────────────
   G.nota = async (raiz, app) => {
     const produtos = await NE.dados.produtos();
+    const iaOn = await NE.iaLigada().catch(() => false);   // só promete ler a nota por IA se ela estiver ligada de verdade
     const n = { como: "", numero: "", cliente: "", vendedor: "", itens: [], fotos: [] };
     NE.assistente({
       raiz, rotuloFinal: "Colocar na fila", aoCancelar: () => app.voltar(),
@@ -24,13 +25,13 @@
         { titulo: "Como a nota chegou?", icone: "nota", ajuda: "Escolha o jeito mais fácil para você.",
           tela: (r) => NE.escolhaUnica([
             { valor: "xml", rotulo: "Tenho o arquivo XML", dica: "O mais rápido: lê várias notas de uma vez" },
-            { valor: "foto", rotulo: "Tenho a foto da nota", dica: C.premiumIA ? "O assistente lê o número e os itens (Premium)" : "Eu tiro a foto e digito os dados" },
+            { valor: "foto", rotulo: "Tenho a foto da nota", dica: iaOn ? "O assistente lê o número e os itens (Premium)" : "Eu tiro a foto e digito os dados" },
             { valor: "digitar", rotulo: "Vou digitar", dica: "Número, cliente e itens" }], n.como, (v) => { if (v === "xml") return app.ir("guia", { fluxo: "xml" }, { substituir: true }); n.como = v; r(); }),
           validar: () => (!n.como ? "Toque em uma das três opções." : null) },
         { titulo: "Número e cliente", icone: "conferir", ajuda: "O número fica no alto da nota, ao lado de \"Nº\".",
           tela: (r) => el("div", {},
             n.como === "foto" && el("div", {}, NE.seletorFoto({ titulo: "Foto da nota", dica: "Pegue a nota inteira, sem sombra.", lista: n.fotos, varias: false, aoMudar: r }),
-              C.premiumIA && n.fotos.length > 0 && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ler-foto", style: "margin-bottom:14px", onclick: (ev) => NE.comCarregando(ev.currentTarget, async () => {
+              iaOn && n.fotos.length > 0 && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ler-foto", style: "margin-bottom:14px", onclick: (ev) => NE.comCarregando(ev.currentTarget, async () => {
                 const res = await NE.dados.iaLerNota(n.fotos[0].blob); n.numero = res.numero || n.numero; n.cliente = res.cliente || n.cliente;
                 n.itens = ligar((res.itens || []).map((i) => ({ descricao: i.descricao, quantidade: i.quantidade, codigo: i.codigo })), produtos).map((i) => ({ produto_id: i.produto_id, descricao: i.descricao, quantidade: i.quantidade }));
                 NE.aviso("Pronto! Confira os dados nos próximos passos.", "ok"); r();

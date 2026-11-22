@@ -4,12 +4,14 @@ window.NOVA_ERA = {
   supabaseUrl: "https://kfazxjertfzoeewfsime.supabase.co",
   supabaseAnonKey: "sb_publishable_yJEGtaiNkJiyHjh7KyYZ3g_z1NRnbyK",
   bucketFotos: "fotos-cargas",
-  // ★ MODO TESTE: com `true`, o login admin / admin abre um ambiente de TESTE, só neste aparelho, com dados de exemplo.
-  // Nada é gravado no banco de verdade. Antes de entregar ao cliente, troque para `false`.
-  modoTeste: true,
-  // ★ PREMIUM IA: liga a leitura da nota por IA (foto → número, cliente e itens) e o assistente com Claude.
-  // A IA só responde sobre a empresa e só para a administração (chat) e para quem confere cargas (leitura da nota).
-  premiumIA: true,
+  // ★ DEMONSTRAÇÃO: com `true`, o endereço app.html?demo=exemplo (ou ?demo=vazio) abre um ambiente de DEMONSTRAÇÃO,
+  // com os logins de teste, só naquela aba (some ao fechar). Nada é gravado no banco de verdade e nada fica no aparelho.
+  // Sem ?demo= no endereço o app é sempre o de verdade. Para entregar ao cliente sem a demonstração, troque para `false`.
+  demo: true,
+  // ★ PREMIUM IA: `true` liga a leitura da nota por IA (foto → número, cliente e itens) e o assistente com Claude.
+  // Só vira botão na tela quando a função do servidor também está no ar; sem isso, nada de IA aparece para ninguém.
+  // Hoje está desligada: ligue quando a empresa contratar a versão completa.
+  premiumIA: false,
   urlPublica: "", // endereço do site quando for hospedado (ex.: "https://www.novaera.com.br/") — usado nos links de rastreio
 
   // Contato (aparece no site inteiro)
@@ -29,3 +31,6 @@ window.NOVA_ERA = {
   // Calculadora de concreto
   capacidadeBetoneiraM3: 8, // A CONFIRMAR: capacidade usada para estimar quantas viagens
 };
+
+// Se a demonstração estiver desligada, o endereço ?demo= deixa de valer (ambiente.js já rodou antes deste arquivo).
+if (window.NE && window.NE.demo) window.NE.demo.permitir(window.NOVA_ERA.demo !== false);

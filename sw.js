@@ -1,7 +1,7 @@
 // Service worker: (1) abre o app na hora, mesmo com sinal fraco, usando os arquivos guardados no aparelho;
 // (2) recebe os AVISOS (Web Push) com o app fechado e abre a tela certa ao tocar.
 // Dados do Supabase NUNCA passam por aqui (sempre ao vivo e protegidos).
-const VERSAO = "confere-carga-20261122b";
+const VERSAO = "confere-carga-20261122c1";
 const ESSENCIAIS = ["./app.html", "./manifest.json"];
 
 self.addEventListener("install", (e) => {
@@ -16,9 +16,18 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(req.url);
   if (url.hostname.endsWith("supabase.co")) return; // dados e fotos: sempre direto, nunca guardados aqui
   if (url.origin !== location.origin) return;       // tudo o que o app usa está dentro do próprio projeto
+  if (req.headers.has("range") || /\.(mp4|webm)$/i.test(url.pathname)) return; // vídeo: o navegador cuida (e o cache não guarda resposta parcial)
+
+  // Páginas (HTML): REDE primeiro. Assim uma correção publicada chega na PRIMEIRA abertura; sem sinal, abre a última guardada.
+  if (req.mode === "navigate" || req.destination === "document") {
+    e.respondWith(fetch(req).then((r) => { if (r.ok) { const c = r.clone(); caches.open(VERSAO).then((cache) => cache.put(req, c)); } return r; })
+      .catch(() => caches.open(VERSAO).then((cache) => cache.match(req, { ignoreSearch: true })).then((g) => g || caches.match("./app.html"))));
+    return;
+  }
+  // Scripts, estilos e imagens: o que está guardado abre na hora e se atualiza por baixo (os endereços já mudam a cada versão: ?v=)
   e.respondWith(caches.open(VERSAO).then(async (cache) => {
-    const guardado = await cache.match(req, { ignoreSearch: req.mode === "navigate" });
-    const rede = fetch(req).then((r) => { if (r.ok) cache.put(req, r.clone()); return r; }).catch(() => guardado);
+    const guardado = await cache.match(req);
+    const rede = fetch(req).then((r) => { if (r.ok && r.status === 200) cache.put(req, r.clone()); return r; }).catch(() => guardado);
     return guardado || rede;
   }));
 });

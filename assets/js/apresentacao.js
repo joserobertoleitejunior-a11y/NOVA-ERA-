@@ -31,10 +31,13 @@
   const esperar = (cond, ms = 7000) => new Promise((ok) => { const t0 = performance.now(); (function p() { try { if (cond()) return ok(true); } catch { /* ainda carregando */ } if (performance.now() - t0 > ms) return ok(false); setTimeout(p, 80); })(); });
   const carregar = (url) => new Promise((ok) => { F.onload = () => { F.onload = null; ok(); }; F.src = url; });
   const emApp = () => { try { return W().location.pathname.endsWith("app.html"); } catch { return false; } };
-  const marcarTutorialVisto = () => ["painel", "conferente", "passo"].forEach((t) => localStorage.setItem(`ne-tour-${t}`, "true"));
+  // O app dentro do celular roda em DEMONSTRAÇÃO (?demo=exemplo): os dados ficam só nesta aba (sessionStorage) e
+  // nada é gravado no aparelho de quem assiste. Antes, este player deixava o app "em modo teste" para sempre.
+  const URL_DEMO = "app.html?demo=exemplo";
+  const limparDemo = () => { try { Object.keys(sessionStorage).filter((k) => k.startsWith("ne-demo-")).forEach((k) => sessionStorage.removeItem(k)); } catch { /* sem armazenamento */ } };
   async function carregarApp() {
-    marcarTutorialVisto(); await carregar("app.html"); await esperar(() => W().NE && W().NE.app && (Dc().querySelector("#login-usuario") || Dc().querySelector(".nav-inferior")));
-    const st = Dc().createElement("style"); st.textContent = ".fab-teste,.menu-teste{display:none!important} html{scroll-behavior:smooth}"; Dc().head.append(st); await sleep(300);
+    await carregar(URL_DEMO); await esperar(() => W().NE && W().NE.app && (Dc().querySelector("#login-usuario") || Dc().querySelector(".nav-inferior")));
+    const st = Dc().createElement("style"); st.textContent = ".fab-teste,.menu-teste,.faixa-demo{display:none!important} html{scroll-behavior:smooth}"; Dc().head.append(st); await sleep(300);
   }
   const digitarRapido = (sel, v) => { const e = Dc().querySelector(sel); if (!e) return; e.value = v; e.dispatchEvent(new (W().Event)("input", { bubbles: true })); };
   async function sair() { Dc().querySelector('.usuario .link-acao[aria-label="Sair"]')?.click(); await esperar(() => Dc().querySelector("#login-usuario")); }
@@ -48,7 +51,7 @@
   }
   async function preparar(c) {
     const p = c.pre || {};
-    if (p.reiniciar) { localStorage.setItem("ne-teste-demo", "1"); localStorage.removeItem("ne-teste-v6"); localStorage.removeItem("ne-modo-teste"); await carregarApp(); }
+    if (p.reiniciar) { limparDemo(); await carregarApp(); }
     else if ("perfil" in p) await garantirPerfil(p.perfil === "admin" ? "admin" : p.perfil);
     if (p.rota && W().NE?.app) { W().NE.app.ir(p.rota, p.params || {}); await sleep(650); }
   }
@@ -87,7 +90,7 @@
       else if (a.destacar) await realcar(a.destacar);
       else if (a.ir) { W().NE.app.ir(a.ir[0], a.ir[1] || {}); await esp(600); }
       else if (a.rolar) { Dc().querySelector(a.rolar)?.scrollIntoView({ behavior: "smooth", block: "center" }); await esp(500); }
-      else if (a.rastreio) { const ctx = await W().NE.dados.contexto(); const tk = (ctx.conferencias[0] || {}).token_publico; if (tk) { await carregar(`rastreio.html?c=${tk}`); await esperar(() => Dc().querySelector(".rastreio")); } }
+      else if (a.rastreio) { const ctx = await W().NE.dados.contexto(); const tk = (ctx.conferencias[0] || {}).token_publico; if (tk) { await carregar(`rastreio.html?c=${tk}&demo=exemplo`); await esperar(() => Dc().querySelector(".rastreio")); } }
       else if (a.site) { await carregar("index.html"); await esperar(() => Dc().querySelector(".produto")); }
       else if (a.siteRolar) { Dc().querySelector(a.siteRolar)?.scrollIntoView({ behavior: "smooth", block: "center" }); await esp(600); }
     } catch (e) { if (e !== CANCELADO) { window.__falhasVideo.push(`erro em ${JSON.stringify(a)}: ${e.message}`); console.error("VIDEO FALHOU — ação deu erro", a, e); } }
@@ -139,7 +142,7 @@
   $("#b-som").addEventListener("click", () => { mudo = !mudo; audio.muted = mudo; if (mudo) speechSynthesis.cancel(); $("#b-som").textContent = mudo ? "🔇" : "🔊"; });
   $("#b-leg").addEventListener("click", () => { document.body.classList.toggle("sem-legenda"); $("#b-leg").classList.toggle("ligado"); });
   $("#b-tela").addEventListener("click", () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); });
-  const comecar = () => { localStorage.setItem("ne-teste-demo", "1"); localStorage.removeItem("ne-teste-v6"); localStorage.removeItem("ne-modo-teste"); $("#inicio").hidden = true; $("#fim").hidden = true; speechSynthesis.getVoices(); ir(0); };
+  const comecar = () => { limparDemo(); $("#inicio").hidden = true; $("#fim").hidden = true; speechSynthesis.getVoices(); ir(0); };
   $("#b-comecar").addEventListener("click", comecar); $("#b-rever").addEventListener("click", comecar);
   if (GRAVANDO) { window.__fim = false; setTimeout(comecar, 900); }
   addEventListener("keydown", (e) => { if (e.key === " ") { e.preventDefault(); pausarOuContinuar(); } else if (e.key === "ArrowRight") ir(Math.min(C.length - 1, i + 1)); else if (e.key === "ArrowLeft") ir(Math.max(0, i - 1)); else if (e.key.toLowerCase() === "f") $("#b-tela").click(); else if (e.key.toLowerCase() === "c") $("#b-leg").click(); });
