@@ -11,8 +11,10 @@
   const ajustar = () => { const vertical = PARAMS.has("vertical") || innerHeight > innerWidth * 1.1; palco.dataset.modo = vertical ? "vertical" : "horizontal"; const L = vertical ? 720 : 1280, A = vertical ? 1280 : 720; palco.style.setProperty("--escala", Math.min(innerWidth / L, innerHeight / A)); };
   ajustar(); addEventListener("resize", ajustar);
   const R = await (await fetch(FUNCAO ? `assets/tutoriais/${FUNCAO === "ajudante" ? "conferente" : FUNCAO}.json` : "assets/apresentacao/roteiro.json")).json(); const C = R.cenas; const PASTA_AUDIO = R.audio || "assets/apresentacao/audio";
-  document.title = R.titulo || document.title; if (R.inicio) { $("#inicio h2").textContent = R.inicio.titulo; $("#inicio p").textContent = R.inicio.sub; $("#b-comecar").textContent = R.inicio.botao || "Começar"; } if (R.fim) { $("#fim h2").textContent = R.fim.titulo; $("#fim p").textContent = R.fim.sub; }
-  const RAPIDO = new URLSearchParams(location.search).has("rapido"); // ?rapido=1 para conferir o roteiro em velocidade 4x
+  document.title = R.titulo || document.title; if (R.selo || R.titulo) $(".selo").textContent = R.selo || R.titulo; if (R.inicio) { $("#inicio h2").textContent = R.inicio.titulo; $("#inicio p").textContent = R.inicio.sub; $("#b-comecar").textContent = R.inicio.botao || "Começar"; } if (R.fim) { $("#fim h2").textContent = R.fim.titulo; $("#fim p").textContent = R.fim.sub; }
+  const RAPIDO = PARAMS.has("rapido");   // ?rapido=1 para conferir o roteiro em velocidade 4x
+  const GRAVANDO = PARAMS.has("gravar"); // ?gravar=1 para gerar o MP4: sem controles na tela, começa sozinho
+  if (GRAVANDO) document.body.classList.add("gravando");
   const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
   const norm = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 
@@ -61,19 +63,26 @@
     return { x: (fr.left + (r.left + r.width / 2) * k - pr.left) / esc, y: (fr.top + (r.top + r.height / 2) * k - pr.top) / esc, x0: (fr.left + r.left * k - pr.left) / esc, y0: (fr.top + r.top * k - pr.top) / esc, w: (r.width * k) / esc, h: (r.height * k) / esc };
   }
   async function mover(el) { await esp(120); const p = ponto(el); cursor.style.opacity = "1"; cursor.style.transform = `translate(${p.x - 6}px, ${p.y - 4}px)`; await esp(820); return p; }
-  const achar = (sel, texto, idx = 0) => { const d = Dc(); if (!texto) return d.querySelector(sel); return [...d.querySelectorAll(sel)].filter((e) => norm(e.textContent).includes(norm(texto)))[idx] || null; };
-  async function clicar(el) { if (!el) return; await mover(el); cursor.classList.remove("toque"); void cursor.offsetWidth; cursor.classList.add("toque"); await esp(160); el.click(); await esp(520); }
+  // Ação que não encontra o alvo é FALHA, não silêncio: senão o vídeo narra um passo que não aconteceu.
+  window.__falhasVideo = [];
+  const falhou = (oque, alvo) => { const f = `${C[i] ? C[i].id : "?"}: ${oque} não achou ${JSON.stringify(alvo)}`; window.__falhasVideo.push(f); console.error("VIDEO FALHOU — " + f); };
+  // procura pelo texto do botão OU pelo rótulo de acessibilidade (os botões de mais e menos só têm rótulo)
+  const achar = (sel, texto, idx = 0) => { const d = Dc(); if (!texto) return d.querySelector(sel);
+    const rotulo = (e) => norm(`${e.getAttribute("aria-label") || ""} ${e.textContent || ""}`);
+    return [...d.querySelectorAll(sel)].filter((e) => rotulo(e).includes(norm(texto)))[idx] || null; };
+  async function clicar(el, alvo) { if (!el) return falhou("clicar", alvo); await mover(el); cursor.classList.remove("toque"); void cursor.offsetWidth; cursor.classList.add("toque"); await esp(160); el.click(); await esp(520); }
   async function digitar(sel, texto) {
-    const el = Dc().querySelector(sel); if (!el) return; await mover(el); el.focus({ preventScroll: true }); el.value = "";
+    const el = Dc().querySelector(sel); if (!el) return falhou("digitar", sel); await mover(el); el.focus({ preventScroll: true }); el.value = "";
     for (const ch of String(texto)) { el.value += ch; el.dispatchEvent(new (W().Event)("input", { bubbles: true })); await esp(55); }
     el.dispatchEvent(new (W().Event)("change", { bubbles: true })); await esp(300);
   }
-  async function realcar(sel) { const el = Dc().querySelector(sel); if (!el) return; const p = ponto(el); Object.assign(destaque.style, { left: `${p.x0 - 6}px`, top: `${p.y0 - 6}px`, width: `${p.w + 12}px`, height: `${p.h + 12}px` }); destaque.classList.add("on"); setTimeout(() => destaque.classList.remove("on"), 2600); await esp(400); }
+  async function realcar(sel) { const el = Dc().querySelector(sel); if (!el) return falhou("destacar", sel); const p = ponto(el); Object.assign(destaque.style, { left: `${p.x0 - 6}px`, top: `${p.y0 - 6}px`, width: `${p.w + 12}px`, height: `${p.h + 12}px` }); destaque.classList.add("on"); setTimeout(() => destaque.classList.remove("on"), 2600); await esp(400); }
   async function executar(a, token) {
     if (token !== rodada) return;
     try {
-      if (a.clicar) await clicar(achar(a.clicar));
-      else if (a.clicarTexto) await clicar(achar(a.clicarTexto[0], a.clicarTexto[1], a.clicarTexto[2] || 0));
+      if (a.clicar) await clicar(achar(a.clicar), a.clicar);
+      else if (a.clicarTexto) await clicar(achar(a.clicarTexto[0], a.clicarTexto[1], a.clicarTexto[2] || 0), a.clicarTexto);
+      else if (a.esperar) { const ok = await esperar(() => Dc().querySelector(a.esperar)); if (!ok) falhou("esperar", a.esperar); }
       else if (a.digitar) await digitar(a.digitar[0], a.digitar[1]);
       else if (a.destacar) await realcar(a.destacar);
       else if (a.ir) { W().NE.app.ir(a.ir[0], a.ir[1] || {}); await esp(600); }
@@ -81,15 +90,19 @@
       else if (a.rastreio) { const ctx = await W().NE.dados.contexto(); const tk = (ctx.conferencias[0] || {}).token_publico; if (tk) { await carregar(`rastreio.html?c=${tk}`); await esperar(() => Dc().querySelector(".rastreio")); } }
       else if (a.site) { await carregar("index.html"); await esperar(() => Dc().querySelector(".produto")); }
       else if (a.siteRolar) { Dc().querySelector(a.siteRolar)?.scrollIntoView({ behavior: "smooth", block: "center" }); await esp(600); }
-    } catch (e) { if (e !== CANCELADO) console.warn("ação da apresentação ignorada", a, e); }
+    } catch (e) { if (e !== CANCELADO) { window.__falhasVideo.push(`erro em ${JSON.stringify(a)}: ${e.message}`); console.error("VIDEO FALHOU — ação deu erro", a, e); } }
   }
 
   // ───────────────────────── voz, legenda e linha do tempo ─────────────────────────
   const audio = new Audio(); audio.preload = "auto"; let mudo = false;
   const vozes = () => speechSynthesis.getVoices().filter((v) => /^pt/i.test(v.lang)); const melhorVoz = () => { const v = vozes(); return v.find((x) => /pt-BR/i.test(x.lang) && /Google|Microsoft|Francisca|Antonio|Luciana/i.test(x.name)) || v.find((x) => /pt-BR/i.test(x.lang)) || v[0] || null; };
   let rodada = 0, i = -1, tocando = false, t = 0, dur = 1, pronto = false, fila = Promise.resolve(), pend = 0, feitas = new Set(), usaMp3 = false, ttsFim = true, terminou = false, trechos = [];
+  // Nos tutoriais a coluna da esquerda vira a lista de aulas: dá a sensação de curso, e a pessoa sabe onde está.
+  const aulas = FUNCAO ? C.map((c, k) => { const li = document.createElement("li"); li.innerHTML = `<i>${k + 1}</i><span></span>`; li.querySelector("span").textContent = c.titulo; $("#aulas").append(li); return li; }) : [];
   const render = (c, k) => {
-    $("#etapa").textContent = `${String(k + 1).padStart(2, "0")} / ${String(C.length).padStart(2, "0")}`; $("#titulo").textContent = c.titulo; $("#subtitulo").textContent = c.subtitulo || "";
+    $("#etapa").textContent = FUNCAO ? `Aula ${k + 1} de ${C.length}` : `${String(k + 1).padStart(2, "0")} / ${String(C.length).padStart(2, "0")}`;
+    $("#titulo").textContent = c.titulo; $("#subtitulo").textContent = c.subtitulo || "";
+    aulas.forEach((li, j) => { li.className = j === k ? "agora" : j < k ? "feita" : ""; if (j < k) li.querySelector("i").textContent = "\u2713"; else li.querySelector("i").textContent = String(j + 1); });
     $("#pontos").replaceChildren(...(c.pontos || []).map((p) => { const li = document.createElement("li"); li.textContent = p; return li; }));
     const h = $("#titulo"); h.style.animation = "none"; void h.offsetWidth; h.style.animation = "";
     segs.forEach((s, j) => s.classList.toggle("feita", j < k));
@@ -119,7 +132,7 @@
     }
     requestAnimationFrame(laco);
   }
-  const proxima = () => { if (i >= C.length - 1) { segs.forEach((s) => s.classList.add("feita")); $("#fim").hidden = false; tocando = false; return; } ir(i + 1); };
+  const proxima = () => { if (i >= C.length - 1) { segs.forEach((s) => s.classList.add("feita")); aulas.forEach((li) => { li.className = "feita"; li.querySelector("i").textContent = "\u2713"; }); $("#fim").hidden = false; tocando = false; window.__fim = true; return; } ir(i + 1); };
   const pausarOuContinuar = () => { if (!pronto) return; tocando = !tocando; if (tocando) { audio.play().catch(() => {}); speechSynthesis.resume?.(); } else { audio.pause(); speechSynthesis.pause?.(); } $("#b-play").textContent = tocando ? "⏸" : "▶"; $("#b-play").setAttribute("aria-label", tocando ? "Pausar" : "Continuar"); };
 
   $("#b-play").addEventListener("click", pausarOuContinuar); $("#b-prox").addEventListener("click", () => ir(Math.min(C.length - 1, i + 1))); $("#b-ant").addEventListener("click", () => ir(Math.max(0, i - 1)));
@@ -128,6 +141,7 @@
   $("#b-tela").addEventListener("click", () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen?.(); });
   const comecar = () => { localStorage.setItem("ne-teste-demo", "1"); localStorage.removeItem("ne-teste-v6"); localStorage.removeItem("ne-modo-teste"); $("#inicio").hidden = true; $("#fim").hidden = true; speechSynthesis.getVoices(); ir(0); };
   $("#b-comecar").addEventListener("click", comecar); $("#b-rever").addEventListener("click", comecar);
+  if (GRAVANDO) { window.__fim = false; setTimeout(comecar, 900); }
   addEventListener("keydown", (e) => { if (e.key === " ") { e.preventDefault(); pausarOuContinuar(); } else if (e.key === "ArrowRight") ir(Math.min(C.length - 1, i + 1)); else if (e.key === "ArrowLeft") ir(Math.max(0, i - 1)); else if (e.key.toLowerCase() === "f") $("#b-tela").click(); else if (e.key.toLowerCase() === "c") $("#b-leg").click(); });
   requestAnimationFrame(laco);
   window.NEApresentacao = { ir, cenas: C };

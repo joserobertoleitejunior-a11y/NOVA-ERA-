@@ -3,284 +3,306 @@
  "audio": "assets/tutoriais/audio/conferente",
  "voz": {
   "modelo": "eleven_multilingual_v2",
-  "estabilidade": 0.55,
-  "similaridade": 0.8,
-  "estilo": 0.25
+  "estabilidade": 0.35,
+  "similaridade": 0.75,
+  "estilo": 0.45
  },
  "inicio": {
   "titulo": "Tutorial · Conferente",
-  "sub": "Como conferir a carga, passo a passo",
-  "botao": "Assistir ao tutorial"
+  "sub": "Conferir carga, do começo ao fim",
+  "botao": "Começar o tutorial"
  },
  "fim": {
-  "titulo": "Pronto!",
-  "sub": "Agora é com você. Qualquer dúvida, toque em Ajuda no aplicativo."
+  "titulo": "Tutorial concluído",
+  "sub": "Agora é com você. Boa conferência!"
  },
  "cenas": [
   {
    "id": "01-entrar",
-   "titulo": "Como entrar",
-   "pontos": [],
-   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar. Você cai na fila de notas.",
+   "titulo": "Entrar no aplicativo",
+   "fala": "Vamos começar. A expedição te mandou um link no WhatsApp, com o seu usuário e a sua senha. Abra esse link, digite os dois, e toque em entrar. Pronto: a sua tela é a fila de carga.",
    "pre": {
-    "perfil": null,
-    "reiniciar": true
+    "perfil": null
    },
    "acoes": [
     {
-     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "conferente"
-     ]
+     ],
+     "at": 0.05
     },
     {
-     "at": 0.39,
      "digitar": [
       "#login-senha",
       "admin"
-     ]
+     ],
+     "at": 0.438
     },
     {
-     "at": 0.729,
-     "clicar": "#btn-entrar"
+     "clicar": "#btn-entrar",
+     "at": 0.826
     }
    ]
   },
   {
    "id": "02-fila",
-   "titulo": "A fila de notas",
-   "pontos": [
-    "Toque na nota que vai sair",
-    "Sem nota na fila? Conferir uma carga"
-   ],
-   "fala": "Aqui ficam as notas esperando conferência. Com o caminhão carregado, toque na nota.",
+   "titulo": "A fila: o que conferir",
+   "fala": "Esta é a fila. Cada linha é uma nota esperando conferência, e embaixo aparece há quanto tempo ela está esperando. A que está em vermelho é a mais antiga: comece por ela. Se chegou carga sem nota na fila, use o botão de cima.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": "#lista-minhas"
+     "destacar": "#lista-minhas",
+     "at": 0.05
     },
     {
-     "at": 0.706,
-     "destacar": "#btn-nova"
+     "destacar": ".linha-cartao",
+     "at": 0.468
+    },
+    {
+     "destacar": "#btn-nova",
+     "at": 0.886
     }
    ]
   },
   {
    "id": "03-conferir",
-   "titulo": "Conferir a carga, passo a passo",
-   "pontos": [
-    "Escolha a nota e o caminhão",
-    "Tudo confere? Toque no botão verde",
-    "Foto da carga e foto da placa"
-   ],
-   "fala": "Toque na nota e escolha o caminhão. Olhe a carga: se cada peça confere, toque em tudo confere. Depois, tire a foto do caminhão carregado e a foto da placa, e confirme. Pronto: fica registrado, com hora e foto. Passo a passo, sem pressa. Rápido e fácil.",
+   "titulo": "Conferir uma carga certa",
+   "fala": "Agora a parte principal. Toque na nota. Escolha o caminhão que vai sair. Olhe a carga e compare com a lista: se cada peça bate, toque em tudo confere. Tire a foto do caminhão carregado e a foto da placa. Confira o resumo e registre. Pronto: carga conferida, com hora, foto e o seu nome. Ninguém consegue apagar isso depois.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "clicar": ".linha-cartao"
+     "clicar": ".linha-cartao",
+     "at": 0.05
     },
     {
-     "at": 0.146,
-     "clicar": ".grade-escolha .escolha"
+     "clicar": ".escolha",
+     "at": 0.16
     },
     {
-     "at": 0.241,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.27
     },
     {
-     "at": 0.337,
-     "clicar": "#btn-tudo-confere"
+     "clicar": "#btn-tudo-confere",
+     "at": 0.38
     },
     {
-     "at": 0.433,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.49
     },
     {
-     "at": 0.529,
      "clicarTexto": [
-      "button.link-acao",
+      ".link-acao",
       "Usar foto de teste",
       0
-     ]
+     ],
+     "at": 0.6
     },
     {
-     "at": 0.624,
      "clicarTexto": [
-      "button.link-acao",
+      ".link-acao",
       "Usar foto de teste",
       1
-     ]
+     ],
+     "at": 0.711
     },
     {
-     "at": 0.72,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.821
     },
     {
-     "at": 0.816,
-     "clicar": "#btn-seguir"
-    },
-    {
-     "at": 0.912,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.931
     }
    ],
    "ritmo": 0.6
   },
   {
    "id": "04-diferenca",
-   "titulo": "Quando algo está diferente",
-   "pontos": [
-    "Item diferente: toque em Diferente",
-    "Diga quantas peças subiram",
-    "Informe o motivo no fim"
-   ],
-   "fala": "Se uma peça não confere, toque em diferente e diga quantas subiram. O aplicativo mostra se foi a mais ou a menos. A administração é avisada na hora.",
+   "titulo": "Quando falta ou sobra peça",
+   "fala": "E quando a carga não bate? Comece igual: nota, caminhão, tudo confere. Aí, no item que está diferente, toque em diferente e diga quantas peças subiram de verdade no caminhão. O aplicativo mostra na hora se foi a mais ou a menos. Tire as fotos, escolha o motivo da diferença e registre. A administração é avisada na mesma hora, no celular dela.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "clicar": ".linha-cartao"
+     "clicar": ".linha-cartao",
+     "at": 0.05
     },
     {
-     "at": 0.206,
-     "clicar": ".grade-escolha .escolha"
+     "clicar": ".escolha",
+     "at": 0.13
     },
     {
-     "at": 0.362,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.211
     },
     {
-     "at": 0.518,
-     "clicar": ".opcao.diferente"
+     "clicar": "#btn-tudo-confere",
+     "at": 0.291
     },
     {
-     "at": 0.674,
-     "digitar": [
-      "#carregada-0",
-      "2"
-     ]
+     "clicar": ".opcao.diferente",
+     "at": 0.372
     },
     {
-     "at": 0.83,
-     "destacar": ".diferenca"
+     "clicarTexto": [
+      "button",
+      "Diminuir",
+      0
+     ],
+     "at": 0.452
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.533
+    },
+    {
+     "clicarTexto": [
+      ".link-acao",
+      "Usar foto de teste",
+      0
+     ],
+     "at": 0.613
+    },
+    {
+     "clicarTexto": [
+      ".link-acao",
+      "Usar foto de teste",
+      1
+     ],
+     "at": 0.693
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.774
+    },
+    {
+     "clicar": ".chip",
+     "at": 0.854
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.935
     }
-   ]
+   ],
+   "ritmo": 0.6
   },
   {
    "id": "05-etiquetas",
-   "titulo": "Contar com a câmera",
-   "pontos": [
-    "Aponte a câmera para o QR",
-    "O app conta peça por peça"
-   ],
-   "fala": "Pra conferir mais rápido, aponte a câmera para o QR de cada peça. O aplicativo conta sozinho.",
+   "titulo": "Contar lendo as etiquetas",
+   "fala": "Carga grande, com muita peça? Tem um jeito mais rápido. Dentro da conferência existe o botão contar lendo as etiquetas. Você aponta a câmera do celular para o QR de cada peça, e o aplicativo vai contando sozinho. Se a etiqueta for de outra nota, ele avisa na hora.",
    "pre": {
     "perfil": "conferente",
     "rota": "notas"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "clicar": ".linha-cartao"
+     "clicar": ".linha-cartao",
+     "at": 0.05
     },
     {
-     "at": 0.279,
-     "clicar": ".grade-escolha .escolha"
+     "clicar": ".escolha",
+     "at": 0.263
     },
     {
-     "at": 0.507,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.477
     },
     {
-     "at": 0.736,
-     "destacar": "#btn-ler-etiquetas"
+     "destacar": "#btn-ler-etiquetas",
+     "at": 0.69
+    },
+    {
+     "destacar": "#btn-ler-etiquetas",
+     "at": 0.903
     }
    ]
   },
   {
    "id": "06-contagem",
-   "titulo": "Contagem rápida do estoque",
-   "pontos": [
-    "Conte as pilhas",
-    "Depois as peças soltas",
-    "Não precisa saber o saldo"
-   ],
-   "fala": "Na contagem do dia, conte as pilhas e as peças soltas, sem ver o número do sistema. Leva uns três minutos.",
+   "titulo": "A contagem do dia",
+   "fala": "Uma vez por dia, quando der um tempo, faça a contagem. O aplicativo já escolhe os produtos que mais valem a pena contar. Conte quantas pilhas e quantas peças soltas tem de cada um. Você não vê o número do sistema, para ninguém ser influenciado. No fim, é só enviar. Leva uns três minutos.",
    "pre": {
     "perfil": "conferente",
-    "rota": "estoque"
+    "rota": "contar"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "clicar": "#btn-contagem"
+     "clicar": "#btn-seguir",
+     "at": 0.05
     },
     {
-     "at": 0.229,
-     "clicar": "#btn-seguir"
+     "clicarTexto": [
+      "button",
+      "Aumentar",
+      0
+     ],
+     "at": 0.175
     },
     {
-     "at": 0.408,
-     "destacar": ".contar-card"
+     "clicarTexto": [
+      "button",
+      "Aumentar",
+      0
+     ],
+     "at": 0.299
     },
     {
-     "at": 0.587,
-     "digitar": [
-      "#ct-pilhas",
-      "3"
-     ]
+     "clicar": "#btn-seguir",
+     "at": 0.424
     },
     {
-     "at": 0.767,
-     "destacar": ".total-grande"
+     "clicarTexto": [
+      "button",
+      "Aumentar",
+      0
+     ],
+     "at": 0.549
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.673
+    },
+    {
+     "clicarTexto": [
+      "button",
+      "Aumentar",
+      0
+     ],
+     "at": 0.798
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.922
     }
-   ]
+   ],
+   "ritmo": 0.6
   },
   {
    "id": "07-avisos",
-   "titulo": "Os avisos",
-   "pontos": [],
-   "fala": "O sino mostra os seus avisos. Ligue os avisos do celular pra receber sem abrir o aplicativo.",
+   "titulo": "Avisos e ajuda",
+   "fala": "Por último, duas coisas. O sino mostra os seus avisos: nota nova na fila e pedido de contagem. Ligue os avisos do celular para receber sem precisar abrir o aplicativo. E se travar em qualquer tela, toque em ajuda, lá em cima. Bom trabalho!",
    "pre": {
     "perfil": "conferente",
     "rota": "alertas"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".alerta-item"
+     "destacar": "#btn-ler-todos",
+     "at": 0.05
     },
     {
-     "at": 0.733,
-     "destacar": "#btn-sino"
-    }
-   ]
-  },
-  {
-   "id": "08-ajuda",
-   "titulo": "Se tiver dúvida",
-   "pontos": [],
-   "fala": "Com dúvida, toque em ajuda, no alto da tela. Bom trabalho!",
-   "pre": {
-    "perfil": "conferente",
-    "rota": "notas"
-   },
-   "acoes": [
-    {
-     "at": 0.3,
-     "destacar": "#btn-ajuda"
+     "rolar": ".cartao-guia",
+     "at": 0.929
     }
    ]
   }

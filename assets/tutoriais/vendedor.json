@@ -1,194 +1,162 @@
 {
- "titulo": "Tutorial · Vendas",
+ "titulo": "Tutorial · Vendedor",
  "audio": "assets/tutoriais/audio/vendedor",
  "voz": {
   "modelo": "eleven_multilingual_v2",
-  "estabilidade": 0.55,
-  "similaridade": 0.8,
-  "estilo": 0.25
+  "estabilidade": 0.35,
+  "similaridade": 0.75,
+  "estilo": 0.45
  },
  "inicio": {
-  "titulo": "Tutorial · Vendas",
-  "sub": "Notas, cargas e rastreio ao cliente",
-  "botao": "Assistir ao tutorial"
+  "titulo": "Tutorial · Vendedor",
+  "sub": "Notas, cargas e o cliente",
+  "botao": "Começar o tutorial"
  },
  "fim": {
-  "titulo": "Pronto!",
-  "sub": "Lance a nota e mande o rastreio: o cliente agradece."
+  "titulo": "Tutorial concluído",
+  "sub": "Agora é com você. Boas vendas!"
  },
  "cenas": [
   {
    "id": "01-entrar",
-   "titulo": "Como entrar",
-   "pontos": [],
-   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar.",
+   "titulo": "Entrar no aplicativo",
+   "fala": "Abra o link que a empresa mandou, digite o seu usuário e a sua senha, e toque em entrar.",
    "pre": {
-    "perfil": null,
-    "reiniciar": true
+    "perfil": null
    },
    "acoes": [
     {
-     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "adminvendas"
-     ]
+     ],
+     "at": 0.05
     },
     {
-     "at": 0.35,
      "digitar": [
       "#login-senha",
       "admin"
-     ]
+     ],
+     "at": 0.353
     },
     {
-     "at": 0.649,
-     "clicar": "#btn-entrar"
+     "clicar": "#btn-entrar",
+     "at": 0.657
     }
    ]
   },
   {
    "id": "02-inicio",
-   "titulo": "A tela inicial",
-   "pontos": [],
-   "fala": "A tela inicial mostra se está tudo certo, e os botões do que você faz: lançar nota e ver as cargas.",
+   "titulo": "Sua tela: notas e entregas",
+   "fala": "A sua tela mostra duas coisas: quantas notas suas estão esperando carregar, e quantas entregas já saíram hoje. Se alguma nota estiver parada demais, aparece aqui em cima, para você cobrar a expedição antes do cliente ligar.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "inicio"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".status-simples"
+     "destacar": ".status-simples",
+     "at": 0.05
     },
     {
-     "at": 0.751,
-     "destacar": ".tiles"
+     "destacar": ".numeros-simples",
+     "at": 0.886
     }
    ]
   },
   {
    "id": "03-nota",
    "titulo": "Lançar uma nota",
-   "pontos": [],
-   "fala": "Pra lançar uma nota: escolha como ela chegou, digite o número e o cliente, escolha os produtos, e confirme. Ela entra na fila, e os conferentes são avisados na hora, no celular. Sem papel, tudo no celular. Simples assim.",
+   "fala": "Fechou a venda? Lance a nota. Escolha como ela chegou: se você tem o arquivo XML, o aplicativo lê tudo sozinho. Vamos digitar. Número e cliente. Escolha os produtos e a quantidade. Confira e coloque na fila. Pronto: os conferentes já foram avisados no celular.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "inicio"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "clicar": "#tile-nota"
+     "clicar": "#tile-nota",
+     "at": 0.05
     },
     {
-     "at": 0.156,
      "clicarTexto": [
       ".escolha",
-      "Vou digitar"
-     ]
+      "Vou digitar",
+      0
+     ],
+     "at": 0.158
     },
     {
-     "at": 0.262,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.266
     },
     {
-     "at": 0.368,
      "digitar": [
       "#nn-numero",
-      "48600"
-     ]
+      "48500"
+     ],
+     "at": 0.374
     },
     {
-     "at": 0.475,
      "digitar": [
       "#nn-cliente",
-      "Prefeitura de Tatuí"
-     ]
+      "Construtora Alfa"
+     ],
+     "at": 0.482
     },
     {
-     "at": 0.581,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.59
     },
     {
-     "at": 0.687,
-     "clicar": ".grade-escolha .escolha"
+     "clicar": ".grade-escolha .escolha",
+     "at": 0.698
     },
     {
-     "at": 0.793,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.806
     },
     {
-     "at": 0.899,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.914
     }
    ],
    "ritmo": 0.6
   },
   {
-   "id": "04-cargas",
-   "titulo": "Ver as cargas",
-   "pontos": [],
-   "fala": "Na aba cargas, toque numa carga pra ver itens, fotos e diferenças.",
-   "pre": {
-    "perfil": "adminvendas",
-    "rota": "cargas"
-   },
-   "acoes": [
-    {
-     "at": 0.05,
-     "destacar": ".conf"
-    },
-    {
-     "at": 0.552,
-     "clicar": ".conf"
-    }
-   ]
-  },
-  {
-   "id": "05-rastreio",
+   "id": "04-rastreio",
    "titulo": "Mandar o rastreio ao cliente",
-   "pontos": [],
-   "fala": "Dentro da carga, toque em enviar ao cliente e escolha o WhatsApp dele. Ele acompanha tudo por um link.",
+   "fala": "Depois que a carga é conferida, ela aparece aqui em cargas. Toque nela e você vê os itens, as fotos e se teve diferença. E tem o botão de enviar ao cliente: ele recebe um link no WhatsApp com a hora da saída, o que foi carregado e a foto da carga. Menos ligação para você, mais confiança para ele.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "cargas"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "clicar": ".conf"
+     "destacar": ".filtros",
+     "at": 0.05
     },
     {
-     "at": 0.404,
-     "clicarTexto": [
-      ".janela-rodape .btn",
-      "Enviar ao cliente"
-     ]
+     "clicar": ".conf",
+     "at": 0.482
     },
     {
-     "at": 0.758,
-     "destacar": ".previa-mensagem"
+     "destacar": ".janela",
+     "at": 0.914
     }
    ]
   },
   {
-   "id": "06-avisos",
-   "titulo": "Os avisos",
-   "pontos": [],
-   "fala": "Os avisos chegam no sino e no celular.",
+   "id": "05-avisos",
+   "titulo": "Os seus avisos",
+   "fala": "E o sino avisa você quando uma carga sua é conferida, ou quando teve diferença. Assim você fala com o cliente antes de ele falar com você.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "alertas"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".alerta-item"
-    },
-    {
-     "at": 0.404,
-     "destacar": "#btn-sino"
+     "rolar": ".cartao-guia",
+     "at": 0.05
     }
    ]
   }

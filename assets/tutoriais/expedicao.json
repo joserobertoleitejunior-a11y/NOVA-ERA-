@@ -3,206 +3,264 @@
  "audio": "assets/tutoriais/audio/expedicao",
  "voz": {
   "modelo": "eleven_multilingual_v2",
-  "estabilidade": 0.55,
-  "similaridade": 0.8,
-  "estilo": 0.25
+  "estabilidade": 0.35,
+  "similaridade": 0.75,
+  "estilo": 0.45
  },
  "inicio": {
   "titulo": "Tutorial · Expedição",
-  "sub": "Notas, cargas, estoque e equipe",
-  "botao": "Assistir ao tutorial"
+  "sub": "Comandar o pátio pelo celular",
+  "botao": "Começar o tutorial"
  },
  "fim": {
-  "titulo": "Pronto!",
-  "sub": "A expedição no controle. Dúvida? Toque em Ajuda."
+  "titulo": "Tutorial concluído",
+  "sub": "Agora é com você. Bom trabalho!"
  },
  "cenas": [
   {
    "id": "01-entrar",
-   "titulo": "Como entrar",
-   "pontos": [],
-   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar. Você comanda a operação.",
+   "titulo": "Entrar no aplicativo",
+   "fala": "Você comanda a operação do pátio. Abra o link, digite o usuário e a senha, e entre.",
    "pre": {
-    "perfil": null,
-    "reiniciar": true
+    "perfil": null
    },
    "acoes": [
     {
-     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "adminexpedicao"
-     ]
+     ],
+     "at": 0.05
     },
     {
-     "at": 0.387,
      "digitar": [
       "#login-senha",
       "admin"
-     ]
+     ],
+     "at": 0.344
     },
     {
-     "at": 0.724,
-     "clicar": "#btn-entrar"
+     "clicar": "#btn-entrar",
+     "at": 0.637
     }
    ]
   },
   {
-   "id": "02-inicio",
-   "titulo": "A tela inicial",
-   "pontos": [],
-   "fala": "A tela inicial diz se está tudo certo. Se tiver problema, toque em resolver agora.",
+   "id": "02-patio",
+   "titulo": "O pátio agora",
+   "fala": "A sua tela é o pátio em tempo real: quantas notas esperam conferência e quantas cargas já saíram hoje. Se tem algo errado, aparece em cima com o botão de resolver agora. Embaixo ficam os botões do seu dia a dia.",
    "pre": {
     "perfil": "adminexpedicao",
     "rota": "inicio"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".status-simples"
+     "destacar": ".status-simples",
+     "at": 0.05
     },
     {
-     "at": 0.376,
-     "destacar": ".numeros-simples"
+     "destacar": ".numeros-simples",
+     "at": 0.465
     },
     {
-     "at": 0.703,
-     "destacar": ".tiles"
+     "destacar": ".tiles",
+     "at": 0.88
     }
    ]
   },
   {
    "id": "03-nota",
-   "titulo": "Lançar notas",
-   "pontos": [],
-   "fala": "Pra lançar uma nota, escolha: arquivo XML, foto, ou digitando. Com o XML, o aplicativo lê tudo sozinho.",
+   "titulo": "Lançar uma nota",
+   "fala": "Chegou nota nova. Toque em lançar uma nota e escolha como ela chegou. Vamos digitar: número e cliente, depois os produtos e as quantidades. Confira e coloque na fila. Os conferentes recebem o aviso na hora.",
    "pre": {
     "perfil": "adminexpedicao",
     "rota": "inicio"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "clicar": "#tile-nota"
+     "clicar": "#tile-nota",
+     "at": 0.05
     },
     {
-     "at": 0.287,
-     "destacar": ".grade-escolha"
-    },
-    {
-     "at": 0.523,
      "clicarTexto": [
       ".escolha",
-      "arquivo XML"
-     ]
+      "Vou digitar",
+      0
+     ],
+     "at": 0.155
     },
     {
-     "at": 0.76,
-     "destacar": "#btn-escolher-xml"
+     "clicar": "#btn-seguir",
+     "at": 0.261
+    },
+    {
+     "digitar": [
+      "#nn-numero",
+      "48500"
+     ],
+     "at": 0.366
+    },
+    {
+     "digitar": [
+      "#nn-cliente",
+      "Construtora Alfa"
+     ],
+     "at": 0.471
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.576
+    },
+    {
+     "clicar": ".grade-escolha .escolha",
+     "at": 0.682
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.787
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.892
+    }
+   ],
+   "ritmo": 0.6
+  },
+  {
+   "id": "04-xml",
+   "titulo": "Várias notas de uma vez",
+   "fala": "Quando o escritório te manda os arquivos XML, não precisa digitar nada. Escolha os arquivos de uma vez, o aplicativo lê número, cliente e todos os itens, e você só confere e envia. Produto que ainda não existe no cadastro, ele cria sozinho.",
+   "pre": {
+    "perfil": "adminexpedicao",
+    "rota": "guia",
+    "params": {
+     "fluxo": "xml"
+    }
+   },
+   "acoes": [
+    {
+     "destacar": "#btn-escolher-xml",
+     "at": 0.05
+    },
+    {
+     "destacar": "#btn-escolher-xml",
+     "at": 0.894
     }
    ]
   },
   {
-   "id": "04-cargas",
-   "titulo": "Cargas e diferenças",
-   "pontos": [],
-   "fala": "Na aba cargas, veja o que saiu, filtre as diferenças, e imprima as etiquetas.",
+   "id": "05-cargas",
+   "titulo": "Acompanhar o que saiu",
+   "fala": "Em cargas você vê tudo que saiu, por dia. Dá para filtrar só as que tiveram diferença, que são as que interessam. Toque numa carga para ver as fotos, os itens e quem conferiu. E dá para baixar a planilha dos últimos trinta dias.",
    "pre": {
     "perfil": "adminexpedicao",
     "rota": "cargas"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".numeros"
+     "destacar": ".filtros",
+     "at": 0.05
     },
     {
-     "at": 0.367,
      "clicarTexto": [
       ".chip",
-      "Com diferença"
-     ]
+      "Com diferença",
+      0
+     ],
+     "at": 0.456
     },
     {
-     "at": 0.685,
-     "destacar": ".conf"
+     "clicar": ".conf",
+     "at": 0.862
     }
    ]
   },
   {
-   "id": "05-estoque",
-   "titulo": "Estoque e contagem",
-   "pontos": [],
-   "fala": "O estoque se atualiza sozinho. Se a contagem não bater, você decide: corrigir, ou contar de novo.",
+   "id": "06-contagem",
+   "titulo": "Pedir e resolver a contagem",
+   "fala": "O estoque se atualiza sozinho a cada carga conferida. Quando quiser conferir na prática, peça a contagem do dia à equipe. Se a contagem não bater, você decide: corrigir o estoque com o número contado, ou pedir para contar de novo.",
    "pre": {
     "perfil": "adminexpedicao",
-    "rota": "estoque"
+    "rota": "estoque",
+    "params": {
+     "aba": "contagens"
+    }
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".linha-cartao"
+     "destacar": ".chips",
+     "at": 0.05
     },
     {
-     "at": 0.398,
-     "destacar": "#btn-contagem"
+     "clicarTexto": [
+      "button",
+      "Pedir contagem",
+      0
+     ],
+     "at": 0.457
     },
     {
-     "at": 0.746,
-     "destacar": "#btn-lancar"
+     "clicar": ".escolha",
+     "at": 0.863
     }
    ]
   },
   {
-   "id": "06-equipe",
-   "titulo": "Cadastrar a equipe",
-   "pontos": [],
-   "fala": "Pra cadastrar alguém: nome, função, WhatsApp e foto, um passo por vez. O aplicativo manda o acesso e o vídeo tutorial no WhatsApp dela.",
+   "id": "07-equipe",
+   "titulo": "Cadastrar uma pessoa",
+   "fala": "Entrou gente nova? É uma pergunta por tela: nome, função, WhatsApp e foto. O aplicativo cria o usuário e a senha sozinho e manda no WhatsApp da pessoa um link com o acesso e o vídeo tutorial da função dela. E fica registrado que foi você quem cadastrou.",
    "pre": {
     "perfil": "adminexpedicao",
-    "rota": "equipe"
+    "rota": "guia",
+    "params": {
+     "fluxo": "novaPessoa"
+    }
    },
    "acoes": [
     {
-     "at": 0.05,
-     "clicar": "#btn-cadastrar"
-    },
-    {
-     "at": 0.305,
      "digitar": [
       "#cad-nome",
-      "Marcos Lima"
-     ]
+      "Carlos Souza"
+     ],
+     "at": 0.05
     },
     {
-     "at": 0.56,
-     "clicar": "#btn-seguir"
+     "clicar": "#btn-seguir",
+     "at": 0.173
     },
     {
-     "at": 0.815,
-     "destacar": ".grade-escolha"
+     "clicarTexto": [
+      ".escolha",
+      "Conferente",
+      0
+     ],
+     "at": 0.296
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.419
+    },
+    {
+     "digitar": [
+      "#cad-tel",
+      "15999990001"
+     ],
+     "at": 0.543
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.666
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.789
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.912
     }
-   ]
-  },
-  {
-   "id": "07-avisos",
-   "titulo": "Os avisos",
-   "pontos": [],
-   "fala": "Peça a mais, estoque baixo, nota parada, pedido de senha: tudo chega no sino e no celular.",
-   "pre": {
-    "perfil": "adminexpedicao",
-    "rota": "alertas"
-   },
-   "acoes": [
-    {
-     "at": 0.05,
-     "destacar": ".alerta-item"
-    },
-    {
-     "at": 0.728,
-     "destacar": "#btn-sino"
-    }
-   ]
+   ],
+   "ritmo": 0.6
   }
  ]
 }

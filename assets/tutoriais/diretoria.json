@@ -3,154 +3,133 @@
  "audio": "assets/tutoriais/audio/diretoria",
  "voz": {
   "modelo": "eleven_multilingual_v2",
-  "estabilidade": 0.55,
-  "similaridade": 0.8,
-  "estilo": 0.25
+  "estabilidade": 0.35,
+  "similaridade": 0.75,
+  "estilo": 0.45
  },
  "inicio": {
   "titulo": "Tutorial · Diretoria",
-  "sub": "A empresa inteira em uma tela",
-  "botao": "Assistir ao tutorial"
+  "sub": "A empresa em uma tela",
+  "botao": "Começar o tutorial"
  },
  "fim": {
-  "titulo": "Pronto!",
-  "sub": "Decisão com informação, sem abrir planilha."
+  "titulo": "Tutorial concluído",
+  "sub": "A empresa na palma da mão."
  },
  "cenas": [
   {
    "id": "01-entrar",
-   "titulo": "Como entrar",
-   "pontos": [],
-   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar. Você vê a empresa inteira em uma tela.",
+   "titulo": "Entrar no aplicativo",
+   "fala": "Abra o link, digite o usuário e a senha, e entre. Em uma tela você vê a empresa inteira.",
    "pre": {
-    "perfil": null,
-    "reiniciar": true
+    "perfil": null
    },
    "acoes": [
     {
-     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "admindiretoria"
-     ]
+     ],
+     "at": 0.05
     },
     {
-     "at": 0.402,
      "digitar": [
       "#login-senha",
       "admin"
-     ]
+     ],
+     "at": 0.353
     },
     {
-     "at": 0.754,
-     "clicar": "#btn-entrar"
+     "clicar": "#btn-entrar",
+     "at": 0.657
     }
    ]
   },
   {
-   "id": "02-inicio",
+   "id": "02-empresa",
    "titulo": "Como está a empresa",
-   "pontos": [],
-   "fala": "A tela inicial mostra como está a empresa. Verde, tudo certo. Amarelo ou vermelho, toque em resolver agora.",
+   "fala": "A primeira coisa é um semáforo. Verde: nada precisa de você agora. Amarelo ou vermelho: tem algo para olhar, e o botão leva direto na tela que resolve. Embaixo, os números do dia: quantas cargas saíram e quantas tiveram diferença.",
    "pre": {
     "perfil": "admindiretoria",
     "rota": "inicio"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".status-simples"
+     "destacar": ".status-simples",
+     "at": 0.05
     },
     {
-     "at": 0.769,
-     "destacar": ".numeros-simples"
+     "destacar": ".numeros-simples",
+     "at": 0.889
     }
    ]
   },
   {
    "id": "03-resumo",
    "titulo": "O resumo completo",
-   "pontos": [],
-   "fala": "O resumo completo traz os números do dia, da semana e do mês, e onde a operação mais erra.",
+   "fala": "O resumo completo é o raio-x. Escolha o período: hoje, ontem, sete ou trinta dias. Você vê quantas conferências foram feitas, quantas deram diferença, quantas notas estão paradas e quantos produtos pedem atenção. Mais abaixo, onde a empresa mais erra e como está cada pessoa da equipe.",
    "pre": {
     "perfil": "admindiretoria",
     "rota": "resumo"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".kpis"
-    },
-    {
-     "at": 0.389,
      "clicarTexto": [
       ".chip",
-      "7 dias"
-     ]
+      "30 dias",
+      0
+     ],
+     "at": 0.05
     },
     {
-     "at": 0.728,
-     "destacar": ".barras"
+     "destacar": ".kpis",
+     "at": 0.495
+    },
+    {
+     "rolar": ".barras",
+     "at": 0.94
     }
    ]
   },
   {
-   "id": "04-ia",
-   "titulo": "O assistente de inteligência artificial",
-   "pontos": [],
-   "fala": "Na versão completa, pergunte ao assistente de inteligência artificial. Ele responde com os dados reais, e só fala da Nova Era.",
+   "id": "04-cargas",
+   "titulo": "Onde está o prejuízo",
+   "fala": "Este é o filtro que mais importa para você: só as cargas com diferença. Cada uma mostra o que saiu a mais ou a menos, a foto do caminhão e quem conferiu. É aqui que aparece, em número, quanto a empresa estava perdendo sem saber.",
    "pre": {
     "perfil": "admindiretoria",
-    "rota": "inicio"
+    "rota": "cargas"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "clicar": "#fab-ia"
+     "clicarTexto": [
+      ".chip",
+      "Com diferença",
+      0
+     ],
+     "at": 0.05
     },
     {
-     "at": 0.426,
-     "clicar": ".chat-sugestoes .chip"
-    },
-    {
-     "at": 0.802,
-     "destacar": ".chat"
+     "clicar": ".conf",
+     "at": 0.862
     }
    ]
   },
   {
    "id": "05-equipe",
-   "titulo": "Quem cadastrou quem",
-   "pontos": [],
-   "fala": "Na equipe, cada pessoa mostra qual administrador a cadastrou, e quando.",
+   "titulo": "A equipe e os avisos",
+   "fala": "Na equipe você vê quem confere, quanto cada um erra, e qual administrador cadastrou cada pessoa. E os avisos críticos chegam no seu celular na hora, com um botão para chamar no WhatsApp quem precisa resolver.",
    "pre": {
     "perfil": "admindiretoria",
     "rota": "equipe"
    },
    "acoes": [
     {
-     "at": 0.3,
-     "destacar": ".pessoa-linha"
-    }
-   ]
-  },
-  {
-   "id": "06-avisos",
-   "titulo": "Os avisos",
-   "pontos": [],
-   "fala": "Os avisos críticos chegam no sino e no celular, com botão pra chamar no WhatsApp.",
-   "pre": {
-    "perfil": "admindiretoria",
-    "rota": "alertas"
-   },
-   "acoes": [
-    {
-     "at": 0.05,
-     "destacar": ".alerta-item"
+     "destacar": ".pessoa-linha",
+     "at": 0.05
     },
     {
-     "at": 0.699,
-     "destacar": "#btn-sino"
+     "rolar": ".lista-simples",
+     "at": 0.919
     }
    ]
   }

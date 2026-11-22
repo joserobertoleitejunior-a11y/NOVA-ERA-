@@ -86,7 +86,7 @@
       horas.forEach((h, k) => novaConferencia(base + h * 3600000, BL_DIAS.includes(d) && k === 0, r() < 0.15));
     }
     novaConferencia(inicioHoje - 3 * DIA + 20.7 * 3600000, false, true); // fora do expediente (20h40)
-    [30, 95, 160].forEach((m, k) => { if (!D.foraDoExpediente(agora - m * MIN) && agora - m * MIN > inicioHoje) novaConferencia(agora - m * MIN, false, k === 1); }); // hoje (só dentro do expediente)
+    [30, 95, 160].forEach((m, k) => { if (agora - m * MIN > inicioHoje) novaConferencia(agora - m * MIN, false, k === 1); }); // hoje (a demonstração mostra um dia normal, inclusive no fim de semana)
     // fila de notas esperando
     const fila = [[190, "Construtora Alfa"], [75, "Prefeitura de Tatuí"], [40, "Loteamento Vila Nova"], [12, "JB Obras"]];
     fila.forEach(([min, cliente], k) => {
@@ -106,7 +106,9 @@
       { id: uid("ct"), criado_em: new Date(inicioHoje - 6 * DIA + 16 * 3600000).toISOString(), criado_por: "u-carlos", status: "aplicada", escopo: "Contagem do dia", itens: ["p2", "p6", "p9", "p10"].map((p) => itemC(p, 0, 0)) },
       { id: uid("ct"), criado_em: new Date(agora - 26 * 3600000).toISOString(), criado_por: "u-marcos", status: "aguardando_aprovacao", escopo: "Contagem do dia", itens: [itemC("p3", 126, 120), itemC("p5", 40, 40)] },
     ];
-    const cfg = { ...D.CONFIG_PADRAO };
+    // No ambiente de demonstração a empresa "trabalha" todo dia: assim o tutorial e a apresentação
+    // mostram um pátio movimentado em qualquer dia da semana, inclusive sábado e domingo.
+    const cfg = { ...D.CONFIG_PADRAO, expediente: { ...D.CONFIG_PADRAO.expediente, dias: [0, 1, 2, 3, 4, 5, 6] } };
     const estado = { v: 6, criadoEm: agora, perfilId: "u-admin", perfis, veiculos, produtos, notas, conferencias, movimentos, contagens, alertas: [], config: cfg, vistoResumo: {} };
     // alertas dos últimos dias (as cargas com diferença de hoje e ontem)
     const saldos = D.calcularSaldos(produtos, movimentos, contagens);

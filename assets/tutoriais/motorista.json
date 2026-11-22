@@ -3,106 +3,98 @@
  "audio": "assets/tutoriais/audio/motorista",
  "voz": {
   "modelo": "eleven_multilingual_v2",
-  "estabilidade": 0.55,
-  "similaridade": 0.8,
-  "estilo": 0.25
+  "estabilidade": 0.35,
+  "similaridade": 0.75,
+  "estilo": 0.45
  },
  "inicio": {
   "titulo": "Tutorial · Motorista",
   "sub": "O que você precisa saber",
-  "botao": "Assistir ao tutorial"
+  "botao": "Começar o tutorial"
  },
  "fim": {
-  "titulo": "Pronto!",
-  "sub": "Sempre saia só depois da carga conferida."
+  "titulo": "Tutorial concluído",
+  "sub": "Só saia com a carga conferida. Boa viagem!"
  },
  "cenas": [
   {
    "id": "01-entrar",
-   "titulo": "Como entrar",
-   "pontos": [],
-   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar.",
+   "titulo": "Entrar no aplicativo",
+   "fala": "Seu aplicativo é bem simples. Abra o link que a expedição mandou, digite o usuário e a senha, e toque em entrar.",
    "pre": {
-    "perfil": null,
-    "reiniciar": true
+    "perfil": null
    },
    "acoes": [
     {
-     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "motorista"
-     ]
+     ],
+     "at": 0.05
     },
     {
-     "at": 0.35,
      "digitar": [
       "#login-senha",
       "admin"
-     ]
+     ],
+     "at": 0.388
     },
     {
-     "at": 0.649,
-     "clicar": "#btn-entrar"
+     "clicar": "#btn-entrar",
+     "at": 0.727
     }
    ]
   },
   {
-   "id": "02-fila",
-   "titulo": "A fila de cargas",
-   "pontos": [
-    "Veja se a sua carga já está na fila",
-    "Quem confere é o conferente"
-   ],
-   "fala": "Aqui você vê as notas esperando conferência. Quem confere é o conferente. Quando termina, o caminhão está liberado.",
+   "id": "02-viagem",
+   "titulo": "Posso sair do pátio?",
+   "fala": "Esta é a sua tela. Ela responde a única pergunta que importa para você: posso sair? Em cima aparece se ainda tem carga esperando conferência. Verde quer dizer que está tudo conferido. Amarelo quer dizer que alguma carga ainda não passou pelo conferente.",
+   "pre": {
+    "perfil": "motorista",
+    "rota": "inicio"
+   },
+   "acoes": [
+    {
+     "destacar": ".status-simples",
+     "at": 0.05
+    },
+    {
+     "destacar": ".numeros-simples",
+     "at": 0.899
+    }
+   ]
+  },
+  {
+   "id": "03-fila",
+   "titulo": "A fila de carga",
+   "fala": "Na fila você vê o que está esperando conferência. Você não precisa conferir nada: quem confere é o conferente. Quando a sua carga sai da fila, ela foi conferida e o caminhão está liberado. Nunca saia do pátio antes disso: a conferência é o que protege você se o cliente reclamar depois.",
    "pre": {
     "perfil": "motorista",
     "rota": "notas"
    },
    "acoes": [
     {
-     "at": 0.3,
-     "destacar": "#lista-minhas"
+     "destacar": "#lista-minhas",
+     "at": 0.05
+    },
+    {
+     "destacar": ".linha-cartao",
+     "at": 0.911
     }
    ]
   },
   {
-   "id": "03-avisos",
-   "titulo": "Os avisos",
-   "pontos": [],
-   "fala": "Fique de olho no sino: os avisos pra você aparecem ali.",
+   "id": "04-avisos",
+   "titulo": "Os seus avisos",
+   "fala": "E o sino guarda os avisos para você. Ligue os avisos do celular e eles chegam mesmo com o aplicativo fechado. É só isso. Boa viagem!",
    "pre": {
     "perfil": "motorista",
     "rota": "alertas"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".alerta-item"
-    },
-    {
-     "at": 0.571,
-     "destacar": "#btn-sino"
-    }
-   ]
-  },
-  {
-   "id": "04-cliente",
-   "titulo": "O cliente acompanha a entrega",
-   "pontos": [],
-   "fala": "O cliente acompanha a sua saída por um link. Por isso, só saia do pátio com a carga conferida.",
-   "pre": {
-    "perfil": "motorista",
-    "rota": "notas"
-   },
-   "acoes": [
-    {
-     "at": 0.05,
-     "rastreio": true
-    },
-    {
-     "at": 0.84,
-     "rolar": ".resumo"
+     "rolar": ".cartao-guia",
+     "at": 0.05
     }
    ]
   }

@@ -3,79 +3,71 @@
  "audio": "assets/tutoriais/audio/administrativo",
  "voz": {
   "modelo": "eleven_multilingual_v2",
-  "estabilidade": 0.55,
-  "similaridade": 0.8,
-  "estilo": 0.25
+  "estabilidade": 0.35,
+  "similaridade": 0.75,
+  "estilo": 0.45
  },
  "inicio": {
   "titulo": "Tutorial · Administrativo",
-  "sub": "Cadastros: notas, equipe, frota e produtos",
-  "botao": "Assistir ao tutorial"
+  "sub": "Cadastros e notas sem digitar",
+  "botao": "Começar o tutorial"
  },
  "fim": {
-  "titulo": "Pronto!",
-  "sub": "Cadastros em dia, operação sem erro."
+  "titulo": "Tutorial concluído",
+  "sub": "Agora é com você. Bom trabalho!"
  },
  "cenas": [
   {
    "id": "01-entrar",
-   "titulo": "Como entrar",
-   "pontos": [],
-   "fala": "Abra o endereço, digite o usuário e a senha da tela de boas-vindas, e toque em entrar. Você cuida dos cadastros.",
+   "titulo": "Entrar no aplicativo",
+   "fala": "Você cuida dos cadastros e das notas. Abra o link, digite o usuário e a senha, e entre.",
    "pre": {
-    "perfil": null,
-    "reiniciar": true
+    "perfil": null
    },
    "acoes": [
     {
-     "at": 0.05,
      "digitar": [
       "#login-usuario",
       "adminadministrativo"
-     ]
+     ],
+     "at": 0.05
     },
     {
-     "at": 0.388,
      "digitar": [
       "#login-senha",
       "admin"
-     ]
+     ],
+     "at": 0.352
     },
     {
-     "at": 0.727,
-     "clicar": "#btn-entrar"
+     "clicar": "#btn-entrar",
+     "at": 0.653
     }
    ]
   },
   {
    "id": "02-inicio",
-   "titulo": "A tela inicial",
-   "pontos": [],
-   "fala": "A tela inicial mostra se está tudo certo, e botões simples levam a cada tarefa.",
+   "titulo": "A sua tela",
+   "fala": "A sua tela mostra quantas notas estão na fila e quantas pessoas estão cadastradas. Embaixo ficam os atalhos do que você mais faz: importar XML, lançar nota, cadastrar gente, caminhões e produtos.",
    "pre": {
     "perfil": "adminadministrativo",
     "rota": "inicio"
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".status-simples"
+     "destacar": ".numeros-simples",
+     "at": 0.05
     },
     {
-     "at": 0.371,
-     "destacar": ".tiles"
-    },
-    {
-     "at": 0.692,
-     "destacar": "#btn-resumo"
+     "destacar": ".tiles",
+     "at": 0.87
     }
    ]
   },
   {
    "id": "03-xml",
-   "titulo": "Notas por XML",
-   "pontos": [],
-   "fala": "Pra várias notas de uma vez, use o arquivo XML: escolha, confira e envie.",
+   "titulo": "Importar as notas por XML",
+   "fala": "Este é o caminho mais rápido. Escolha os arquivos XML, pode ser vários de uma vez. O aplicativo lê o número, o cliente e todos os itens de cada nota. Você confere o que ele leu e envia. Produto que ainda não existe, ele cadastra sozinho.",
    "pre": {
     "perfil": "adminadministrativo",
     "rota": "guia",
@@ -85,82 +77,117 @@
    },
    "acoes": [
     {
-     "at": 0.3,
-     "destacar": "#btn-escolher-xml"
+     "destacar": "#btn-escolher-xml",
+     "at": 0.05
+    },
+    {
+     "destacar": "#btn-escolher-xml",
+     "at": 0.893
     }
    ]
   },
   {
-   "id": "04-equipe",
-   "titulo": "Equipe",
-   "pontos": [],
-   "fala": "Em mais, equipe: cadastre pessoas e gere uma senha nova pra quem esqueceu.",
+   "id": "04-pessoa",
+   "titulo": "Cadastrar uma pessoa",
+   "fala": "Para cadastrar alguém é uma pergunta por tela: nome, função, WhatsApp e foto. No fim o aplicativo cria o usuário e a senha, e o botão manda tudo no WhatsApp da pessoa, junto com o vídeo da função dela. Fica registrado quem cadastrou e quando.",
    "pre": {
     "perfil": "adminadministrativo",
-    "rota": "equipe"
+    "rota": "guia",
+    "params": {
+     "fluxo": "novaPessoa"
+    }
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".pessoa-linha"
+     "digitar": [
+      "#cad-nome",
+      "Carlos Souza"
+     ],
+     "at": 0.05
     },
     {
-     "at": 0.361,
-     "clicar": ".pessoa-linha"
+     "clicar": "#btn-seguir",
+     "at": 0.173
     },
     {
-     "at": 0.673,
-     "destacar": ".grade-escolha"
+     "clicarTexto": [
+      ".escolha",
+      "Conferente",
+      0
+     ],
+     "at": 0.295
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.418
+    },
+    {
+     "digitar": [
+      "#cad-tel",
+      "15999990001"
+     ],
+     "at": 0.54
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.663
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.785
+    },
+    {
+     "clicar": "#btn-seguir",
+     "at": 0.908
     }
-   ]
+   ],
+   "ritmo": 0.6
   },
   {
-   "id": "05-frota",
-   "titulo": "Frota e produtos",
-   "pontos": [],
-   "fala": "Cadastre os caminhões com fotos, e os produtos com estoque mínimo.",
+   "id": "05-cadastros",
+   "titulo": "Caminhões e produtos",
+   "fala": "Em produtos você guarda o estoque mínimo e quantas peças tem cada pilha. Isso é o que deixa o aviso de estoque baixo e a contagem funcionarem direito. Na aba do lado ficam os caminhões, com placa, dados e fotos. Cada cadastro tem editar e apagar.",
    "pre": {
     "perfil": "adminadministrativo",
     "rota": "cadastros",
     "params": {
-     "aba": "caminhoes"
+     "aba": "produtos"
     }
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".veiculo-miniatura"
+     "destacar": ".acoes-cadastro",
+     "at": 0.05
     },
     {
-     "at": 0.343,
      "clicarTexto": [
       ".aba",
-      "Produtos"
-     ]
+      "Caminhões",
+      0
+     ],
+     "at": 0.473
     },
     {
-     "at": 0.636,
-     "destacar": ".lista-simples"
+     "destacar": ".lista-simples",
+     "at": 0.896
     }
    ]
   },
   {
-   "id": "06-avisos",
-   "titulo": "Os avisos",
-   "pontos": [],
-   "fala": "Os avisos mostram o que precisa de atenção, inclusive pedidos de senha.",
+   "id": "06-ajustes",
+   "titulo": "Os ajustes da empresa",
+   "fala": "E aqui você diz ao aplicativo como a empresa trabalha: o horário de expediente e em quanto tempo uma nota parada vira aviso. É isso que faz o aplicativo avisar na hora certa, sem encher ninguém de recado à toa.",
    "pre": {
     "perfil": "adminadministrativo",
-    "rota": "alertas"
+    "rota": "guia",
+    "params": {
+     "fluxo": "ajustes"
+    }
    },
    "acoes": [
     {
-     "at": 0.05,
-     "destacar": ".alerta-item"
-    },
-    {
-     "at": 0.66,
-     "destacar": "#btn-sino"
+     "destacar": "#conteudo",
+     "at": 0.05
     }
    ]
   }
