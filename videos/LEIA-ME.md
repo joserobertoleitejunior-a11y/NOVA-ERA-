@@ -41,3 +41,6 @@ deve ser entregue**: quer dizer que a narração está falando de um passo que n
 2. Gere as partes no ElevenLabs e salve com o nome que está no título de cada parte.
 3. `python3 scripts/roteiro-voz.py cortar gravacoes/*.mp3`
 4. `node scripts/gravar-videos.mjs` de novo: agora com voz, e o tempo de cada cena segue o áudio.
+
+## O que vai para o GitHub
+Só os `-vertical.mp4` dos tutoriais por função (a tela de boas-vindas toca esses). Os `-horizontal.mp4` e a apresentação comercial (`apresentacao-*`) ficam fora do repositório (`.gitignore`): são arquivos grandes e a apresentação não vai para o site.

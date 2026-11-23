@@ -2,5 +2,7 @@
 node_modules/
 .DS_Store
 *.mp4
+!videos/*-vertical.mp4
+videos/apresentacao-*.mp4
 *.mov
 *.zip
