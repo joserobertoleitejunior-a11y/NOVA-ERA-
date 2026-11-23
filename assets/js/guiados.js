@@ -7,7 +7,15 @@
   const C = window.NOVA_ERA || {};
   const { el, ic } = NE;
   const G = (NE.guiados = {});
-  const VENDEDORES = ["Wesley", "Fábio"];
+  // Quem vende e quanto tem para vender. O vendedor logado lança sempre em nome dele; a administração escolhe entre os vendedores cadastrados.
+  const contextoVenda = async (app) => {
+    const ehVendedor = app.perfil.funcao === "vendedor";
+    const [pessoas, saldos, fila] = await Promise.all([ehVendedor ? Promise.resolve([]) : NE.dados.funcionarios().catch(() => []), NE.dados.saldos().catch(() => []), NE.dados.notas({ status: ["pendente", "em_conferencia"] }).catch(() => [])]);
+    return { ehVendedor, vendedores: pessoas.filter((p) => p.funcao === "vendedor" && p.ativo !== false), disp: D.disponivelPorProduto(saldos, fila) };
+  };
+  const campoVendedor = (cv, app, n, r) => (cv.ehVendedor ? el("div", { class: "campo" }, el("label", {}, "Vendedor"), el("p", { class: "suave", id: "nn-vendedor-fixo" }, `${app.perfil.nome} (você)`))
+    : cv.vendedores.length ? el("div", { class: "campo" }, el("label", {}, "Vendedor (opcional)"), el("div", { class: "chips" }, cv.vendedores.map((v) => el("button", { type: "button", class: "chip", "aria-pressed": String(n.vendedor_id === v.id), onclick: () => { const igual = n.vendedor_id === v.id; n.vendedor_id = igual ? null : v.id; n.vendedor = igual ? "" : v.nome; r(); } }, v.nome)))) : null);
+  const avisoFalta = (faltas) => (faltas.length ? el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, `Estoque insuficiente para ${D.lista(faltas.map((f) => `${f.nome} (pedido ${NE.num(f.pedido)}, disponível ${NE.num(f.disponivel)})`), 3)}. A nota entra na fila mesmo assim: confira se a produção cobre.`)) : null);
   const titulo = (t) => t.toLowerCase().replace(/(^|\s)\S/g, (m) => m.toUpperCase());
   const ligar = (itens, produtos) => itens.map((i) => { const m = D.casarProduto(i, produtos); return { ...i, produto_id: m.produto ? m.produto.id : null, descricao: m.produto ? m.produto.nome : i.descricao }; });
   const dica = (t) => el("p", { class: "guia-dica" }, t);
@@ -18,7 +26,8 @@
   G.nota = async (raiz, app) => {
     const produtos = await NE.dados.produtos();
     const iaOn = NE.iaLeitura ? await NE.iaLeitura().catch(() => false) : false;   // só promete ler a nota por IA se ela estiver ligada de verdade
-    const n = { como: "", numero: "", cliente: "", vendedor: "", itens: [], fotos: [] };
+    const cv = await contextoVenda(app);
+    const n = { como: "", numero: "", cliente: "", vendedor: cv.ehVendedor ? app.perfil.nome : "", vendedor_id: cv.ehVendedor ? app.perfil.id : null, itens: [], fotos: [] };
     NE.assistente({
       raiz, rotuloFinal: "Colocar na fila", aoCancelar: () => app.voltar(),
       passos: [
@@ -38,28 +47,31 @@
               }) }, ic("faisca"), "Ler a nota para mim · Premium")),
             NE.campoTexto("Número da nota", { id: "nn-numero", inputmode: "numeric", value: n.numero, placeholder: "Ex.: 48213" }, (v) => { n.numero = v.trim(); }),
             NE.campoTexto("Nome do cliente (opcional)", { id: "nn-cliente", value: n.cliente, placeholder: "Ex.: Construtora Alfa" }, (v) => { n.cliente = v; }),
-            el("div", { class: "campo" }, el("label", {}, "Vendedor (opcional)"), el("div", { class: "chips" }, VENDEDORES.map((v) => el("button", { type: "button", class: "chip", "aria-pressed": String(n.vendedor === v), onclick: () => { n.vendedor = n.vendedor === v ? "" : v; r(); } }, v))))),
+            campoVendedor(cv, app, n, r)),
           validar: () => (!n.numero ? "Digite o número da nota." : null) },
         { titulo: "O que tem na nota?", icone: "caixas", ajuda: "Toque no produto para adicionar e ajuste a quantidade.",
           tela: (r) => {
             const tem = new Set(n.itens.map((i) => i.produto_id).filter(Boolean));
+            const dispLinha = (p) => { const d = cv.disp.get(p.id); return d ? el("small", { class: d.disponivel > 0 ? "lp-disp" : "lp-sem" }, d.disponivel > 0 ? `Disponível ${NE.num(d.disponivel)}` : "Sem estoque disponível") : null; };
+            const itemNota = (i, k) => { const aviso = el("p", { class: "aviso-estoque", hidden: true }); const atualizar = () => { const d = i.produto_id && cv.disp.get(i.produto_id); const falta = d && Number(i.quantidade) > d.disponivel; aviso.hidden = !falta; if (falta) aviso.textContent = `Só tem ${NE.num(Math.max(0, d.disponivel))} disponíveis (pátio ${NE.num(d.saldo)}${d.reservado ? `, ${NE.num(d.reservado)} já vendidos esperando carregar` : ""}). Lance mesmo assim só se a produção cobre.`; }; atualizar();
+              return el("div", { class: "item" }, el("div", { class: "item-topo" }, el("strong", {}, i.descricao), el("button", { type: "button", class: "link-acao", onclick: () => { n.itens.splice(k, 1); r(); } }, ic("fechar"), "Tirar")), NE.contador(i.quantidade, (v) => { i.quantidade = v; atualizar(); }, `nn-q-${k}`), aviso); };
             const busca = el("input", { class: "entrada", id: "nn-busca", type: "search", placeholder: "Buscar produto…", autocomplete: "off", "aria-label": "Buscar produto" });
-            const linhas = produtos.filter((p) => !tem.has(p.id)).map((p) => { const b = el("button", { type: "button", class: "lp-linha", "data-nome": NE.semAcento ? NE.semAcento(p.nome).toLowerCase() : p.nome.toLowerCase(), onclick: () => { n.itens.push({ produto_id: p.id, descricao: p.nome, quantidade: p.por_pilha || 1 }); r(); } }, el("strong", {}, p.nome), el("span", { class: "lp-mais" }, ic("mais"), "Incluir")); return b; });
+            const linhas = produtos.filter((p) => !tem.has(p.id)).map((p) => { const b = el("button", { type: "button", class: "lp-linha", "data-nome": NE.semAcento ? NE.semAcento(p.nome).toLowerCase() : p.nome.toLowerCase(), onclick: () => { n.itens.push({ produto_id: p.id, descricao: p.nome, quantidade: p.por_pilha || 1 }); r(); } }, el("span", { class: "lp-nome" }, el("strong", {}, p.nome), dispLinha(p)), el("span", { class: "lp-mais" }, ic("mais"), "Incluir")); return b; });
             const norm = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
             const vazia = dica("Nenhum produto com esse nome. Use o campo \"Outro produto\" abaixo.");
             vazia.hidden = true;
             busca.addEventListener("input", () => { const q = norm(busca.value.trim()); let achou = 0; linhas.forEach((l) => { const ok = !q || norm(l.textContent).includes(q); l.hidden = !ok; if (ok) achou++; }); vazia.hidden = achou > 0 || !linhas.length; });
             return el("div", {},
-              n.itens.length ? [el("h2", { class: "secao-titulo" }, `Na nota (${n.itens.length})`), ...n.itens.map((i, k) => el("div", { class: "item" }, el("div", { class: "item-topo" }, el("strong", {}, i.descricao), el("button", { type: "button", class: "link-acao", onclick: () => { n.itens.splice(k, 1); r(); } }, ic("fechar"), "Tirar")), NE.contador(i.quantidade, (v) => { i.quantidade = v; }, `nn-q-${k}`)))] : [dica("Nenhum produto ainda. Busque ou toque em um produto abaixo.")],
+              n.itens.length ? [el("h2", { class: "secao-titulo" }, `Na nota (${n.itens.length})`), ...n.itens.map(itemNota)] : [dica("Nenhum produto ainda. Busque ou toque em um produto abaixo.")],
               produtos.length ? [el("h2", { class: "secao-titulo" }, "Adicionar produto"), linhas.length > 6 ? busca : null, el("div", { class: "lista-produtos" }, linhas), vazia] : null,
               (() => { const nome = el("input", { class: "entrada", id: "nn-outro", placeholder: produtos.length ? "Outro produto (escreva o nome)" : "Nome do produto" }); const add = el("button", { type: "button", class: "btn btn-azul", id: "nn-outro-add", "aria-label": "Adicionar produto" }, ic("mais")); add.addEventListener("click", () => { const t = nome.value.trim(); if (!t) return nome.focus(); n.itens.push({ produto_id: null, descricao: t, quantidade: 1 }); r(); }); return el("div", { class: "campo", style: "margin-top:12px" }, el("div", { style: "display:flex;gap:8px" }, nome, add)); })());
           },
           validar: () => (!n.itens.length ? "Adicione pelo menos um produto." : n.itens.some((i) => !(i.quantidade > 0)) ? "Toda quantidade precisa ser maior que zero." : null) },
         { titulo: "Conferiu? Então envie", icone: "check", ajuda: "Ao confirmar, a nota entra na fila e os conferentes são avisados.",
-          tela: () => el("div", { class: "resumo" }, NE.linhaResumo("Nota", n.numero), NE.linhaResumo("Cliente", n.cliente || "—"), NE.linhaResumo("Vendedor", n.vendedor || "—"), n.itens.map((i) => NE.linhaResumo(i.descricao, NE.num(i.quantidade)))) },
+          tela: () => el("div", {}, avisoFalta(D.faltaEstoque(n.itens, cv.disp)), el("div", { class: "resumo" }, NE.linhaResumo("Nota", n.numero), NE.linhaResumo("Cliente", n.cliente || "—"), NE.linhaResumo("Vendedor", n.vendedor || "—"), n.itens.map((i) => NE.linhaResumo(i.descricao, NE.num(i.quantidade))))) },
       ],
       async aoConcluir() {
-        await NE.dados.criarNota({ numero: n.numero, cliente: n.cliente, vendedor: n.vendedor, itens: n.itens.map((i) => ({ produto_id: i.produto_id || null, descricao: i.descricao, quantidade: i.quantidade })) });
+        await NE.dados.criarNota({ numero: n.numero, cliente: n.cliente, vendedor: n.vendedor, vendedor_id: n.vendedor_id || null, itens: n.itens.map((i) => ({ produto_id: i.produto_id || null, descricao: i.descricao, quantidade: i.quantidade })) });
         NE.telaFim(raiz, { titulo: "Nota na fila", texto: `A nota ${n.numero} já aparece para os conferentes. Quando o caminhão for carregado, eles conferem e você é avisado se algo não bater.`,
           botoes: [{ rotulo: "Lançar outra nota", icone: "mais", acao: () => G.nota(raiz, app) }, { rotulo: "Ver a fila", acao: () => app.ir("notas", {}, { substituir: true }) }] });
       },
@@ -68,6 +80,7 @@
 
   // ───────────────────────── 2. Importar XML ─────────────────────────
   G.xml = async (raiz, app) => {
+    const cv = await contextoVenda(app); const vend = { vendedor: cv.ehVendedor ? app.perfil.nome : "", vendedor_id: cv.ehVendedor ? app.perfil.id : null };
     let achadas = [], criar = true; const entrada = el("input", { type: "file", accept: ".xml,text/xml,application/xml", multiple: true, "aria-label": "Arquivos XML" });
     NE.assistente({
       raiz, rotuloFinal: "Colocar na fila", aoCancelar: () => app.voltar(),
@@ -82,14 +95,15 @@
         { titulo: "Confira o que foi lido", icone: "conferir", ajuda: "O sistema ligou cada item ao seu produto cadastrado.",
           tela: (r) => { const boas = achadas.filter((x) => x.ok); const sem = new Set(boas.flatMap((x) => x.itens.filter((i) => !i.produto_id).map((i) => i.descricao)));
             return el("div", {}, boas.map((x) => el("div", { class: "linha-cartao ok", role: "group" }, el("strong", {}, `Nota ${x.numero}${x.cliente ? " · " + x.cliente : ""}`), el("span", { class: "meta" }, x.itens.map((i) => `${i.descricao} ×${NE.num(i.quantidade)}${i.produto_id ? "" : " ⚠"}`).join(" · ")))),
-              sem.size ? el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, `${D.plural(sem.size, "produto ainda não está", "produtos ainda não estão")} cadastrado: ${D.lista([...sem], 3)}.`), NE.chave(criar, "Cadastrar sozinho", (v) => { criar = v; })) : null); } },
-        { titulo: "Pronto para enviar", icone: "check", ajuda: "As notas entram na fila de conferência.", tela: () => el("div", { class: "resumo" }, NE.linhaResumo("Notas", String(achadas.filter((x) => x.ok).length))) },
+              sem.size ? el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, `${D.plural(sem.size, "produto ainda não está", "produtos ainda não estão")} cadastrado: ${D.lista([...sem], 3)}.`), NE.chave(criar, "Cadastrar sozinho", (v) => { criar = v; })) : null,
+              avisoFalta(D.faltaEstoque(boas.flatMap((x) => x.itens), cv.disp))); } },
+        { titulo: "Pronto para enviar", icone: "check", ajuda: "As notas entram na fila de conferência.", tela: (r) => el("div", {}, el("div", { class: "resumo" }, NE.linhaResumo("Notas", String(achadas.filter((x) => x.ok).length)), cv.ehVendedor ? NE.linhaResumo("Vendedor", `${app.perfil.nome} (você)`) : null), campoVendedor(cv, app, vend, r)) },
       ],
       async aoConcluir() {
         const boas = achadas.filter((x) => x.ok); let produtos = await NE.dados.produtos(true);
         const sem = new Set(boas.flatMap((x) => x.itens.filter((i) => !i.produto_id).map((i) => i.descricao)));
         if (criar && sem.size) { for (const nome of sem) { try { await NE.dados.criarProduto({ nome: titulo(nome), unidade: "un", minimo: 0 }); } catch { /* já existe */ } } produtos = await NE.dados.produtos(true); }
-        const r = await NE.dados.importarNotas(boas.map((x) => ({ numero: x.numero, cliente: x.cliente, chave_nfe: x.chave_nfe, itens: ligar(x.itens, produtos).map((i) => ({ produto_id: i.produto_id, descricao: i.descricao, codigo: i.codigo, quantidade: i.quantidade })) })));
+        const r = await NE.dados.importarNotas(boas.map((x) => ({ numero: x.numero, cliente: x.cliente, vendedor: vend.vendedor, vendedor_id: vend.vendedor_id || null, chave_nfe: x.chave_nfe, itens: ligar(x.itens, produtos).map((i) => ({ produto_id: i.produto_id, descricao: i.descricao, codigo: i.codigo, quantidade: i.quantidade })) })));
         const ok = r.filter((x) => x.ok).length, falhas = r.filter((x) => !x.ok);
         NE.telaFim(raiz, { tipo: falhas.length ? "alerta" : "ok", titulo: `${D.plural(ok, "nota entrou", "notas entraram")} na fila`, texto: falhas.length ? `${falhas.length} não entrou: ${falhas[0].erro}` : "Os conferentes já podem conferir.",
           botoes: [{ rotulo: "Ver a fila", acao: () => app.ir("notas", {}, { substituir: true }) }, { rotulo: "Importar mais", icone: "mais", acao: () => G.xml(raiz, app) }] });

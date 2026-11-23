@@ -12,7 +12,7 @@ Publicada no projeto Supabase `kfazxjertfzoeewfsime`. Roda só no servidor: a ch
 Sem a chave, nenhuma IA aparece para ninguém. Para desligar de vez: apague o segredo, ou `premiumIA: false` em `assets/js/config.js`.
 
 ## O que faz
-- `perguntar` — só administração (função diretoria, administrativo ou expedição, com acesso de administrador). O Claude **consulta** os dados reais e **prepara ações** por comando. Nada é gravado nesta etapa.
+- `perguntar` — administração (função diretoria, administrativo ou expedição, com acesso de administrador) e vendedor, que usa um **escopo de vendas** (veja abaixo). O Claude **consulta** os dados reais e **prepara ações** por comando. Nada é gravado nesta etapa.
 - `executar` — roda UMA ação preparada, só com o token assinado do botão **Confirmar**.
 - `ler_nota` — quem confere carga (e a administração): foto da nota → número, cliente e itens.
 - `status` — diz se a IA está ligada e para quem (`ativo`, `leitura`, `acoes`).
@@ -22,6 +22,9 @@ Ferramentas de **ação** (sempre viram um cartão Confirmar/Cancelar):
 cadastrar / editar / apagar funcionários · redefinir senhas · cadastrar / editar / apagar produtos · cadastrar / editar / apagar caminhões (com fotos) ·
 lançar notas (digitadas, de foto ou de XML) · cancelar notas · **conferir carga** (fotos da carga e da placa obrigatórias) ·
 lançar entrada/perda · pedir contagem · registrar contagem · decidir contagem (aplicar, descartar, recontar) · marcar avisos · escolher avisos que recebe · mudar ajustes.
+
+## Escopo de vendas (vendedor)
+O vendedor recebe só 11 ferramentas (`estoque`, `produtos`, `notas`, `conferencias`, `avisos`, `abrir_tela`, `link_rastreio`, `lancar_notas`, `cancelar_notas`, `marcar_avisos`, `preferencias_avisos`) e um prompt próprio. Nas consultas, `notas`, `conferencias` e `link_rastreio` só devolvem o que é dele; `estoque` devolve só o disponível para vender. Lançar nota grava sempre em nome dele (o banco também força isso) e cancelar só vale para nota dele. A trava vale no servidor em três pontos: lista de ferramentas enviada à IA, preparo da proposta e execução do token (um token de outra função é recusado com 403).
 
 ## Como a IA nunca escreve sozinha
 1. As ferramentas de ação só **propõem**: o servidor valida tudo, acha os registros pelo nome e monta o texto do cartão (o texto é do servidor, não da IA).
@@ -42,7 +45,7 @@ Segredo `ANTHROPIC_MODEL` troca o modelo (padrão `claude-sonnet-5-5`).
 - `ferramentas-base.js` — erros, utilitários, "achadores" (nome → registro).
 - `ferramentas-leitura.js` / `ferramentas-escrita.js` — o que a IA consulta e o que ela pode propor.
 - `dominio.js` — cópia das regras do app (`assets/js/dominio.js`), para publicar pela CLI.
-- Testes: `node --test tests/assistente.test.js` (34 testes, sem rede) e `tests/dominio.test.js`.
+- Testes: `node --test tests/assistente.test.js` (41 testes, sem rede) e `tests/dominio.test.js`.
 
 ## Como publicar
 Pela CLI: `supabase functions deploy assistente` (os arquivos acima já estão na pasta).

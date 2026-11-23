@@ -25,8 +25,11 @@
     const c = await ctx.dominio(); const per = D().periodo(e.periodo || "hoje", c.agora); return D().rankingProdutos(c.conferencias, per.de, per.ate).slice(0, 15);
   });
   ler("estoque", "Saldos de estoque, mínimo, situação e cobertura em dias. Opcional: filtrar por nome de produto.", esq({ produto: str("Parte do nome do produto") }), async (ctx, e) => {
-    const c = await ctx.dominio(); const f = D().normalizar(e.produto ?? "");
-    return c.saldos.filter((s) => s.ativo !== false && (!f || D().normalizar(s.nome).includes(f))).map((s) => ({ produto: s.nome, saldo: s.saldo, minimo: s.minimo, unidade: s.unidade, situacao: D().situacaoEstoque(s, c.config, c.agora).estado, cobertura_dias: D().coberturaDias(s.produto_id, c.movimentos, s.saldo, c.agora), ultima_contagem: s.ultima_contagem }));
+    const c = await ctx.dominio(); const f = D().normalizar(e.produto ?? ""); const disp = D().disponivelPorProduto(c.saldos, c.notas);
+    const lista = c.saldos.filter((s) => s.ativo !== false && (!f || D().normalizar(s.nome).includes(f)));
+    const dd = (s) => disp.get(s.produto_id) || { saldo: Number(s.saldo), reservado: 0, disponivel: Number(s.saldo) };
+    if (dom.escopoDe(ctx.eu) === "vendas") return lista.map((s) => ({ produto: s.nome, unidade: s.unidade, no_patio: Math.max(0, dd(s).saldo), vendido_esperando_carregar: dd(s).reservado, disponivel_para_vender: Math.max(0, dd(s).disponivel), situacao: dd(s).disponivel <= 0 ? "sem estoque" : Number(s.minimo) > 0 && dd(s).disponivel <= Number(s.minimo) ? "pouco" : "tem" }));
+    return lista.map((s) => ({ produto: s.nome, saldo: s.saldo, reservado_em_notas_na_fila: dd(s).reservado, disponivel_para_vender: dd(s).disponivel, minimo: s.minimo, unidade: s.unidade, situacao: D().situacaoEstoque(s, c.config, c.agora).estado, cobertura_dias: D().coberturaDias(s.produto_id, c.movimentos, s.saldo, c.agora), ultima_contagem: s.ultima_contagem }));
   });
   ler("contagem_sugerida", "Produtos que mais valem contar hoje e por quê.", esq(), async (ctx) => {
     const c = await ctx.dominio(); return D().sugerirContagem({ saldos: c.saldos, movimentos: c.movimentos, conferencias: c.conferencias, config: c.config, agora: c.agora }, 6).map((s) => ({ produto: s.nome, motivos: s.motivos }));
@@ -61,13 +64,15 @@
       const st = e.status || "fila"; const b = U.norm(e.busca || ""); const agora = ctx.agora;
       const produtos = await ctx.produtos(true); const nomeProd = new Map(produtos.map((p) => [p.id, p.nome]));
       const rows = await ctx.notas({ status: st === "todas" ? null : st === "fila" ? ["pendente", "em_conferencia"] : [st], ordemAsc: st === "fila", limite: 300 });
-      const lista = rows.filter((n) => !b || U.norm(`${n.numero} ${n.cliente || ""}`).includes(b)).slice(0, lim(e.limite, 30, 100));
+      const meus = dom.escopoDe(ctx.eu) === "vendas" ? rows.filter((n) => D().ehMinhaNota(n, ctx.eu)) : rows;   // vendedor só enxerga as notas dele
+      const lista = meus.filter((n) => !b || U.norm(`${n.numero} ${n.cliente || ""}`).includes(b)).slice(0, lim(e.limite, 30, 100));
       return { total: lista.length, notas: lista.map((n) => ({ id: n.id, numero: n.numero, cliente: n.cliente || null, vendedor: n.vendedor || null, situacao: n.status, criada_em: n.criado_em, espera: n.status === "pendente" || n.status === "em_conferencia" ? D().duracao((agora - D().aMs(n.criado_em)) / D().MIN) : null, itens: (n.itens || []).map((i) => ({ produto: nomeProd.get(i.produto_id) || i.descricao, quantidade: i.quantidade, cadastrado: !!i.produto_id })) })) };
     });
   ler("conferencias", "Conferências de carga já feitas: nota, cliente, placa, quem conferiu, se bateu, diferenças e motivo.",
     esq({ periodo: periodoProp, busca: str("Parte do número da nota, cliente, placa ou conferente"), so_diferencas: { type: "boolean", description: "Só as que tiveram diferença" }, limite: { type: "number", description: "Quantas listar (padrão 20, máximo 60)" } }), async (ctx, e) => {
       const c = await ctx.dominio(); const per = D().periodo(e.periodo || "7d", c.agora); const b = U.norm(e.busca || "");
-      const lista = c.conferencias.filter((x) => { const t = D().aMs(x.criado_em); return t >= per.de && t < per.ate && (!e.so_diferencas || x.status === "divergencia") && (!b || U.norm(`${x.numero_nota} ${x.cliente || ""} ${x.placa} ${(x.conferente || {}).nome || ""}`).includes(b)); }).slice(0, lim(e.limite, 20, 60));
+      const minhas = dom.escopoDe(ctx.eu) === "vendas" ? await ctx.minhasNotasIds() : null;   // vendedor só enxerga as cargas das notas dele
+      const lista = c.conferencias.filter((x) => { const t = D().aMs(x.criado_em); return t >= per.de && t < per.ate && (!minhas || minhas.has(x.nota_id)) && (!e.so_diferencas || x.status === "divergencia") && (!b || U.norm(`${x.numero_nota} ${x.cliente || ""} ${x.placa} ${(x.conferente || {}).nome || ""}`).includes(b)); }).slice(0, lim(e.limite, 20, 60));
       return { periodo: per.rotulo, total: lista.length, conferencias: lista.map((x) => ({ nota: x.numero_nota, cliente: x.cliente || null, placa: x.placa, conferente: (x.conferente || {}).nome || null, quando: x.criado_em, resultado: x.status === "ok" ? "bateu" : "teve diferença", motivo: x.motivo_divergencia || null, diferencas: (x.itens || []).filter((i) => Number(i.qtd_nota) !== Number(i.qtd_carregada)).map((i) => ({ produto: i.descricao, na_nota: i.qtd_nota, carregado: i.qtd_carregada })) })) };
     });
 
@@ -105,7 +110,8 @@
     }, "nav");
   ler("link_rastreio", "Prepara o link de rastreio que o cliente recebe (mostra a carga conferida). Só existe depois que a nota foi conferida.", esq({ nota: str("Número da nota") }, ["nota"]), async (ctx, e) => {
     const numero = U.txt(e.nota).replace(/^nota\s*/i, ""); const r = achar.nota(await ctx.notasPorNumero([numero]), numero); if (r.erro) return { erro: r.erro };
-    const n = r.item; if (n.status !== "conferida") return { erro: `A nota ${n.numero} ainda não foi conferida (situação: ${n.status}). O link só mostra a carga depois da conferência.` };
+    const n = r.item; if (dom.escopoDe(ctx.eu) === "vendas" && !D().ehMinhaNota(n, ctx.eu)) return { erro: `A nota ${n.numero} não é sua. Você só consegue o rastreio das suas notas.` };
+    if (n.status !== "conferida") return { erro: `A nota ${n.numero} ainda não foi conferida (situação: ${n.status}). O link só mostra a carga depois da conferência.` };
     ctx.acoes.push({ rotulo: `Link de rastreio da nota ${n.numero}`, rastreio: n.token_publico, numero: n.numero, cliente: n.cliente || "" }); return { ok: true, nota: n.numero };
   }, "nav");
 

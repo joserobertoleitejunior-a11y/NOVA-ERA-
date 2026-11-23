@@ -107,14 +107,15 @@ test("quem pode usar o assistente (mesma regra do app)", async () => {
   assert.equal((await quem("administrativo", "admin")).ativo, true);
   assert.equal((await quem("diretoria", "admin")).ativo, true);
   assert.equal((await quem("expedicao", "admin")).ativo, true);
-  assert.equal((await quem("vendedor", "admin")).ativo, false, "vendedor não vê o assistente");
+  assert.equal((await quem("vendedor", "admin")).ativo, true, "vendedor usa o assistente (só de vendas)"); assert.equal((await quem("vendedor", "admin")).escopo, "vendas"); assert.equal((await quem("expedicao", "admin")).escopo, "total");
+  assert.equal((await quem("vendedor", "funcionario")).ativo, false, "vendedor sem acesso de administração não entra");
   assert.equal((await quem("conferente", "funcionario")).ativo, false);
   assert.equal((await quem("diretoria", "funcionario")).ativo, false, "sem papel de administração não entra");
   const s = await quem("administrativo", "admin"); assert.equal(s.acoes, true); assert.equal(s.modo, "claude");
   const sem = (await N.processar({ corpo: { acao: "status" }, repo: criarRepo(), claude: null, env: { ...ENV, ligado: false } })).corpo; assert.equal(sem.ativo, false); assert.equal(sem.leitura, false);
 });
 test("perguntar por quem não pode: 403 e a IA nem é chamada", async () => {
-  const repo = criarRepo({ eu: { ...EU, funcao: "vendedor" }, dados: { ...semente(), perfis: [{ ...EU, funcao: "vendedor" }] } });
+  const repo = criarRepo({ eu: { ...EU, funcao: "conferente", papel: "funcionario" }, dados: { ...semente(), perfis: [{ ...EU, funcao: "conferente", papel: "funcionario" }] } });
   const claude = claudeFalso([dizer("oi")]);
   await falha(() => N.processar({ corpo: { acao: "perguntar", pergunta: "oi" }, repo, claude, env: ENV }), 403);
   assert.equal(claude.pedidos.length, 0);
@@ -369,10 +370,72 @@ test("handler HTTP: CORS, método, JSON ruim, login ausente, status e erro de a�
   const pedir = (tratar, metodo, corpo, headers = {}) => tratar(new Request("http://f", { method: metodo, headers: { Authorization: "Bearer t", ...headers }, body: metodo === "POST" ? corpo : undefined }));
   const tratar = N.montar({ createClient: criar(true), env, fetch: async () => { throw new Error("sem rede"); } });
   assert.equal((await pedir(tratar, "OPTIONS")).status, 200); assert.equal((await pedir(tratar, "GET")).status, 405); assert.equal((await pedir(tratar, "POST", "{ruim")).status, 400);
-  const st = await pedir(tratar, "POST", JSON.stringify({ acao: "status" })); assert.deepEqual(await st.json(), { ativo: true, leitura: true, modo: "claude", acoes: true });
+  const st = await pedir(tratar, "POST", JSON.stringify({ acao: "status" })); assert.deepEqual(await st.json(), { ativo: true, leitura: true, modo: "claude", acoes: true, escopo: "total" });
   const sem = await N.montar({ createClient: criar(false), env, fetch: async () => { throw new Error("x"); } })(new Request("http://f", { method: "POST", body: JSON.stringify({ acao: "status" }) })); assert.equal(sem.status, 401);
   const inv = await pedir(tratar, "POST", JSON.stringify({ acao: "voar" })); assert.equal(inv.status, 400); assert.equal((await inv.json()).erro, "Ação inválida.");
   const ruim = await pedir(tratar, "POST", JSON.stringify({ acao: "executar", token: "lixo" })); assert.equal(ruim.status, 400);
   const semIA = await pedir(N.montar({ createClient: criar(true), env: new Map([["SUPABASE_URL", "u"], ["SUPABASE_ANON_KEY", "a"]]), fetch: async () => { throw new Error("x"); } }), "POST", JSON.stringify({ acao: "perguntar", pergunta: "oi" })); assert.equal(semIA.status, 503);
   const caiu = await pedir(tratar, "POST", JSON.stringify({ acao: "perguntar", pergunta: "oi" })); assert.equal(caiu.status, 500); assert.equal((await caiu.json()).erro, "Algo deu errado. Tente de novo.");
+});
+
+// ───────────────────────── vendedor: assistente só de vendas ─────────────────────────
+const VEND = { id: "u-wes", nome: "Wesley Costa", usuario: "wesley", funcao: "vendedor", papel: "admin", ativo: true, alertas: null };
+function dadosVendas() {
+  const d = semente(); d.perfis.push(VEND);
+  d.notas[0] = { ...d.notas[0], vendedor: "Wesley Costa", vendedor_id: "u-wes" };                 // 48172: do Wesley, na fila
+  d.notas[1] = { ...d.notas[1], vendedor: "Wesley", vendedor_id: null };                          // 48100: do Wesley (nota antiga, só o nome), conferida
+  d.notas.push({ id: "n9", numero: "50000", cliente: "Outro Cliente", vendedor: "Fábio Reis", vendedor_id: "u-fab", status: "pendente", chave_nfe: null, token_publico: "tok-9", criado_em: new Date(AGORA - 3600e3).toISOString(), itens: [{ id: "i9", produto_id: "p2", descricao: "Meio-fio", quantidade: 40 }] });
+  d.conferencias.push({ id: "c9", nota_id: "n9", conferente_id: "u-edu", numero_nota: "50000", placa: "XYZ1A23", status: "ok", criado_em: new Date(AGORA - 600e3).toISOString(), conferente: { nome: "Eduardo" }, itens: [] });
+  d.conferencias[0].nota_id = "n2";
+  return d;
+}
+const repoVend = () => criarRepo({ eu: VEND, dados: dadosVendas() });
+test("vendedor: a IA só recebe as ferramentas de venda; as de administração nem aparecem", async () => {
+  const r = await perguntar(repoVend(), [dizer("ok")]); const nomes = r.claude.pedidos[0].tools.map((t) => t.name);
+  assert.deepEqual(nomes.sort(), ["abrir_tela", "avisos", "cancelar_notas", "conferencias", "estoque", "lancar_notas", "link_rastreio", "marcar_avisos", "notas", "preferencias_avisos", "produtos"]);
+  assert.match(r.claude.pedidos[0].system[0].text, /assistente de vendas/); assert.match(r.claude.pedidos[0].system[0].text, /Wesley Costa, vendedor/); assert.doesNotMatch(r.claude.pedidos[0].system[0].text, /cadastrar_funcionarios/);
+  const adm = await perguntar(criarRepo(), [dizer("ok")]); assert.equal(adm.claude.pedidos[0].tools.length, 37); assert.doesNotMatch(adm.claude.pedidos[0].system[0].text, /assistente de vendas/);
+});
+test("vendedor: se a IA tentar uma ferramenta de administração, a trava recusa (e nada é preparado)", async () => {
+  const repo = repoVend(); const r = await perguntar(repo, [usar("cadastrar_funcionarios", { pessoas: [{ nome: "X Y", funcao: "ajudante" }] }), dizer("Isso é com a administração.")]);
+  assert.equal(r.propostas.length, 0); assert.match(JSON.stringify(r.claude.pedidos[1].messages), /não faz parte da função/); assert.equal(repo.escritas.length, 0);
+  const t = await N.assinar({ v: 1, u: "u-wes", f: "apagar_funcionarios", a: { pessoas: [{ id: "u-nat", nome: "Natalia" }] }, n: crypto.randomUUID(), e: AGORA + 60000 }, SEGREDO);
+  await falha(() => executar(repo, t), 403, /função/); assert.equal(repo.escritas.length, 0, "mesmo com token válido, ferramenta de outra função não roda");
+});
+test("vendedor: só enxerga as notas e as cargas dele; estoque mostra o disponível", async () => {
+  const r = await perguntar(repoVend(), [usarVarias([["notas", { status: "todas" }], ["conferencias", { periodo: "7d" }], ["estoque", {}], ["link_rastreio", { nota: "50000" }], ["link_rastreio", { nota: "48100" }]]), dizer("ok")]);
+  const res = r.claude.pedidos[1].messages.at(-1).content; const j = (x) => JSON.parse(x.content.replace(/^<dados>|<\/dados>$/g, ""));
+  assert.deepEqual(j(res[0]).notas.map((n) => n.numero).sort(), ["48100", "48172"], "50000 é do Fábio e não aparece");
+  assert.deepEqual(j(res[1]).conferencias.map((c) => c.nota), ["48100"], "só a carga da nota dele; a 50000 (do Fábio) não aparece");
+  const est = j(res[2]); const meio = est.find((x) => x.produto === "Meio-fio"); assert.equal(meio.no_patio, 340); assert.equal(meio.vendido_esperando_carregar, 190); assert.equal(meio.disponivel_para_vender, 150); assert.equal(meio.situacao, "tem"); assert.ok(!("minimo" in meio) && !("cobertura_dias" in meio), "vendedor não recebe dados internos");
+  assert.match(res[3].content, /não é sua/); assert.ok(res[3].is_error === undefined); assert.deepEqual(r.acoes.map((a) => a.rastreio), ["tok-2"]);
+  const todas = await perguntar(criarRepo(), [usar("estoque", {}), dizer("ok")]); const adm = JSON.parse(todas.claude.pedidos[1].messages.at(-1).content[0].content.replace(/^<dados>|<\/dados>$/g, "")).find((x) => x.produto === "Meio-fio"); assert.equal(adm.disponivel_para_vender, 190); assert.equal(adm.reservado_em_notas_na_fila, 150); assert.ok("minimo" in adm);
+});
+test("vendedor: lança nota sempre em nome dele, com aviso de estoque; só cancela nota dele", async () => {
+  const repo = repoVend(); const r = await perguntar(repo, [usar("lancar_notas", { notas: [{ numero: "60001", cliente: "Cli Z", vendedor: "Fábio", itens: [{ produto: "Meio-fio", quantidade: 400 }] }] }), dizer("ok")]); const p = r.propostas[0];
+  assert.match(textoDoCartao(p), /Nota 60001 · Cli Z · vendedor Wesley Costa/, "o nome que ele tentou pôr (Fábio) é ignorado"); assert.ok(p.avisos.some((a) => /Estoque insuficiente para Meio-fio \(pedido 400, disponível 150\)/.test(a)));
+  await executar(repo, p.token); const n = repo.escritas.find((x) => x.nome === "criar_nota").args.p; assert.equal(n.vendedor, "Wesley Costa"); assert.equal(n.vendedor_id, "u-wes");
+  const c = await perguntar(repoVend(), [usar("cancelar_notas", { notas: ["50000", "48172"] }), dizer("ok")]); assert.match(textoDoCartao(c.propostas[0]), /48172/); assert.doesNotMatch(textoDoCartao(c.propostas[0]), /50000/); assert.ok(c.propostas[0].avisos.some((a) => /50000: só dá para cancelar notas suas/.test(a)));
+});
+test("vendedor: preferências de aviso só dos avisos de vendedor; administração não vê os avisos 'minha_*'", async () => {
+  let r = await perguntar(repoVend(), [usar("preferencias_avisos", { remover: ["minha_nota_parada"] }), dizer("ok")]); assert.match(textoDoCartao(r.propostas[0]), /Passa a receber: Minha carga saiu e Minha carga saiu com diferença/);
+  r = await perguntar(repoVend(), [usar("preferencias_avisos", { adicionar: ["estoque_negativo"] }), dizer("ok")]); assert.equal(r.propostas.length, 0); assert.match(JSON.stringify(r.claude.pedidos[1].messages), /não existe para esta pessoa/);
+  r = await perguntar(criarRepo(), [usar("preferencias_avisos", { adicionar: ["minha_carga_saiu"] }), dizer("ok")]); assert.equal(r.propostas.length, 0);
+});
+test("administração: lançar nota com vendedor cadastrado liga a nota a ele; sem cadastro avisa", async () => {
+  const dados = dadosVendas(); const repo = criarRepo({ dados });
+  const r = await perguntar(repo, [usar("lancar_notas", { notas: [{ numero: "61000", vendedor: "wesley", itens: [{ produto: "Boca de lobo", quantidade: 2 }] }, { numero: "61001", vendedor: "Beltrano", itens: [{ produto: "Boca de lobo", quantidade: 1 }] }] }), dizer("ok")]);
+  assert.match(textoDoCartao(r.propostas[0]), /Nota 61000 · vendedor Wesley Costa/); assert.ok(r.propostas[0].avisos.some((a) => /Vendedor sem cadastro \(Beltrano\)/.test(a)));
+  await executar(repo, r.propostas[0].token); const [a, b] = repo.escritas.filter((x) => x.nome === "criar_nota").map((x) => x.args.p); assert.equal(a.vendedor_id, "u-wes"); assert.equal(b.vendedor_id, null); assert.equal(b.vendedor, "Beltrano");
+});
+test("domínio do vendedor: dono da nota, disponível, falta de estoque e aviso de carga", () => {
+  const D = globalThis.NEDominio; const perfis = [{ id: "u1", nome: "Wesley Costa", funcao: "vendedor", ativo: true }, { id: "u2", nome: "Wesley Lima", funcao: "vendedor", ativo: true }, { id: "u3", nome: "Fábio Reis", funcao: "vendedor", ativo: true }];
+  assert.equal(D.perfilDoVendedor("Fábio", perfis).id, "u3"); assert.equal(D.perfilDoVendedor("fabio reis", perfis).id, "u3"); assert.equal(D.perfilDoVendedor("Wesley", perfis), null, "dois Wesley: não adivinha"); assert.equal(D.perfilDoVendedor("Wesley Lima", perfis).id, "u2");
+  assert.equal(D.ehMinhaNota({ vendedor_id: "u1" }, perfis[0]), true); assert.equal(D.ehMinhaNota({ vendedor_id: "u2", vendedor: "Wesley Costa" }, perfis[0]), false, "o id manda mais que o nome"); assert.equal(D.ehMinhaNota({ vendedor: "Fábio" }, perfis[2]), true); assert.equal(D.ehMinhaNota({ vendedor: "" }, perfis[2]), false);
+  const disp = D.disponivelPorProduto([{ produto_id: "p", saldo: 100 }], [{ status: "pendente", itens: [{ produto_id: "p", quantidade: 30 }] }, { status: "conferida", itens: [{ produto_id: "p", quantidade: 99 }] }]);
+  assert.deepEqual(disp.get("p"), { saldo: 100, reservado: 30, disponivel: 70 }); assert.deepEqual(D.faltaEstoque([{ produto_id: "p", descricao: "P", quantidade: 50 }, { produto_id: "p", descricao: "P", quantidade: 30 }, { produto_id: null, descricao: "solto", quantidade: 999 }], disp).map((f) => [f.nome, f.pedido, f.disponivel]), [["P", 80, 70]]);
+  const a = D.alertaMinhaCarga({ nota: { numero: "9", cliente: "Cli" }, conf: { id: "c", placa: "AAA1A11", criado_em: new Date(Date.UTC(2026, 10, 23, 15, 0)).toISOString() }, itens: [{ descricao: "X", qtd_nota: 10, qtd_carregada: 12 }] });
+  assert.equal(a.tipo, "minha_carga_diferenca"); assert.match(a.texto, /X \+2\. Caminhão AAA1A11, às 12:00/); assert.equal(D.alertaMinhaCarga({ nota: { numero: "9" }, conf: { id: "c", placa: "A", criado_em: AGORA }, itens: [{ descricao: "X", qtd_nota: 1, qtd_carregada: 1 }] }).tipo, "minha_carga_saiu");
+  assert.deepEqual(D.alertasPadrao("admin", "vendedor"), ["minha_carga_saiu", "minha_carga_diferenca", "minha_nota_parada"]); assert.ok(D.alertasPadrao("admin", "expedicao").includes("estoque_negativo")); assert.deepEqual(D.destinatarios("estoque_negativo", [...perfis, { id: "adm", funcao: "expedicao", papel: "admin", ativo: true }]), ["adm"]);
+  const v = D.alertasDaVarredura({ notas: [{ id: "n", numero: "7", cliente: "C", status: "pendente", criado_em: new Date(AGORA - 5 * 3600e3).toISOString(), vendedor: "Fábio" }], saldos: [], contagens: [], config: null, agora: AGORA, perfis }); assert.equal(v.find((x) => x.tipo === "minha_nota_parada").destinatario_id, "u3");
 });

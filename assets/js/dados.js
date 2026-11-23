@@ -154,7 +154,7 @@
       },
       marcarLidos: async (ids) => ok(await sb.rpc("marcar_alertas_lidos", { p_ids: ids === "todos" ? null : ids })),
       resolverAlerta: async (id) => ok(await sb.rpc("resolver_alerta", { p_id: id })),
-      async preferencias() { const p = await api.perfil(); return p.alertas || D.alertasPadrao(p.papel); },
+      async preferencias() { const p = await api.perfil(); return p.alertas || D.alertasPadrao(p.papel, p.funcao); },
       salvarPreferencias: async (lista) => ok(await sb.rpc("salvar_preferencias", { p_alertas: lista })),
       async config() { const { data } = await sb.from("configuracoes").select("valor").eq("id", 1).maybeSingle(); return D.comPadrao(data?.valor); },
       salvarConfig: async (c) => ok(await sb.from("configuracoes").upsert({ id: 1, valor: c })),

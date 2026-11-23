@@ -21,13 +21,19 @@
   };
 
   function item(a, app, recarregar) {
-    const destino = ROTA[a.ref_tipo];
+    const minha = String(a.tipo || "").startsWith("minha_");   // avisos do vendedor sobre as notas dele
+    const destino = minha ? (a.ref_tipo === "conferencia" ? ["cargas", {}] : ["notas", {}]) : ROTA[a.ref_tipo];
+    const rastreio = (a.tipo === "minha_carga_saiu" || a.tipo === "minha_carga_diferenca") && a.ref_tipo === "conferencia" && el("button", { type: "button", class: "link-acao verde", onclick: (ev) => NE.comCarregando(ev.currentTarget, async () => {
+      const t = D.aMs(a.criado_em); const c = (await NE.dados.conferencias({ de: t - D.DIA, ate: t + D.DIA })).find((x) => x.id === a.ref_id);
+      if (!c) return NE.aviso("Não achei essa carga. Abra Minhas cargas.", "alerta");
+      await NE.dados.marcarLidos([a.id]); app.atualizarSino(); NE.enviarRastreio(c);
+    }) }, ic("whatsapp"), "Mandar rastreio ao cliente");
     const abrir = destino && el("button", { type: "button", class: "link-acao", onclick: async () => { await NE.dados.marcarLidos([a.id]); app.atualizarSino(); app.ir(destino[0], destino[1]); } }, "Abrir", ic("seguir"));
-    const zap = a.severidade !== "info" && el("a", { class: "link-acao verde", target: "_blank", rel: "noopener", href: `https://wa.me/?text=${encodeURIComponent(`Nova Era · ${a.titulo}\n${a.texto}`)}` }, ic("whatsapp"), "Mandar no WhatsApp");
+    const zap = a.severidade !== "info" && !minha && el("a", { class: "link-acao verde", target: "_blank", rel: "noopener", href: `https://wa.me/?text=${encodeURIComponent(`Nova Era · ${a.titulo}\n${a.texto}`)}` }, ic("whatsapp"), "Mandar no WhatsApp");
     const feito = el("button", { type: "button", class: "link-acao", onclick: async () => { await NE.dados.resolverAlerta(a.id); app.atualizarSino(); recarregar(); } }, ic("check"), "Resolvido");
     return el("div", { class: `alerta-item ${a.severidade}${a.lido_em ? "" : " nao-lido"}`, role: "group" },
       el("strong", {}, a.titulo), el("p", {}, a.texto), el("span", { class: "quando" }, `${D.tempoRelativo(a.criado_em, Date.now())} · ${(D.TIPOS_ALERTA[a.tipo] || {}).rotulo || ""}`),
-      el("div", { class: "acoes-linha" }, abrir, zap, feito));
+      el("div", { class: "acoes-linha" }, rastreio, abrir, zap, feito));
   }
 
   function cartaoPush(app) {
@@ -48,7 +54,7 @@
 
   async function preferencias(app) {
     const atual = new Set(await NE.dados.preferencias()); const admin = app.admin;
-    const tipos = (admin ? D.ALERTAS_ADMIN.concat(D.ALERTAS_FUNCIONARIO) : D.ALERTAS_FUNCIONARIO).filter((t, i, v) => v.indexOf(t) === i);
+    const tipos = (app.perfil.funcao === "vendedor" ? D.ALERTAS_VENDEDOR : admin ? D.ALERTAS_ADMIN.concat(D.ALERTAS_FUNCIONARIO) : D.ALERTAS_FUNCIONARIO).filter((t, i, v) => v.indexOf(t) === i);
     const corpo = el("div", {}, el("p", { style: "margin-top:0" }, "Ligue só o que importa para você."), tipos.map((t) => el("div", { style: "margin-bottom:10px" }, NE.chave(atual.has(t), D.TIPOS_ALERTA[t].rotulo, async (v) => { v ? atual.add(t) : atual.delete(t); await NE.dados.salvarPreferencias([...atual]); }), el("div", { class: "suave", style: "font-size:.85rem;margin:2px 0 0 62px" }, D.TIPOS_ALERTA[t].dica))));
     NE.janelaSimples({ etiqueta: "Avisos", titulo: "O que quero receber", corpo });
   }

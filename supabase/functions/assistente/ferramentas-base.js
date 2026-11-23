@@ -65,7 +65,11 @@
   // Quem vê o painel da administração (mesma regra do cadastro guiado do app). "Administrativo" e "Diretoria" veem tudo.
   const papelDe = (f) => (["expedicao", "diretoria", "vendedor", "administrativo"].includes(f) ? "admin" : "funcionario");
   const FUNCOES_DO_ASSISTENTE = ["diretoria", "administrativo", "expedicao"];   // quem usa o chat (mesma regra de PAPEIS.ia no app)
-  const podeUsarAssistente = (eu) => !!eu && eu.papel === "admin" && eu.ativo !== false && (FUNCOES_DO_ASSISTENTE.includes(eu.funcao) || !FUNCOES.includes(eu.funcao));
+  const podeUsarAssistente = (eu) => !!eu && eu.papel === "admin" && eu.ativo !== false && (FUNCOES_DO_ASSISTENTE.includes(eu.funcao) || eu.funcao === "vendedor" || !FUNCOES.includes(eu.funcao));
+  // Escopo: o vendedor usa o assistente só para vender (as notas e cargas DELE, estoque para consulta, rastreio, avisos). Os demais usam tudo.
+  const escopoDe = (eu) => (eu && eu.funcao === "vendedor" ? "vendas" : "total");
+  const FERRAMENTAS_DE_VENDAS = new Set(["estoque", "produtos", "notas", "conferencias", "avisos", "abrir_tela", "link_rastreio", "lancar_notas", "cancelar_notas", "marcar_avisos", "preferencias_avisos"]);
+  const ferramentaPermitida = (def, eu) => escopoDe(eu) === "total" || FERRAMENTAS_DE_VENDAS.has(def.nome);
   const acesso = (papel) => (papel === "admin" ? "Painel da administração" : "Só a conferência");
 
   const PAL = ["carga", "nota", "silo", "patio", "caixa", "tubo", "laje", "munck", "brita", "areia"];
@@ -136,7 +140,7 @@
   raiz.NEFerramentas = {
     ErroAssistente, ErroProposta, catalogo, registrar, achar,
     util: { arr, txt, vazio, num, digitos, semAcento, norm, fmt, linha, plural, nomeBonito, tituloProduto, dataISO, dataBR, telefoneBR, placaDe, placaValida },
-    dom: { FUNCOES, ROTULO_FUNCAO, funcaoDe, papelDe, acesso, podeUsarAssistente, FUNCOES_DO_ASSISTENTE, senhaNova, usuarioDe, TIPOS_VEICULO, tipoVeiculoDe, TIPOS_FOTO_VEICULO, UNIDADES, unidadeDe, TELAS, FLUXOS },
+    dom: { FUNCOES, ROTULO_FUNCAO, funcaoDe, papelDe, acesso, podeUsarAssistente, escopoDe, ferramentaPermitida, FUNCOES_DO_ASSISTENTE, senhaNova, usuarioDe, TIPOS_VEICULO, tipoVeiculoDe, TIPOS_FOTO_VEICULO, UNIDADES, unidadeDe, TELAS, FLUXOS },
   };
   if (typeof module !== "undefined" && module.exports) module.exports = raiz.NEFerramentas;
 })(typeof window !== "undefined" ? window : globalThis);

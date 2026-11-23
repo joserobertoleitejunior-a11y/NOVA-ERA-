@@ -9,7 +9,7 @@
  },
  "inicio": {
   "titulo": "Tutorial · Vendedor",
-  "sub": "Notas, cargas e o cliente",
+  "sub": "Notas, estoque, cargas e o cliente",
   "botao": "Começar o tutorial"
  },
  "fim": {
@@ -47,8 +47,8 @@
   },
   {
    "id": "02-inicio",
-   "titulo": "Sua tela: notas e entregas",
-   "fala": "A sua tela mostra duas coisas: quantas notas suas estão esperando carregar, e quantas entregas já saíram hoje. Se alguma nota estiver parada demais, aparece aqui em cima, para você cobrar a expedição antes do cliente ligar.",
+   "titulo": "Sua tela: só o que é seu",
+   "fala": "A sua tela mostra só o que é seu: quantas notas suas esperam carregar, e quantas entregas suas já saíram hoje. Se uma nota sua está parada, ou uma carga saiu com diferença, aparece aqui em cima com um botão, para você agir antes de o cliente ligar.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "inicio"
@@ -60,14 +60,18 @@
     },
     {
      "destacar": ".numeros-simples",
-     "at": 0.886
+     "at": 0.474
+    },
+    {
+     "destacar": ".tiles",
+     "at": 0.897
     }
    ]
   },
   {
    "id": "03-nota",
    "titulo": "Lançar uma nota",
-   "fala": "Fechou a venda? Lance a nota. Escolha como ela chegou: se você tem o arquivo XML, o aplicativo lê tudo sozinho. Vamos digitar. Número e cliente. Escolha os produtos e a quantidade. Confira e coloque na fila. Pronto: os conferentes já foram avisados no celular.",
+   "fala": "Fechou a venda? Lance a nota. Escolha como ela chegou. Vamos digitar: número e cliente. Você já entra como vendedor da nota. Agora os produtos: cada um mostra quanto tem disponível, e se você pedir mais do que tem, o aplicativo avisa antes de você prometer ao cliente. Confira e coloque na fila.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "inicio"
@@ -83,49 +87,106 @@
       "Vou digitar",
       0
      ],
-     "at": 0.158
+     "at": 0.147
     },
     {
      "clicar": "#btn-seguir",
-     "at": 0.266
+     "at": 0.244
     },
     {
      "digitar": [
       "#nn-numero",
       "48500"
      ],
-     "at": 0.374
+     "at": 0.341
     },
     {
      "digitar": [
       "#nn-cliente",
       "Construtora Alfa"
      ],
-     "at": 0.482
+     "at": 0.439
     },
     {
      "clicar": "#btn-seguir",
-     "at": 0.59
+     "at": 0.536
     },
     {
-     "clicar": ".grade-escolha .escolha",
-     "at": 0.698
+     "destacar": ".lista-produtos",
+     "at": 0.633
+    },
+    {
+     "clicar": ".lp-linha",
+     "at": 0.73
     },
     {
      "clicar": "#btn-seguir",
-     "at": 0.806
+     "at": 0.827
     },
     {
      "clicar": "#btn-seguir",
-     "at": 0.914
+     "at": 0.924
     }
    ],
    "ritmo": 0.6
   },
   {
-   "id": "04-rastreio",
+   "id": "04-estoque",
+   "titulo": "Quanto tem para vender",
+   "fala": "Antes de prometer uma entrega, olhe o estoque. O número grande é o que está disponível de verdade: já desconta o que está vendido em notas esperando carregar. Dá para buscar um produto e mostrar só o que está pouco ou em falta. Aqui você só consulta.",
+   "pre": {
+    "perfil": "adminvendas",
+    "rota": "estoque"
+   },
+   "acoes": [
+    {
+     "destacar": ".busca-linha",
+     "at": 0.05
+    },
+    {
+     "destacar": ".linha-cartao",
+     "at": 0.462
+    },
+    {
+     "clicarTexto": [
+      ".chip",
+      "Pouco ou sem",
+      0
+     ],
+     "at": 0.874
+    }
+   ]
+  },
+  {
+   "id": "05-notas",
+   "titulo": "Minhas notas e a busca por cliente",
+   "fala": "Em notas ficam as suas: as que esperam carregar e as que já saíram. Quer ver as de todos os vendedores? Toque em de todos. E escreva o nome de um cliente: o aplicativo acha as notas dele em qualquer situação.",
+   "pre": {
+    "perfil": "adminvendas",
+    "rota": "notas"
+   },
+   "acoes": [
+    {
+     "destacar": ".chips",
+     "at": 0.05
+    },
+    {
+     "digitar": [
+      "#busca-notas",
+      "alfa"
+     ],
+     "at": 0.464
+    },
+    {
+     "destacar": ".filtro-ativo",
+     "at": 0.878
+    }
+   ]
+  },
+  {
+   "id": "06-rastreio",
    "titulo": "Mandar o rastreio ao cliente",
-   "fala": "Depois que a carga é conferida, ela aparece aqui em cargas. Toque nela e você vê os itens, as fotos e se teve diferença. E tem o botão de enviar ao cliente: ele recebe um link no WhatsApp com a hora da saída, o que foi carregado e a foto da carga. Menos ligação para você, mais confiança para ele.",
+   "fala": "Em minhas cargas ficam as entregas das suas notas. Toque numa carga e você vê os itens, as fotos e se teve diferença. E tem o botão de enviar ao cliente: ele recebe um link no WhatsApp com a hora da saída, o que foi carregado e a foto da carga. Menos ligação para você, mais confiança para ele.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "cargas"
@@ -137,26 +198,30 @@
     },
     {
      "clicar": ".conf",
-     "at": 0.482
+     "at": 0.481
     },
     {
      "destacar": ".janela",
-     "at": 0.914
+     "at": 0.913
     }
    ]
   },
   {
-   "id": "05-avisos",
+   "id": "07-avisos",
    "titulo": "Os seus avisos",
-   "fala": "E o sino avisa você quando uma carga sua é conferida, ou quando teve diferença. Assim você fala com o cliente antes de ele falar com você.",
+   "fala": "E o sino avisa quando uma carga sua sai, quando sai com diferença, ou quando uma nota sua fica parada. Do próprio aviso você manda o rastreio ao cliente com um toque, antes de ele ligar.",
    "pre": {
     "perfil": "adminvendas",
     "rota": "alertas"
    },
    "acoes": [
     {
-     "rolar": ".cartao-guia",
+     "destacar": ".alerta-item",
      "at": 0.05
+    },
+    {
+     "rolar": ".alerta-item",
+     "at": 0.909
     }
    ]
   }

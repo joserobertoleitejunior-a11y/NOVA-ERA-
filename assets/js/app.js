@@ -22,7 +22,7 @@
     diretoria:      { nav: ["inicio", "cargas", "estoque", "mais"],                  painel: "empresa", telas: TODAS_ADMIN,                                                              conferir: false, ia: true,  cadastra: true,  lancaNota: false, fluxos: ["ajustes", "pessoa", "veiculo", "produto", "novaPessoa", "novoVeiculo", "novoProduto"] },
     administrativo: { nav: ["inicio", "notas", "estoque", "mais"],                   painel: "escritorio", telas: TODAS_ADMIN,                                                           conferir: false, ia: true,  cadastra: true,  lancaNota: true,  fluxos: null },
     expedicao:      { nav: ["inicio", "notas", "estoque", "cargas", "mais"],         painel: "patio",   telas: TODAS_ADMIN.concat("conferir"),                                           conferir: true,  ia: true,  cadastra: true,  lancaNota: true,  fluxos: null },
-    vendedor:       { nav: ["inicio", "notas", "cargas", "mais"],                    painel: "vendas",  telas: ["inicio", "notas", "cargas", "mais", "alertas", "guia"],                 conferir: false, ia: false, cadastra: false, lancaNota: true,  fluxos: ["nota", "xml"] },
+    vendedor:       { nav: ["inicio", "notas", "estoque", "cargas", "mais"],         painel: "vendas",  telas: ["inicio", "notas", "estoque", "cargas", "mais", "alertas", "guia"],      conferir: false, ia: true,  cadastra: false, lancaNota: true,  fluxos: ["nota", "xml"] },
     conferente:     { nav: ["notas", "estoque", "alertas"],                          painel: "fila",    telas: ["notas", "estoque", "alertas", "conferir", "contar", "guia", "inicio"],  conferir: true,  ia: false, cadastra: false, lancaNota: false, fluxos: ["resolver"] },
     ajudante:       { nav: ["notas", "estoque", "alertas"],                          painel: "fila",    telas: ["notas", "estoque", "alertas", "conferir", "contar", "guia", "inicio"],  conferir: true,  ia: false, cadastra: false, lancaNota: false, fluxos: ["resolver"] },
     motorista:      { nav: ["inicio", "notas", "alertas"],                           painel: "viagem",  telas: ["inicio", "notas", "alertas"],                                           conferir: false, ia: false, cadastra: false, lancaNota: false, fluxos: [] },
@@ -165,7 +165,7 @@
   }
 
   // ───────────────────────── ajuda e tutorial ─────────────────────────
-  const tipoGuia = () => (ehAdmin() ? "painel" : "conferente");
+  const tipoGuia = () => (ehAdmin() ? (perm().painel === "vendas" ? "vendas" : "painel") : "conferente");
   function abrirDicas() { $("main").className = ""; NE.abrirGuia(tipoGuia(), raiz(), () => ir(inicial()), { novaConferencia: () => ir("conferir") }); }
   function abrirAjuda() {
     NE.fecharJanela?.();

@@ -142,6 +142,12 @@
       { icone: "conferir", titulo: "4. Conferir", texto: "Bateu? Confere. Não bateu? Diferente. Experimente:", treino: "conferir" },
       { icone: "camera", titulo: "5. Fotos e registrar", texto: "Foto da carga e da placa. Depois, Registrar. Experimente:", treino: "fotos" },
     ],
+    vendas: [
+      { icone: "nota", titulo: "Lançar uma nota", texto: "A venda fechou? Toque em Lançar uma nota: digite, use a foto ou importe o XML. A nota já entra no seu nome." },
+      { icone: "caixas", titulo: "Antes de prometer", texto: "Em Estoque, o número grande é o que está disponível: já desconta o que está vendido esperando carregar." },
+      { icone: "whatsapp", titulo: "Avise o cliente", texto: "Quando a carga sai, você recebe um aviso. Toque em Mandar rastreio ao cliente e o WhatsApp abre com a mensagem pronta." },
+      { icone: "lupa", titulo: "Procure por cliente", texto: "Em Notas e em Cargas, escreva o nome do cliente: o app procura nos últimos 31 dias." },
+    ],
     painel: [
       { icone: "lista", titulo: "Resumo do dia", texto: "Laranja é carga com diferença. Experimente o filtro:", treino: "resumo" },
       { icone: "olho", titulo: "Ver tudo", texto: "Toque numa conferência para ver itens, fotos e local.", treino: "abrir" },
@@ -153,7 +159,7 @@
   NE.abrirGuia = (tipo, raiz, aoFechar, acoes = {}) => {
     const passos = GUIAS[tipo].map((g) => ({
       titulo: g.titulo, icone: g.icone, ajuda: null,
-      tela: () => el("div", { class: "guia" }, el("p", { class: "guia-texto" }, g.texto), treino[g.treino](acoes)),
+      tela: () => el("div", { class: "guia" }, el("p", { class: "guia-texto" }, g.texto), g.treino ? treino[g.treino](acoes) : null),
     }));
     NE.memoria.gravar(`ne-guia-${tipo}`, true);
     NE.assistente({ raiz, passos, rotuloPasso: "Dica", rotuloFinal: "Entendi", aoConcluir: async () => aoFechar(), aoCancelar: aoFechar });

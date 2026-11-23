@@ -70,7 +70,7 @@
   // A nota que o vendedor lança cai na fila do conferente; o que o conferente confere vira número aqui.
 
   // O que mostrar em cada painel: título da situação, os dois números e os botões grandes.
-  function montarPainel(tipo, { r, ctx, app, cadastros }) {
+  function montarPainel(tipo, { r, ctx, app, cadastros, vendas }) {
     const ir = (rota, p) => () => app.ir(rota, p || {});
     const guia = (fluxo) => () => app.ir("guia", { fluxo });
     const N = (valor, um, varios) => ({ valor: String(valor), texto: valor === 1 ? um : varios });
@@ -113,13 +113,15 @@
         ["engrenagem", "Ajustes", "Horário e prazos", guia("ajustes")],
       ],
     };
-    if (tipo === "vendas") return {                        // vendedor: o que o cliente dele vê
+    if (tipo === "vendas") return {                        // vendedor: só o que é dele
       saudacao: "Suas notas e entregas",
-      numeros: [N(r.fila.total, "nota esperando carregar", "notas esperando carregar"), N(r.kpis.total, "entrega saiu hoje", "entregas saíram hoje")],
+      numeros: [N(vendas.fila, "nota sua esperando carregar", "notas suas esperando carregar"), N(vendas.saiuHoje, "entrega sua saiu hoje", "entregas suas saíram hoje")],
       pergunta: "O que você quer fazer?",
       tiles: [
         ["nota", "Lançar uma nota", "A venda fechou? Coloque na fila", guia("nota")],
-        ["caminhao", "Ver as cargas", "E mandar o rastreio ao cliente", ir("cargas")],
+        ["caixas", "Ver o estoque", "Quanto tem para vender agora", ir("estoque")],
+        ["lupa", "Minhas notas", "O que está na fila e o que já saiu", ir("notas")],
+        ["caminhao", "Minhas cargas", "E mandar o rastreio ao cliente", ir("cargas")],
       ],
     };
     if (tipo === "viagem") return {                        // motorista: posso sair?
@@ -145,7 +147,13 @@
 
   // Frase de situação: só fala de problema que ESTA pessoa pode resolver.
   // O motorista não resolve nada no app: para ele a frase diz se a carga está liberada.
-  function situacao(r, app) {
+  function situacao(r, app, vendas) {
+    if (app.perm.painel === "vendas" && vendas) {
+      if (vendas.diferencasHoje) return { cor: "amarelo", fixo: true, titulo: vendas.diferencasHoje === 1 ? "Uma entrega sua saiu com diferença" : `${vendas.diferencasHoje} entregas suas saíram com diferença`, texto: "Avise o cliente antes que ele ligue. Veja o que mudou em Minhas cargas.", botao: { rotulo: "Ver minhas cargas", rota: "cargas", params: {} } };
+      if (vendas.paradas) return { cor: "amarelo", fixo: true, titulo: vendas.paradas === 1 ? "Uma nota sua está parada na fila" : `${vendas.paradas} notas suas estão paradas na fila`, texto: "Se o cliente está esperando, fale com a expedição.", botao: { rotulo: "Ver minhas notas", rota: "notas", params: {} } };
+      if (vendas.fila) return { cor: "verde", fixo: true, titulo: "Suas notas estão na fila", texto: `${vendas.fila === 1 ? "Uma nota sua espera" : `${vendas.fila} notas suas esperam`} para carregar. Você é avisado quando a carga sair.` };
+      return { cor: "verde", fixo: true, titulo: "Tudo certo por aqui", texto: "Nenhuma nota sua esperando. Quando lançar uma, ela aparece aqui." };
+    }
     if (app.perm.painel === "viagem") {
       const esperando = r.fila.total;
       return { cor: esperando ? "amarelo" : "verde", fixo: true,
@@ -161,12 +169,23 @@
     return { topo, cor };
   }
 
+  // O que é do vendedor: notas dele esperando, paradas, e as cargas dele que saíram hoje (com ou sem diferença)
+  async function resumoVendas(ctx, app) {
+    const todas = await NE.dados.notas();
+    const minhas = todas.filter((n) => D.ehMinhaNota(n, app.perfil)); const ids = new Set(minhas.map((n) => n.id));
+    const fila = minhas.filter((n) => n.status === "pendente" || n.status === "em_conferencia");
+    const limite = D.comPadrao(ctx.config).limiteNotaParadaMin; const hoje = D.inicioDoDia(ctx.agora);
+    const hojeConf = ctx.conferencias.filter((c) => D.aMs(c.criado_em) >= hoje && ids.has(c.nota_id));
+    return { fila: fila.length, paradas: fila.filter((n) => (ctx.agora - D.aMs(n.criado_em)) / D.MIN >= limite).length, saiuHoje: hojeConf.length, diferencasHoje: hojeConf.filter((c) => c.status === "divergencia").length };
+  }
+
   NE.rotas.inicio = async (raiz, params, app) => {
     raiz.replaceChildren(el("div", { class: "esqueleto", style: "height:110px" }), el("div", { class: "esqueleto", style: "height:260px" }));
     let ctx; try { ctx = await NE.dados.contexto(); } catch (e) { raiz.replaceChildren(); return NE.aviso(NE.mensagemErro(e), "erro", raiz); }
     const r = D.resumoDoPeriodo(ctx, "hoje");
     const primeiro = (app.perfil.nome || "").split(" ")[0];
-    const s = situacao(r, app); const cor = s.cor; const topo = s.topo;
+    const vendas = app.perm.painel === "vendas" ? await resumoVendas(ctx, app).catch(() => ({ fila: 0, paradas: 0, saiuHoje: 0, diferencasHoje: 0 })) : null;
+    const s = situacao(r, app, vendas); const cor = s.cor; const topo = s.topo;
     const irPara = (a) => (a.rota === "contagem" ? app.ir("contar", {}) : app.ir(a.rota, a.params || {}));
 
     const status = el("section", { class: `status-simples ${cor}`, "aria-live": "polite" },
@@ -174,12 +193,13 @@
       el("div", { class: "status-texto" },
         el("strong", {}, s.fixo ? s.titulo : cor === "verde" ? "Tudo certo por aqui" : cor === "amarelo" ? "Tem algo para olhar" : "Precisa da sua atenção"),
         el("p", {}, s.fixo ? s.texto : topo ? topo.titulo : "Nenhum problema agora. Quando algo precisar de você, o app avisa."),
-        !s.fixo && topo && topo.acao && el("button", { type: "button", class: "btn btn-principal", id: "btn-resolver", onclick: () => irPara(topo.acao) }, "Resolver agora")));
+        !s.fixo && topo && topo.acao && el("button", { type: "button", class: "btn btn-principal", id: "btn-resolver", onclick: () => irPara(topo.acao) }, "Resolver agora"),
+        s.fixo && s.botao && el("button", { type: "button", class: "btn btn-principal", id: "btn-resolver", onclick: () => irPara(s.botao) }, s.botao.rotulo)));
 
     const cadastros = app.perm.cadastra
       ? { produtos: (await NE.dados.produtos(true)).length, veiculos: (await NE.dados.veiculos(true)).length, pessoas: (await NE.dados.funcionarios()).length }
       : { produtos: 0, veiculos: 0, pessoas: 0 };
-    const P = montarPainel(app.perm.painel, { r, ctx, app, cadastros });
+    const P = montarPainel(app.perm.painel, { r, ctx, app, cadastros, vendas });
 
     const numeros = el("div", { class: "numeros-simples" }, P.numeros.map((n) => el("div", {}, el("b", {}, n.valor), el("span", {}, n.texto))));
     const tiles = el("div", { class: "tiles" }, P.tiles.map(([icone, nome, sub, acao], i) =>
@@ -201,6 +221,6 @@
       el("h2", { class: "titulo-tiles" }, P.pergunta), tiles,
       el("div", { class: "links-fim" },
         (app.perm.telas || []).includes("resumo") && el("button", { type: "button", class: "link-acao", id: "btn-resumo", onclick: () => app.ir("resumo", {}) }, ic("grafico"), "Ver o resumo completo"),
-        el("button", { type: "button", class: "link-acao", onclick: () => NE.iniciarTour("painel", { verDicas: () => NE.abrirGuia("painel", raiz, () => app.ir("inicio"), { novaConferencia: () => app.ir("conferir") }) }) }, ic("ajuda"), "Como usar o app (1 minuto)")));
+        el("button", { type: "button", class: "link-acao", onclick: () => NE.iniciarTour(app.perm.painel === "vendas" ? "vendas" : "painel", { verDicas: () => NE.abrirGuia(app.perm.painel === "vendas" ? "vendas" : "painel", raiz, () => app.ir("inicio"), { novaConferencia: () => app.ir("conferir") }) }) }, ic("ajuda"), "Como usar o app (1 minuto)")));
   };
 })();

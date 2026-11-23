@@ -15,6 +15,13 @@
       { alvo: "#nav-inferior", titulo: "Menu", texto: "Fila, estoque (conte rápido) e avisos." },
       { alvo: "#btn-sino", titulo: "Avisos", texto: "O app avisa aqui quando chegar nota ou pedirem contagem." },
     ],
+    vendas: [
+      { alvo: ".status-simples", titulo: "Suas notas", texto: "Verde: nada pendente. Amarelo: uma carga sua saiu com diferença ou uma nota sua está parada. Toque no botão." },
+      { alvo: "#tile-nota", titulo: "O que você quer fazer?", texto: "Lançar nota, ver o estoque, suas notas e suas cargas. Cada botão abre um passo a passo." },
+      { alvo: "#nav-inferior", titulo: "Menu", texto: "Notas, estoque (só consulta) e cargas. O resto fica em Mais." },
+      { alvo: "#btn-sino", titulo: "Avisos", texto: "Você é avisado quando a carga de uma nota sua sai e, de lá, manda o rastreio ao cliente." },
+      { alvo: "#fab-ia", titulo: "Assistente", texto: "Peça para lançar a nota, ver o estoque ou pegar o link de rastreio." },
+    ],
     painel: [
       { alvo: ".status-simples", titulo: "Como está a empresa", texto: "Verde: tudo certo. Amarelo ou vermelho: toque em \"Resolver agora\"." },
       { alvo: "#tile-nota", titulo: "O que você quer fazer?", texto: "Cada botão abre um passo a passo. É só seguir as telas." },

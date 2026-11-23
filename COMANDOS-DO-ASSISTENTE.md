@@ -1,6 +1,6 @@
 # O que dá para mandar o assistente fazer
 
-O assistente (botão **Perguntar**, para diretoria, administrativo e expedição) consulta os dados da empresa e faz o trabalho por comando.
+O assistente (botão **Perguntar**, para diretoria, administrativo, expedição e, só para vender, o vendedor) consulta os dados da empresa e faz o trabalho por comando.
 **Ele prepara e você confirma:** toda ação aparece num cartão com o que vai acontecer e os botões **Confirmar** e **Cancelar**. Nada é gravado antes disso.
 Dá para escrever, falar no microfone e anexar foto, PDF ou XML (botão do clipe). Dizer "sim" confirma as ações comuns; apagar, cancelar, conferir carga e dar acesso de administrador só valem tocando no botão.
 
@@ -48,6 +48,13 @@ Dá para escrever, falar no microfone e anexar foto, PDF ou XML (botão do clipe
 - "Abra o estoque" · "Abra a tela de caminhões" · "Quero o link de rastreio da nota 48100" (só depois de conferida).
 
 ## Segurança
-- Só a administração usa o assistente, com o login da própria pessoa: ele não faz nada que o banco não deixaria essa pessoa fazer.
+- Só quem tem acesso de administração usa o assistente (diretoria, administrativo, expedição e, só para vender, o vendedor), com o login da própria pessoa: ele não faz nada que o banco não deixaria essa pessoa fazer.
 - Ninguém apaga o próprio cadastro, o sistema nunca fica sem administrador, e quem tem histórico não é apagado (só desativado).
 - Tudo que foi confirmado fica registrado (quem, o quê, quando), sem senhas: pergunte "o que o assistente fez hoje?".
+
+## Para o vendedor (só venda)
+O vendedor também tem o botão **Perguntar**, mas o assistente dele só enxerga e faz o que é da venda:
+- Consulta: "Quais notas minhas estão na fila?" · "Alguma carga minha saiu hoje?" · "Minhas entregas com diferença" · "Quanto tem de meio-fio disponível para vender?" (o disponível já desconta o que está vendido esperando carregar).
+- Ações (sempre com Confirmar): "Lance a nota 48213 do cliente JB Obras: 60 meio-fio" (a nota já entra no nome dele; o cartão avisa se o estoque não cobre) · foto ou XML da nota pelo clipe · "Cancele a nota 48214" (só as dele) · "Quero o link de rastreio da nota 48172" (só depois de conferida) · marcar avisos como lidos.
+- Não faz: cadastrar pessoas, produtos ou caminhões, lançar entrada/perda, contagem, conferir carga, ajustes. Se pedir, ele diz que é da expedição ou da administração.
+- Só vê as notas e cargas dele (as de outros vendedores não aparecem).

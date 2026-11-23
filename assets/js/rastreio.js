@@ -72,6 +72,9 @@
     raiz.replaceChildren(el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, texto)), tentar);
   }
 
+  // Esc fecha a janela que estiver por cima (e o ouvinte some junto com ela)
+  const fecharComEsc = (tela) => { const f = (e) => { if (!tela.isConnected) return document.removeEventListener("keydown", f); if (e.key === "Escape") { tela.remove(); document.removeEventListener("keydown", f); } }; document.addEventListener("keydown", f); };
+
   // Prévia dentro do app: "Ver como o cliente vê"
   NE.verComoCliente = async (c) => {
     const foto = (c.fotos || []).find((f) => f.tipo === "carga");
@@ -83,7 +86,7 @@
         el("div", { class: "janela-corpo fundo-concreto" }, el("div", { class: "logo-cliente", html: NE.logo }), NE.renderRastreio(NE.rastreioDe(c, url)))));
     fechar.addEventListener("click", () => tela.remove());
     tela.addEventListener("click", (e) => { if (e.target === tela) tela.remove(); });
-    document.body.append(tela);
+    document.body.append(tela); fecharComEsc(tela);
     fechar.focus({ preventScroll: true });
   };
 
@@ -114,7 +117,7 @@
             el("button", { type: "button", class: "link-acao", onclick: () => { tela.remove(); NE.verComoCliente(c); } }, ic("olho"), "Ver como o cliente vê")))));
     fechar.addEventListener("click", () => tela.remove());
     tela.addEventListener("click", (e) => { if (e.target === tela) tela.remove(); });
-    document.body.append(tela);
+    document.body.append(tela); fecharComEsc(tela);
     fone.focus({ preventScroll: true });
   };
 })();

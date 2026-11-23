@@ -65,7 +65,7 @@
 
     const rodape = el("div", { class: "janela-rodape grade-acoes" },
       podeEnviar && c.token_publico && el("button", { type: "button", class: "btn btn-verde", onclick: () => NE.enviarRastreio(c) }, ic("whatsapp"), "Enviar ao cliente"),
-      el("button", { type: "button", class: "btn btn-azul", onclick: () => NE.abrirEtiquetas(c) }, ic("etiqueta"), "Etiquetas"),
+      !(NE.app && NE.app.perm && NE.app.perm.painel === "vendas") && el("button", { type: "button", class: "btn btn-azul", onclick: () => NE.abrirEtiquetas(c) }, ic("etiqueta"), "Etiquetas"),   // etiqueta é do pátio, não do vendedor
       el("button", { type: "button", class: "btn btn-secundario", onclick: () => copiar(resumoTexto(c), "Resumo copiado. Cole no WhatsApp.") }, "Copiar resumo"),
       el("button", { type: "button", class: "btn btn-secundario", onclick: () => fechar() }, "Fechar"));
 

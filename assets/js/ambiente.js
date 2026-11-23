@@ -29,7 +29,7 @@
     velhas.forEach((k) => localStorage.removeItem(k));
     // uma única vez: o vídeo antigo marcava o tutorial como "já visto" no aparelho de quem assistia
     if (!localStorage.getItem("ne-limpeza-1")) {
-      ["painel", "conferente", "passo"].forEach((t) => localStorage.removeItem(`ne-tour-${t}`));
+      ["painel", "vendas", "conferente", "passo"].forEach((t) => localStorage.removeItem(`ne-tour-${t}`));
       localStorage.setItem("ne-limpeza-1", "1");
     }
   } catch { /* sem armazenamento: não há o que limpar */ }

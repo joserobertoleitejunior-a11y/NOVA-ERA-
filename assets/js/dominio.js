@@ -175,11 +175,62 @@
     nota_nova: { rotulo: "Nota nova na fila", severidade: "info", dica: "Chegou uma nota para conferir." },
     contagem_solicitada: { rotulo: "Contagem solicitada", severidade: "info", dica: "A expedição pediu uma contagem de estoque." },
     sistema: { rotulo: "Aviso do sistema", severidade: "info", dica: "Avisos gerais." },
+    minha_carga_saiu: { rotulo: "Minha carga saiu", severidade: "info", dica: "A carga de uma nota sua foi conferida e saiu do pátio." },
+    minha_carga_diferenca: { rotulo: "Minha carga saiu com diferença", severidade: "atencao", dica: "A carga de uma nota sua saiu diferente da nota fiscal." },
+    minha_nota_parada: { rotulo: "Minha nota está parada", severidade: "atencao", dica: "Uma nota sua está esperando conferência há muito tempo." },
   };
   const ALERTAS_ADMIN = ["saida_sem_nota", "divergencia_carga", "estoque_negativo", "estoque_baixo", "contagem_divergente", "nota_parada", "fora_horario", "senha_esquecida", "resumo_dia", "sistema"];
   const ALERTAS_FUNCIONARIO = ["nota_nova", "contagem_solicitada"];
-  const alertasPadrao = (papel) => (papel === "admin" ? ALERTAS_ADMIN.slice() : ALERTAS_FUNCIONARIO.slice());
-  const destinatarios = (tipo, perfis) => (perfis || []).filter((p) => p.ativo !== false && (p.alertas || alertasPadrao(p.papel)).includes(tipo)).map((p) => p.id);
+  const ALERTAS_VENDEDOR = ["minha_carga_saiu", "minha_carga_diferenca", "minha_nota_parada"];   // vendedor não recebe os avisos de administração
+  const alertasPadrao = (papel, funcao) => (funcao === "vendedor" ? ALERTAS_VENDEDOR.slice() : papel === "admin" ? ALERTAS_ADMIN.slice() : ALERTAS_FUNCIONARIO.slice());
+  const destinatarios = (tipo, perfis) => (perfis || []).filter((p) => p.ativo !== false && (p.alertas || alertasPadrao(p.papel, p.funcao)).includes(tipo)).map((p) => p.id);
+
+  // ───────────────────────── vendedor ─────────────────────────
+  const primeiroNome = (nome) => normalizar(nome).split(" ")[0] || "";
+  // Acha o vendedor pelo nome escrito na nota ("Wesley" ou "Wesley Costa"). Dois com o mesmo nome, ou nenhum: não adivinha.
+  function perfilDoVendedor(nome, perfis) {
+    const n = normalizar(nome); if (!n) return null;
+    const achados = (perfis || []).filter((p) => p.funcao === "vendedor" && p.ativo !== false && (normalizar(p.nome) === n || primeiroNome(p.nome) === n));
+    return achados.length === 1 ? achados[0] : null;
+  }
+  // De quem é a nota: pelo vendedor_id; notas antigas só têm o nome escrito.
+  function donoDaNota(nota, perfis) {
+    if (!nota) return null;
+    if (nota.vendedor_id) return (perfis || []).find((p) => p.id === nota.vendedor_id) || { id: nota.vendedor_id };
+    return perfilDoVendedor(nota.vendedor, perfis);
+  }
+  function ehMinhaNota(nota, perfil) {
+    if (!nota || !perfil) return false;
+    if (nota.vendedor_id) return nota.vendedor_id === perfil.id;
+    const v = normalizar(nota.vendedor); if (!v) return false;
+    return v === normalizar(perfil.nome) || v === primeiroNome(perfil.nome);
+  }
+  // Disponível para vender = saldo do pátio − o que já foi vendido em notas esperando carregar
+  function disponivelPorProduto(saldos, notasFila) {
+    const reservado = new Map();
+    for (const n of notasFila || []) {
+      if (n.status !== "pendente" && n.status !== "em_conferencia") continue;
+      for (const i of n.itens || []) if (i.produto_id) reservado.set(i.produto_id, (reservado.get(i.produto_id) || 0) + Number(i.quantidade ?? i.qtd_nota ?? 0));
+    }
+    return new Map((saldos || []).map((s) => { const res = reservado.get(s.produto_id) || 0; return [s.produto_id, { saldo: Number(s.saldo), reservado: arred(res), disponivel: arred(Number(s.saldo) - res) }]; }));
+  }
+  // Itens que pedem mais do que há disponível (soma por produto). Só produtos cadastrados têm estoque controlado.
+  function faltaEstoque(itens, disp) {
+    const pedido = new Map();
+    for (const i of itens || []) if (i.produto_id) pedido.set(i.produto_id, { nome: i.descricao, qtd: (pedido.get(i.produto_id)?.qtd || 0) + Number(i.quantidade || 0) });
+    const out = [];
+    for (const [id, p] of pedido) { const d = disp.get(id); if (d && p.qtd > d.disponivel) out.push({ produto_id: id, nome: p.nome, pedido: arred(p.qtd), disponivel: arred(Math.max(0, d.disponivel)), saldo: d.saldo, reservado: d.reservado }); }
+    return out;
+  }
+  // Aviso ao vendedor quando a carga da nota dele é conferida (mesmo texto do banco)
+  function alertaMinhaCarga({ nota, conf, itens }) {
+    const a = analisarItens(itens); const hora = horaTexto(conf.criado_em);
+    if (a.divergente) {
+      const partes = a.itensDif.map((i) => `${i.descricao} ${i.dif > 0 ? "+" : "−"}${fmt(Math.abs(i.dif))}`);
+      return { tipo: "minha_carga_diferenca", severidade: "atencao", titulo: `Nota ${nota.numero}: a carga saiu com diferença`, texto: `${nota.cliente ? nota.cliente + ". " : ""}${partes.join(", ")}. Caminhão ${conf.placa}, às ${hora}. Avise o cliente antes que ele ligue.`, ref_tipo: "conferencia", ref_id: conf.id, chave_dedupe: `minha_conf:${conf.id}` };
+    }
+    return { tipo: "minha_carga_saiu", severidade: "info", titulo: `Nota ${nota.numero}: a carga saiu`, texto: `${nota.cliente ? nota.cliente + ". " : ""}Conferida às ${hora}, caminhão ${conf.placa}. Mande o rastreio para o cliente acompanhar.`, ref_tipo: "conferencia", ref_id: conf.id, chave_dedupe: `minha_conf:${conf.id}` };
+  }
 
   function alertasDaConferencia({ nota, conf, itens, produtos, saldosDepois, config, agora }) {
     const out = []; const a = analisarItens(itens);
@@ -218,12 +269,14 @@
   }
 
   // Verificações por tempo (rodam sozinhas no servidor a cada poucos minutos)
-  function alertasDaVarredura({ notas, saldos, contagens, config, agora, pushJaEnviadoResumo }) {
+  function alertasDaVarredura({ notas, saldos, contagens, config, agora, pushJaEnviadoResumo, perfis }) {
     const cfg = comPadrao(config); const out = []; const dia = chaveDia(agora);
     for (const n of notas || []) {
       if (n.status !== "pendente" && n.status !== "em_conferencia") continue;
       const idade = (aMs(agora) - aMs(n.criado_em)) / MIN;
       if (idade >= cfg.limiteNotaParadaMin) out.push({ tipo: "nota_parada", severidade: "atencao", titulo: `Nota ${n.numero} esperando há ${duracao(idade)}`, texto: `${n.cliente ? n.cliente + ". " : ""}Está na fila sem conferência. Limite configurado: ${duracao(cfg.limiteNotaParadaMin)}.`, ref_tipo: "nota", ref_id: n.id, chave_dedupe: `nota_parada:${n.id}` });
+      const dono = idade >= cfg.limiteNotaParadaMin ? donoDaNota(n, perfis) : null;
+      if (dono) out.push({ tipo: "minha_nota_parada", severidade: "atencao", destinatario_id: dono.id, titulo: `Sua nota ${n.numero} ainda não foi carregada`, texto: `${n.cliente ? n.cliente + ". " : ""}Está na fila há ${duracao(idade)} sem conferência. Se o cliente está esperando, fale com a expedição.`, ref_tipo: "nota", ref_id: n.id, chave_dedupe: `minha_parada:${n.id}` });
     }
     for (const s of saldos || []) {
       if (s.ativo === false) continue;
@@ -418,12 +471,12 @@
   }
 
   const API = {
-    MIN, HORA, DIA, FUSO, CONFIG_PADRAO, TIPOS_ALERTA, ALERTAS_ADMIN, ALERTAS_FUNCIONARIO,
+    MIN, HORA, DIA, FUSO, CONFIG_PADRAO, TIPOS_ALERTA, ALERTAS_ADMIN, ALERTAS_FUNCIONARIO, ALERTAS_VENDEDOR,
     normalizar, arred, fmt, plural, lista, aMs, inicioDoDia, chaveDia, diaDaSemana, minutosDoDia, rotuloDia, duracao, tempoRelativo, periodo, horaTexto,
     comPadrao, foraDoExpediente, difItem, analisarItens, textoDif, totalPilhas,
     dvChave, validarChave, interpretarChave, extrairChave, formatarChave, casarProduto,
     calcularSaldos, situacaoEstoque, coberturaDias, sugerirContagem,
-    alertasPadrao, destinatarios, alertasDaConferencia, alertasDaContagem, alertasDaVarredura,
+    alertasPadrao, destinatarios, primeiroNome, perfilDoVendedor, donoDaNota, ehMinhaNota, disponivelPorProduto, faltaEstoque, alertaMinhaCarga, alertasDaConferencia, alertasDaContagem, alertasDaVarredura,
     kpis, serieDiaria, rankingProdutos, equipe, insights, semaforo, resumoDoPeriodo,
     mensagemCliente, csv, csvConferencias, csvEstoque, responderLocal,
   };

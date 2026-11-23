@@ -9,6 +9,7 @@
   const ESTADO = { ok: ["OK", "ok"], baixo: ["Baixo", "alerta"], negativo: ["Negativo", "erro"] };
 
   NE.rotas.estoque = async (raiz, params, app) => {
+    if (app.perm.painel === "vendas") return estoqueVendas(raiz);
     if (params.aba) aba = params.aba;
     raiz.replaceChildren(el("div", { class: "esqueleto", style: "height:60px" }), el("div", { class: "esqueleto", style: "height:200px" }));
     let ctx; try { ctx = await NE.dados.contexto(); } catch (e) { raiz.replaceChildren(); return NE.aviso(NE.mensagemErro(e), "erro", raiz); }
@@ -23,6 +24,32 @@
     const corpo = () => ({ saldos: () => saldos(caixa, ctx, produtos, app, exportar), contagens: () => contagens(caixa, ctx, produtos, app), movimentos: () => movimentos(caixa, ctx, produtos) })[aba]();
     desenharAbas(); corpo();
   };
+
+  // Vendedor: só consulta. "Disponível" já desconta o que está vendido em notas esperando carregar,
+  // para ele não prometer ao cliente uma peça que já tem dono.
+  async function estoqueVendas(raiz) {
+    raiz.replaceChildren(el("div", { class: "esqueleto", style: "height:60px" }), el("div", { class: "esqueleto", style: "height:200px" }));
+    let saldosL, fila; try { [saldosL, fila] = await Promise.all([NE.dados.saldos(), NE.dados.notas({ status: ["pendente", "em_conferencia"] })]); } catch (e) { raiz.replaceChildren(); return NE.aviso(NE.mensagemErro(e), "erro", raiz); }
+    const disp = D.disponivelPorProduto(saldosL, fila);
+    const linhas = saldosL.filter((s) => s.ativo !== false).map((s) => ({ s, d: disp.get(s.produto_id) || { saldo: Number(s.saldo), reservado: 0, disponivel: Number(s.saldo) } })).sort((a, b) => a.s.nome.localeCompare(b.s.nome));
+    const busca = el("input", { class: "entrada", type: "search", id: "busca-estoque", placeholder: "Buscar produto", autocomplete: "off" });
+    const chips = el("div", { class: "chips" }); const lista = el("div", {}); let so = "todos";
+    const situ = ({ s, d }) => (d.disponivel <= 0 ? ["Sem", "erro"] : Number(s.minimo) > 0 && d.disponivel <= Number(s.minimo) ? ["Pouco", "alerta"] : ["Tem", "ok"]);
+    const desenhar = () => {
+      const q = D.normalizar(busca.value);
+      chips.replaceChildren(...[["todos", "Todos"], ["pouco", "Pouco ou sem"]].map(([id, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(so === id), onclick: () => { so = id; desenhar(); } }, nome)));
+      const vis = linhas.filter((l) => (!q || D.normalizar(l.s.nome).includes(q)) && (so === "todos" || situ(l)[1] !== "ok"));
+      lista.replaceChildren(...(vis.length ? vis.map((l) => { const [rot, cls] = situ(l);
+        return el("div", { class: `linha-cartao so-leitura ${cls === "erro" ? "critico" : cls === "alerta" ? "atencao" : ""}` }, el("strong", {}, l.s.nome),
+          el("span", { class: "meta" }, `No pátio ${fmt(Math.max(0, l.d.saldo))} ${l.s.unidade}${l.d.reservado ? ` · ${fmt(l.d.reservado)} já vendido, esperando carregar` : ""}`),
+          el("span", { class: "lado" }, fmt(Math.max(0, l.d.disponivel)), el("small", {}, el("span", { class: `etiqueta ${cls}` }, rot)))); })
+        : [el("div", { class: "vazio-grande" }, el("strong", {}, linhas.length ? "Nada por aqui" : "Estoque ainda vazio"), linhas.length ? "Nenhum produto neste filtro." : "Quando a expedição lançar produtos e entradas, eles aparecem aqui.")]));
+    };
+    busca.addEventListener("input", desenhar);
+    raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Estoque"), el("p", {}, "Quanto tem para vender, agora. O número grande é o que está disponível: já desconta as notas esperando carregar."))),
+      el("div", { class: "busca-linha" }, busca), chips, lista, el("p", { class: "suave", style: "margin-top:12px" }, "Só consulta. Quem lança entrada, perda e contagem é a expedição."));
+    desenhar();
+  }
 
   function baixar(nome, texto) { const a = el("a", { href: URL.createObjectURL(new Blob([texto], { type: "text/csv;charset=utf-8" })), download: nome }); document.body.append(a); a.click(); a.remove(); }
   const nomeDe = (produtos, id) => (produtos.find((p) => p.id === id) || {}).nome || "Produto";

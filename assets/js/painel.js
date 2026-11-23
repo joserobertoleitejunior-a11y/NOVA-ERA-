@@ -55,16 +55,19 @@
   const vazio = (t) => el("p", { class: "vazio", style: "flex:1" }, t);
 
   // ───────────────────────── CARGAS ─────────────────────────
+  // Vendedor: "Minhas cargas" (as das notas dele) com a opção "De todos". Qualquer um pode buscar por nota, cliente ou placa:
+  // buscando, o app olha os últimos 31 dias em vez de um dia só.
   NE.rotas.cargas = (raiz, params, app) => {
-    let dia = NE.hojeISO(), situacao = params.dif ? "divergencia" : "todas", filtroExtra = null, todas = [], busca = "";
-    const numeros = el("div", { class: "numeros" }); const navDia = el("div", { class: "navegador-dia" }); const chips = el("div", { class: "chips" });
-    const campoBusca = el("input", { class: "entrada busca", id: "busca-nota", type: "search", inputmode: "search", autocomplete: "off", placeholder: "Buscar nota ou placa" });
-    campoBusca.addEventListener("input", () => { busca = campoBusca.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, ""); desenhar(); });
+    const vendedor = app.perm.painel === "vendas";
+    let dia = NE.hojeISO(), situacao = params.dif ? "divergencia" : "todas", filtroExtra = null, todas = [], busca = "", escopo = vendedor ? "minhas" : "todos", minhasIds = null, modoPeriodo = false, seq = 0;
+    const numeros = el("div", { class: "numeros" }); const navDia = el("div", { class: "navegador-dia" }); const chips = el("div", { class: "chips" }); const chipsDono = el("div", { class: "chips" });
+    const campoBusca = el("input", { class: "entrada busca", id: "busca-nota", type: "search", inputmode: "search", autocomplete: "off", placeholder: "Buscar nota, cliente ou placa" });
+    campoBusca.addEventListener("input", () => { busca = campoBusca.value.trim(); const quer = busca.length > 0; if (quer !== modoPeriodo) { modoPeriodo = quer; carregar(); } else desenhar(); });
     const extra = el("div", {}); const lista = el("div", { class: "lista-conf" }, el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }));
     const planilha = el("button", { type: "button", class: "link-acao", onclick: async () => { const c = await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA }); baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(c)); } }, ic("baixar"), "Baixar planilha (30 dias)");
-    raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Cargas"), el("p", {}, "Tudo que saiu, com fotos e conferência.")),
-      el("button", { class: "btn btn-principal", type: "button", id: "btn-nova-painel", onclick: () => app.ir("conferir", {}) }, ic("mais"), "Nova conferência")),
-      numeros, el("div", { class: "filtros" }, navDia, campoBusca, chips), extra, lista, el("div", { style: "margin-top:12px" }, planilha));
+    raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, vendedor ? "Minhas cargas" : "Cargas"), el("p", {}, vendedor ? "As entregas das suas notas: confira e mande o rastreio ao cliente." : "Tudo que saiu, com fotos e conferência.")),
+      app.perm.conferir && el("button", { class: "btn btn-principal", type: "button", id: "btn-nova-painel", onclick: () => app.ir("conferir", {}) }, ic("mais"), "Nova conferência")),
+      numeros, el("div", { class: "filtros" }, navDia, campoBusca, vendedor && chipsDono, chips), extra, lista, vendedor ? null : el("div", { style: "margin-top:12px" }, planilha));
 
     const mudarDia = (d) => { dia = d; carregar(); };
     const desenharNav = () => {
@@ -76,23 +79,37 @@
         el("button", { type: "button", class: "nav-seta", "aria-label": "Próximo dia", html: NE.icone.seguir, disabled: dia >= hoje, onclick: () => mudarDia(somar(1)) }));
     };
     const desenharChips = () => chips.replaceChildren(...[["todas", "Todas"], ["divergencia", "Com diferença"], ["ok", "Confere"]].map(([id, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(id === situacao), onclick: () => { situacao = id; desenharChips(); desenhar(); } }, nome)));
+    const desenharDono = () => chipsDono.replaceChildren(...[["minhas", "Minhas"], ["todos", "De todos"]].map(([id, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(escopo === id), onclick: () => { escopo = id; desenharDono(); desenhar(); } }, nome)));
     const aoFiltrar = (tipo, valor, rotulo) => { filtroExtra = { tipo, valor, rotulo }; desenhar(); window.scrollTo({ top: 0 }); };
     function desenhar() {
-      const base = filtroExtra ? todas.filter((c) => (filtroExtra.tipo === "placa" ? c.placa === filtroExtra.valor : c.conferente_id === filtroExtra.valor)) : todas;
+      if (vendedor && escopo === "minhas" && !minhasIds) return;   // ainda sabendo quais notas são dele
+      let base = filtroExtra ? todas.filter((c) => (filtroExtra.tipo === "placa" ? c.placa === filtroExtra.valor : c.conferente_id === filtroExtra.valor)) : todas;
+      if (vendedor && escopo === "minhas") base = base.filter((c) => minhasIds.has(c.nota_id));
       const div = base.filter((c) => c.status === "divergencia").length;
       numeros.replaceChildren(el("div", { class: "numero" }, el("b", {}, String(base.length)), el("span", {}, "conferências")), el("div", { class: "numero ok" }, el("b", {}, String(base.length - div)), el("span", {}, "conferem")), el("div", { class: "numero alerta" }, el("b", {}, String(div)), el("span", {}, "com diferença")));
-      extra.replaceChildren(filtroExtra ? el("div", { class: "filtro-ativo" }, el("span", {}, "Mostrando: ", el("strong", {}, filtroExtra.rotulo)), el("button", { type: "button", class: "link-acao", onclick: () => { filtroExtra = null; desenhar(); } }, ic("fechar"), "Tirar filtro")) : "");
-      const vis = base.filter((c) => (situacao === "todas" || c.status === situacao) && (!busca || String(c.numero_nota).includes(busca) || c.placa.includes(busca)));
-      lista.replaceChildren(...(vis.length ? vis.map((c) => NE.cartaoConferencia(c, (x) => NE.abrirConferencia(x, { aoFiltrar, podeEnviar: true }))) : [el("p", { class: "vazio" }, situacao === "divergencia" ? "Nenhuma diferença neste dia." : "Nenhuma conferência neste dia.")]));
+      extra.replaceChildren(modoPeriodo ? el("div", { class: "filtro-ativo" }, el("span", {}, "Buscando nos ", el("strong", {}, "últimos 31 dias"))) : "", filtroExtra ? el("div", { class: "filtro-ativo" }, el("span", {}, "Mostrando: ", el("strong", {}, filtroExtra.rotulo)), el("button", { type: "button", class: "link-acao", onclick: () => { filtroExtra = null; desenhar(); } }, ic("fechar"), "Tirar filtro")) : "");
+      const qa = busca.toUpperCase().replace(/[^A-Z0-9]/g, ""), qn = D.normalizar(busca);
+      const bate = (c) => !busca || (qa && (String(c.numero_nota).toUpperCase().includes(qa) || String(c.placa).includes(qa))) || (qn && D.normalizar(c.cliente || "").includes(qn));
+      const vis = base.filter((c) => (situacao === "todas" || c.status === situacao) && bate(c));
+      const vazioTxt = busca ? "Nenhuma entrega encontrada nos últimos 31 dias." : situacao === "divergencia" ? "Nenhuma diferença neste dia." : vendedor && escopo === "minhas" ? "Nenhuma carga sua neste dia." : "Nenhuma conferência neste dia.";
+      lista.replaceChildren(...(vis.length ? vis.map((c) => NE.cartaoConferencia(c, (x) => NE.abrirConferencia(x, { aoFiltrar, podeEnviar: true }))) : [el("p", { class: "vazio" }, vazioTxt)]));
     }
-    function carregar() { desenharNav(); NE.carregarRapido(`conf-${dia}-todas`, () => NE.dados.conferencias({ dia }), (d) => { todas = d; desenhar(); }, (e) => { lista.replaceChildren(); NE.aviso(NE.mensagemErro(e), "erro", lista); }); }
+    function carregar() {
+      navDia.hidden = modoPeriodo; if (!modoPeriodo) desenharNav();
+      const meu = ++seq; const chave = modoPeriodo ? "conf-periodo" : `conf-${dia}-todas`;
+      const buscar = modoPeriodo ? () => NE.dados.conferencias({ de: Date.now() - 31 * D.DIA }) : () => NE.dados.conferencias({ dia });
+      NE.carregarRapido(chave, buscar, (d) => { if (meu !== seq) return; todas = d; desenhar(); }, (e) => { if (meu !== seq) return; lista.replaceChildren(); NE.aviso(NE.mensagemErro(e), "erro", lista); });
+    }
+    if (vendedor) { desenharDono(); NE.dados.notas().then((l) => { minhasIds = new Set(l.filter((n) => D.ehMinhaNota(n, app.perfil)).map((n) => n.id)); desenhar(); }).catch((e) => { minhasIds = new Set(); NE.aviso(NE.mensagemErro(e), "erro", lista); }); }
     desenharChips(); carregar();
   };
 
   // ───────────────────────── MAIS ─────────────────────────
   NE.rotas.mais = (raiz, params, app) => {
     const item = (icone, titulo, sub, acao, id) => el("button", { type: "button", class: "cartao-guia", id, onclick: acao }, ic(icone), el("span", {}, titulo, el("small", { style: "display:block" }, sub)));
-    const pode = (r) => (app.perm.telas || []).includes(r);
+    const pode = (r) => (app.perm.telas || []).includes(r); const tutorial = app.perm.painel === "vendas" ? "vendas" : "painel";
+    // O tutorial mostra as telas de verdade: vai para o Início e começa quando ele terminou de desenhar
+    const abrirTutorial = () => { app.ir("inicio"); const t0 = Date.now(); const esperar = () => { if (document.querySelector(".tiles") || Date.now() - t0 > 4000) NE.iniciarTour(tutorial, { verDicas: () => NE.abrirGuia(tutorial, raiz, () => app.ir("mais"), { novaConferencia: () => app.ir("conferir") }) }); else setTimeout(esperar, 150); }; esperar(); };
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Mais"), el("p", {}, `${NE.rotuloFuncao(app.perfil.funcao)} · o que mais você pode fazer aqui.`))),
       el("div", { class: "menu-grade" },
         pode("alertas") && item("sino", "Avisos", "O que aconteceu", () => app.ir("alertas")),
@@ -100,8 +117,8 @@
         pode("cadastros") && app.perm.cadastra && item("caminhao", "Caminhões", "Placas da frota", () => app.ir("cadastros", { aba: "caminhoes" })),
         pode("cadastros") && app.perm.cadastra && item("caixas", "Produtos", "Mínimo e pilha", () => app.ir("cadastros", { aba: "produtos" })),
         pode("guia") && app.perm.cadastra && item("engrenagem", "Ajustes", "Horário e prazos", () => app.ir("guia", { fluxo: "ajustes" })),
-        item("ajuda", "Tutorial", "Aprender em 1 minuto", () => NE.iniciarTour("painel", { verDicas: () => NE.abrirGuia("painel", raiz, () => app.ir("mais"), { novaConferencia: () => app.ir("conferir") }) }), "mais-tutorial"),
-        pode("cargas") && item("baixar", "Planilha de cargas", "30 dias em CSV", async () => baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA })))),
+        item("ajuda", "Tutorial", "Aprender em 1 minuto", abrirTutorial, "mais-tutorial"),
+        pode("cargas") && app.perm.painel !== "vendas" && item("baixar", "Planilha de cargas", "30 dias em CSV", async () => baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA })))),
         item("mapa", "Ver o site", "Abre em outra aba", () => window.open("index.html", "_blank", "noopener"))));
   };
 

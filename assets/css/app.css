@@ -260,3 +260,9 @@ body.imprimindo-cartoes #area-cartoes { display: block !important; padding: 8mm;
 .lp-mais { display: inline-flex; align-items: center; gap: 4px; color: var(--azul); font-weight: 700; font-size: .9rem; flex: none; }
 .lp-mais svg { width: 18px; height: 18px; }
 .lp-linha:active { background: var(--ok-fundo); }
+
+/* Estoque disponível na hora de lançar a nota */
+.lp-nome { display: grid; gap: 2px; min-width: 0; }
+.lp-nome small { font-size: .82rem; font-weight: 600; }
+.lp-disp { color: var(--texto-suave); } .lp-sem { color: var(--erro); }
+.aviso-estoque { margin: 8px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--alerta-fundo); color: var(--alerta); font-size: .9rem; font-weight: 600; line-height: 1.35; }

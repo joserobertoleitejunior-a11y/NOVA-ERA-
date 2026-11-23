@@ -8,7 +8,7 @@ como legenda grande na tela. Quando a voz do ElevenLabs chegar, eu encaixo e ger
 | `apresentacao-*.mp4` | **Você**, no dia da oferta à empresa. Não vai no site. | ~4 min |
 | `conferente-*.mp4` | Conferente e ajudante | ~2 min 20 s |
 | `motorista-*.mp4` | Motorista | ~1 min |
-| `vendedor-*.mp4` | Vendedor | ~1 min 20 s |
+| `vendedor-*.mp4` | Vendedor | ~2 min |
 | `expedicao-*.mp4` | Expedição | ~2 min |
 | `administrativo-*.mp4` | Administrativo | ~1 min 40 s |
 | `diretoria-*.mp4` | Diretoria | ~1 min 20 s |

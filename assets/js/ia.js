@@ -6,6 +6,9 @@
   const D = window.NEDominio;
   const { el, ic } = NE;
   const SUGESTOES = ["Resumo do dia", "O que saiu a mais esta semana?", "Estoque baixo", "Notas paradas", "O que contar hoje?", "Quem conferiu hoje?"];
+  // O vendedor usa o assistente só para vender: sugestões e boas-vindas próprias
+  const SUGESTOES_VENDAS = ["Minhas notas na fila", "Alguma carga minha saiu hoje?", "Minhas entregas com diferença", "Quanto tem de estoque para vender?"];
+  const MODELOS_VENDAS = [["Lançar nota", "Lance a nota número "], ["Rastreio da nota", "Quero o link de rastreio da nota "], ["Cancelar nota", "Cancele a nota "], ["Estoque de um produto", "Quanto tem disponível de "]];
   const MODELOS = [["Cadastrar pessoas", "Cadastre estas pessoas (nome e função, uma por linha):\n"], ["Lançar nota", "Lance a nota número "], ["Entrada no estoque", "Lance uma entrada de "], ["Conferir carga", "Confira a carga da nota "], ["Pedir contagem", "Peça a contagem de "]];
   const SIM = /^(sim|confirmo|confirmar|confirma|pode|pode sim|pode fazer|pode ser|isso|isso mesmo|ok|okay|certo|manda ver|faz|faca|fazer|vai)$/;
   const NAO = /^(nao|cancela|cancelar|cancele|deixa|deixa pra la|esquece|desiste|para)$/;
@@ -17,6 +20,7 @@
     const status = await NE.dados.iaDisponivel().catch(() => ({ ativo: false }));
     const real = !!(status.ativo && status.modo !== "local");
     const comAcoes = real && status.acoes === true;      // servidor novo: pode anexar e confirmar ações
+    const vendas = comAcoes && status.escopo === "vendas";
     historico = []; resultados = []; contador = 0; anexos = []; cartoes = [];
     let enviando = false, subindo = 0;
 
@@ -29,8 +33,8 @@
     const clipe = comAcoes && el("button", { type: "button", class: "btn btn-secundario", id: "chat-anexar", "aria-label": "Anexar foto, PDF ou XML", html: NE.icone.clipe });
     const bandeja = el("div", { class: "chat-anexos", id: "chat-anexos", hidden: true });
     const fechar = el("button", { type: "button", class: "janela-fechar", "aria-label": "Fechar", html: NE.icone.fechar });
-    const sugConsulta = el("div", { class: "chat-sugestoes" }, SUGESTOES.map((x) => el("button", { type: "button", class: "chip", onclick: () => perguntar(x) }, x)));
-    const sugAcao = comAcoes && el("div", { class: "chat-sugestoes" }, MODELOS.map(([rot, modelo]) => el("button", { type: "button", class: "chip chip-acao", onclick: () => { campo.value = modelo; ajustar(); campo.focus(); } }, rot)));
+    const sugConsulta = el("div", { class: "chat-sugestoes" }, (vendas ? SUGESTOES_VENDAS : SUGESTOES).map((x) => el("button", { type: "button", class: "chip", onclick: () => perguntar(x) }, x)));
+    const sugAcao = comAcoes && el("div", { class: "chat-sugestoes" }, (vendas ? MODELOS_VENDAS : MODELOS).map(([rot, modelo]) => el("button", { type: "button", class: "chip chip-acao", onclick: () => { campo.value = modelo; ajustar(); campo.focus(); } }, rot)));
     const sug = el("div", { class: "chat-sugestoes-bloco" }, sugConsulta, sugAcao);
     const fundo = el("div", { class: "folha-fundo" }, el("div", { class: "folha", role: "dialog", "aria-modal": "true", "aria-label": "Assistente" },
       el("div", { class: "folha-topo" }, el("div", {}, el("h2", {}, "Assistente"), el("p", {}, comAcoes ? "Claude · você confirma antes de gravar" : real ? "Claude · responde com os dados da empresa" : "Respostas calculadas com os dados da empresa")), fechar),
@@ -139,7 +143,7 @@
     if (clipe) { clipe.addEventListener("click", () => arquivo.click()); arquivo.addEventListener("change", async () => { const l = [...arquivo.files]; arquivo.value = ""; await adicionar(l); }); }
 
     // ───────────── conversa ─────────────
-    bolha("ia", comAcoes ? "Oi! Eu respondo com os dados da Nova Era e também faço o trabalho por comando: cadastrar pessoas, lançar notas, conferir cargas, mexer no estoque, pedir contagem. Eu preparo e você confirma no cartão. Para nota, foto ou XML, use o clipe." : "Oi! Eu leio os dados da Nova Era e respondo na hora. Pode perguntar ou tocar numa sugestão.");
+    bolha("ia", vendas ? "Oi! Eu ajudo na venda: consulto as suas notas e cargas, vejo quanto tem de estoque para vender, lanço a nota (digitada, em foto ou XML) e pego o link de rastreio do cliente. Eu preparo e você confirma no cartão. Para foto ou XML da nota, use o clipe." : comAcoes ? "Oi! Eu respondo com os dados da Nova Era e também faço o trabalho por comando: cadastrar pessoas, lançar notas, conferir cargas, mexer no estoque, pedir contagem. Eu preparo e você confirma no cartão. Para nota, foto ou XML, use o clipe." : "Oi! Eu leio os dados da Nova Era e respondo na hora. Pode perguntar ou tocar numa sugestão.");
     async function perguntar(texto) {
       texto = (texto || campo.value).trim(); const novos = anexos.filter((a) => a.novo);
       if (enviando || subindo || (!texto && !novos.length)) return;

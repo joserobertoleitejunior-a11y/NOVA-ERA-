@@ -40,6 +40,8 @@
       { id: "u-t-conf", nome: "Conferente (teste)", usuario: "conferente", funcao: "conferente", papel: "funcionario", ativo: true, telefone: "15999990014" },
       { id: "u-t-ajud", nome: "Ajudante (teste)", usuario: "ajudante", funcao: "ajudante", papel: "funcionario", ativo: true, telefone: "15999990015" },
       { id: "u-t-moto", nome: "Motorista (teste)", usuario: "motorista", funcao: "motorista", papel: "funcionario", ativo: true, telefone: "15999990016" },
+      { id: "u-wesley", nome: "Wesley Costa", usuario: "wesley", funcao: "vendedor", papel: "admin", ativo: true, telefone: "15999990005" },
+      { id: "u-fabio", nome: "Fábio Reis", usuario: "fabio", funcao: "vendedor", papel: "admin", ativo: true, telefone: "15999990006" },
       { id: "u-paulo", nome: "Paulo Dias", usuario: "paulo", funcao: "motorista", papel: "funcionario", ativo: true, telefone: "15999990004", cnh_validade: new Date(agora + 21 * DIA).toISOString().slice(0, 10), observacao: "Opera o truck com munck" },
     ];
     perfis.forEach((p, k) => { if (p.id !== "u-admin") { p.cadastrado_por = "u-admin"; p.criado_em = new Date(agora - (20 + k * 9) * DIA).toISOString(); } });
@@ -52,7 +54,7 @@
     const produtos = P.map(([nome, codigo, minimo, por_pilha], i) => ({ id: `p${i + 1}`, nome, codigo, unidade: "un", minimo, por_pilha, ativo: true }));
     const alvo = Object.fromEntries(P.map((p, i) => [`p${i + 1}`, p[4]]));
     const clientes = ["Construtora Alfa", "Prefeitura de Tatuí", "Loteamento Vila Nova", "Saneamento Rio Verde", "JB Obras", "Concreserv Engenharia", "Rodovias do Sul"];
-    const vendedores = ["Wesley", "Fábio"];
+    const vendedores = perfis.filter((p) => p.funcao === "vendedor"); const dono = () => { const v = pick(vendedores); return { vendedor: v.nome, vendedor_id: v.id }; };   // notas de exemplo: de três vendedores, um deles é o login de teste
     const conferentes = [perfis[2], perfis[3]];
     const sorteiaItens = (forcarBL) => {
       const n = 1 + Math.floor(r() * 3); const usados = new Set(forcarBL ? ["p1"] : []); const itens = [];
@@ -71,7 +73,7 @@
         return { id: uid("i"), produto_id: i.produto_id, descricao: i.descricao, qtd_nota: i.qtd_nota, qtd_carregada: c };
       });
       const dif = itens.some((i) => i.qtd_nota !== i.qtd_carregada);
-      notas.push({ id: nid, numero: String(numero), cliente, vendedor: pick(vendedores), status: "conferida", chave_nfe: "", token_publico: tokenUuid(), criado_em: new Date(quando - 40 * MIN).toISOString(), conferencia_id: cid,
+      notas.push({ id: nid, numero: String(numero), cliente, ...dono(), status: "conferida", chave_nfe: "", token_publico: tokenUuid(), criado_em: new Date(quando - 40 * MIN).toISOString(), conferencia_id: cid,
         itens: itensNota.map((i) => ({ id: uid("ni"), ...i, quantidade: i.qtd_nota })) });
       conferencias.push({ id: cid, client_id: cid, nota_id: nid, token_publico: tokenUuid(), numero_nota: String(numero), cliente, chave_nfe: "", placa: v.placa, veiculo_id: v.id, motorista: null, conferente_id: cf.id,
         conferente: { nome: cf.nome }, status: dif ? "divergencia" : "ok", motivo_divergencia: dif ? (forcarBL ? "Peças extras separadas por engano" : "Nota vai ser corrigida") : null, observacao: null, latitude: -23.5956, longitude: -48.0532,
@@ -91,7 +93,7 @@
     const fila = [[190, "Construtora Alfa"], [75, "Prefeitura de Tatuí"], [40, "Loteamento Vila Nova"], [12, "JB Obras"]];
     fila.forEach(([min, cliente], k) => {
       numero += 2; const itens = sorteiaItens(false).map((i) => ({ id: uid("ni"), ...i, quantidade: i.qtd_nota }));
-      notas.push({ id: uid("n"), numero: String(numero), cliente, vendedor: pick(vendedores), status: "pendente", chave_nfe: "", token_publico: tokenUuid(), criado_em: new Date(agora - min * MIN).toISOString(), conferencia_id: null, itens });
+      notas.push({ id: uid("n"), numero: String(numero), cliente, ...dono(), status: "pendente", chave_nfe: "", token_publico: tokenUuid(), criado_em: new Date(agora - min * MIN).toISOString(), conferencia_id: null, itens });
     });
     // entradas (produção) calculadas para o saldo final ficar no alvo
     for (const p of produtos) {
@@ -117,13 +119,18 @@
       const nota = notas.find((n) => n.id === c.nota_id);
       for (const a of D.alertasDaConferencia({ nota, conf: c, itens: c.itens, produtos, saldosDepois: sd, config: cfg, agora: D.aMs(c.criado_em) })) emitir(estado, a, D.aMs(c.criado_em), D.aMs(c.criado_em) < inicioHoje);
     }
+    // o vendedor de cada nota é avisado das cargas dele que saíram nos últimos dois dias
+    for (const c of conferencias.filter((x) => D.aMs(x.criado_em) > agora - 2 * DIA)) {
+      const nota = notas.find((n) => n.id === c.nota_id); const dono = D.donoDaNota(nota, perfis);
+      if (dono) emitir(estado, { ...D.alertaMinhaCarga({ nota, conf: c, itens: c.itens }), destinatario_id: dono.id }, D.aMs(c.criado_em), D.aMs(c.criado_em) < inicioHoje);
+    }
     varredura(estado, agora);
     return estado;
   }
 
   // ───────────────────────── alertas ─────────────────────────
   function emitir(e, a, quando, lido = false) {
-    const dest = D.destinatarios(a.tipo, e.perfis); const novos = [];
+    const dest = D.destinatarios(a.tipo, a.destinatario_id ? e.perfis.filter((p) => p.id === a.destinatario_id) : e.perfis); const novos = [];
     for (const d of dest) {
       if (a.chave_dedupe && e.alertas.some((x) => x.destinatario_id === d && x.chave_dedupe === a.chave_dedupe)) continue;
       const linha = { id: uid("a"), destinatario_id: d, tipo: a.tipo, severidade: a.severidade || D.TIPOS_ALERTA[a.tipo].severidade, titulo: a.titulo, texto: a.texto, ref_tipo: a.ref_tipo || null, ref_id: a.ref_id || null, chave_dedupe: a.chave_dedupe || null, criado_em: new Date(quando).toISOString(), lido_em: lido ? new Date(quando).toISOString() : null, resolvido_em: null };
@@ -134,7 +141,7 @@
   const saldosDe = (e) => D.calcularSaldos(e.produtos, e.movimentos, e.contagens.filter((c) => c.status !== "solicitada" && c.itens.some((i) => i.contado != null)));
   function varredura(e, agora) {
     const saldos = saldosDe(e); const resumoJa = e.alertas.some((a) => a.chave_dedupe === `resumo:${D.chaveDia(agora)}`);
-    const lista = D.alertasDaVarredura({ notas: e.notas, saldos, contagens: e.contagens, config: e.config, agora, pushJaEnviadoResumo: resumoJa });
+    const lista = D.alertasDaVarredura({ notas: e.notas, saldos, contagens: e.contagens, config: e.config, agora, pushJaEnviadoResumo: resumoJa, perfis: e.perfis });
     for (const a of lista) {
       if (a.tipo === "resumo_dia") { const r = D.resumoDoPeriodo(contextoDe(e, agora), "hoje"); a.texto = `${r.semaforo.titulo}: ${r.semaforo.texto} Conferências: ${r.kpis.total} (${r.kpis.divergentes} com diferença). Fila: ${r.fila.total}.`; }
       emitir(e, a, agora);
@@ -176,7 +183,11 @@
       const numero = String(n.numero || "").trim(); if (!numero) throw new Error("Digite o número da nota.");
       if (e.notas.some((x) => x.numero === numero && x.status !== "cancelada")) throw new Error(`A nota ${numero} já está no sistema.`);
       const itens = notaItensDeProdutos(n.itens || []); if (!itens.length || itens.some((i) => !(i.quantidade > 0))) throw new Error("A nota precisa de pelo menos um item com quantidade.");
-      const nota = { id: uid("n"), numero, cliente: (n.cliente || "").trim(), vendedor: (n.vendedor || "").trim(), status: "pendente", chave_nfe: n.chave_nfe || "", token_publico: tokenUuid(), criado_em: new Date().toISOString(), conferencia_id: null, itens };
+      let vend = null;   // mesmas regras do banco: vendedor só lança em nome dele; a administração indica um vendedor cadastrado
+      if (eu().funcao === "vendedor") vend = eu();
+      else if (n.vendedor_id) { vend = e.perfis.find((p) => p.id === n.vendedor_id && p.funcao === "vendedor" && p.ativo !== false); if (!vend) throw new Error("Esse vendedor não está cadastrado."); }
+      else if (n.vendedor) vend = D.perfilDoVendedor(n.vendedor, e.perfis);
+      const nota = { id: uid("n"), numero, cliente: (n.cliente || "").trim(), vendedor: vend ? vend.nome : (n.vendedor || "").trim(), vendedor_id: vend ? vend.id : null, status: "pendente", chave_nfe: n.chave_nfe || "", token_publico: tokenUuid(), criado_em: new Date().toISOString(), conferencia_id: null, itens };
       e.notas.push(nota);
       emitir(e, { tipo: "nota_nova", severidade: "info", titulo: `Nota ${numero} na fila`, texto: `${nota.cliente ? nota.cliente + ". " : ""}${D.plural(itens.length, "item", "itens")} para conferir.`, ref_tipo: "nota", ref_id: nota.id, chave_dedupe: `nota_nova:${nota.id}` }, Date.now());
       return nota;
@@ -243,6 +254,7 @@
         e.conferencias.push(conf);
         for (const i of conf.itens) if (i.produto_id) e.movimentos.push({ id: uid("m"), produto_id: i.produto_id, tipo: "saida", quantidade: -Number(i.qtd_carregada), criado_em: conf.criado_em, motivo: `Nota ${nota.numero}`, ref_tipo: "conferencia", ref_id: id, usuario_id: me.id });
         for (const al of D.alertasDaConferencia({ nota: { numero: nota.numero }, conf, itens: conf.itens, produtos: e.produtos, saldosDepois: saldosAtuais(), config: e.config, agora })) emitir(e, al, agora);
+        const dono = D.donoDaNota(nota, e.perfis); if (dono) emitir(e, { ...D.alertaMinhaCarga({ nota, conf, itens: conf.itens }), destinatario_id: dono.id }, agora);
         salvar(); return id;
       },
       async conferencias({ dia, somenteMinhas, idPerfil, de, ate } = {}) {
@@ -290,7 +302,7 @@
       },
       async marcarLidos(ids) { const t = new Date().toISOString(); e.alertas.forEach((a) => { if (a.destinatario_id === e.perfilId && !a.lido_em && (ids === "todos" || ids.includes(a.id))) a.lido_em = t; }); salvar(); },
       async resolverAlerta(id) { const a = e.alertas.find((x) => x.id === id); if (a) { a.resolvido_em = new Date().toISOString(); a.lido_em = a.lido_em || a.resolvido_em; salvar(); } },
-      async preferencias() { const p = eu(); return (p.alertas || D.alertasPadrao(p.papel)).slice(); },
+      async preferencias() { const p = eu(); return (p.alertas || D.alertasPadrao(p.papel, p.funcao)).slice(); },
       async salvarPreferencias(lista) { eu().alertas = lista.slice(); salvar(); },
       // "Esqueci minha senha": avisa os administradores (no app de verdade, o banco faz isso e ainda manda push)
       async pedirAjudaSenha({ usuario, nome, mensagem }) {
@@ -306,7 +318,7 @@
       pushSuportado: () => false, async pushAssinar() { throw new Error("O aviso com o app fechado só funciona no app de verdade (com o banco ligado)."); }, async pushRemover() {}, async pushTestar() {},
 
       // assistente (no teste responde com cálculo local, sem chave do Claude)
-      iaDisponivel: async () => ({ ativo: eu().papel === "admin", modo: "local", leitura: true }),
+      iaDisponivel: async () => ({ ativo: eu().papel === "admin" && eu().funcao !== "vendedor", modo: "local", leitura: true }),   // o assistente de vendas só existe no app de verdade
       async iaPerguntar(texto) { if (eu().papel !== "admin") throw new Error("O assistente é só da administração."); await pausa(400); const r = D.responderLocal(texto, contextoDe(e)); return { ...r, origem: "local" }; },
       async iaLerNota() {
         await pausa(900); const ps = e.produtos;

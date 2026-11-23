@@ -361,6 +361,7 @@
       async propor(ctx, e) {
         const entrada = U.arr(e.notas); if (!entrada.length) throw new ErroProposta("Diga o número da nota e os itens (ou anexe o XML/foto).");
         const produtos = await ctx.produtos(false); const faltantes = e.cadastrar_produtos_faltantes === true;
+        const euVend = dom.escopoDe(ctx.eu) === "vendas"; const perfis = euVend ? [] : await ctx.perfis(); const semVendedor = new Set();
         const nums = entrada.map((n) => U.txt((n && n.numero) || "")).filter(Boolean); const jaTem = await ctx.notasPorNumero(nums.concat(entrada.filter((n) => n && n.anexo).map((n) => { try { return ctx.anexo(n.anexo, "xml").dados.numero; } catch { return ""; } }).filter(Boolean)));
         const igual = (x) => (/^\d+$/.test(x) ? String(Number(x)) : x);   // 048172 e 48172 são a mesma nota
         const vistos = new Set(jaTem.filter((n) => n.status !== "cancelada").map((n) => igual(n.numero))); const bons = [], fora = [], linhas = []; const semCadastro = new Set();
@@ -378,7 +379,10 @@
             });
             let chave = U.vazio(n.chave_nfe) ? base.chave_nfe || "" : String(n.chave_nfe); chave = U.digitos(chave); if (chave && !D().validarChave(chave)) chave = "";
             vistos.add(chaveNum);
-            const nota = { numero, cliente: U.vazio(n.cliente) ? U.txt(base.cliente || "", 120) : U.txt(n.cliente, 120), vendedor: U.vazio(n.vendedor) ? "" : U.txt(n.vendedor, 60), chave_nfe: chave, itens };
+            let vend = { vendedor: "", vendedor_id: null };   // vendedor lança sempre em nome dele; a administração indica um vendedor cadastrado
+            if (euVend) vend = { vendedor: ctx.eu.nome, vendedor_id: ctx.eu.id };
+            else if (!U.vazio(n.vendedor)) { const pv = D().perfilDoVendedor(n.vendedor, perfis); vend = pv ? { vendedor: pv.nome, vendedor_id: pv.id } : { vendedor: U.txt(n.vendedor, 60), vendedor_id: null }; if (!pv) semVendedor.add(U.txt(n.vendedor, 60)); }
+            const nota = { numero, cliente: U.vazio(n.cliente) ? U.txt(base.cliente || "", 120) : U.txt(n.cliente, 120), ...vend, chave_nfe: chave, itens };
             bons.push(nota);
             linhas.push(linha(`Nota ${numero}${nota.cliente ? ` · ${nota.cliente}` : ""}${nota.vendedor ? ` · vendedor ${nota.vendedor}` : ""}`));
             itens.forEach((it) => linhas.push(linha(`    ${U.fmt(it.quantidade)} × ${it.descricao}${it.produto_id ? "" : "  (sem cadastro)"}`)));
@@ -386,6 +390,10 @@
         });
         const avisos = fechar("a nota", bons, fora);
         if (semCadastro.size) avisos.push(faltantes ? `Vou cadastrar estes produtos que ainda não existem: ${D().lista([...semCadastro], 5)}.` : `Sem cadastro (entram só pelo nome, e o estoque dessas peças não é controlado): ${D().lista([...semCadastro], 5)}. Se quiser, peça para cadastrar os produtos que faltam.`);
+        if (semVendedor.size) avisos.push(`Vendedor sem cadastro (${D().lista([...semVendedor], 3)}): a nota fica com o nome escrito e ele não recebe aviso automático quando a carga sair.`);
+        const disp = D().disponivelPorProduto(await ctx.saldos(), await ctx.notas({ status: ["pendente", "em_conferencia"], ordemAsc: true }));
+        const faltas = D().faltaEstoque(bons.flatMap((n) => n.itens), disp);
+        if (faltas.length) avisos.push(`Estoque insuficiente para ${D().lista(faltas.map((f) => `${f.nome} (pedido ${U.fmt(f.pedido)}, disponível ${U.fmt(f.disponivel)})`), 3)}. A nota entra na fila mesmo assim: confira se a produção cobre.`);
         avisos.push("A nota entra na fila e os conferentes são avisados.");
         return { titulo: bons.length === 1 ? `Lançar a nota ${bons[0].numero}` : `Lançar ${bons.length} notas`, linhas, avisos, risco: "normal", args: { notas: bons, cadastrar_faltantes: faltantes } };
       },
@@ -401,7 +409,7 @@
         for (const n of a.notas) {
           itens.push(await tentar(`Nota ${n.numero}`, async () => {
             const its = n.itens.map((it) => { if (it.produto_id) return it; const m = D().casarProduto({ codigo: it.codigo, descricao: it.descricao }, produtos); return m.produto ? { ...it, produto_id: m.produto.id, descricao: m.produto.nome } : it; });
-            await ctx.repo.rpc("criar_nota", { p: { numero: n.numero, cliente: n.cliente, vendedor: n.vendedor, chave_nfe: n.chave_nfe || null, itens: its.map((it) => ({ produto_id: it.produto_id || null, descricao: it.descricao, codigo: it.codigo || null, quantidade: it.quantidade })) } });
+            await ctx.repo.rpc("criar_nota", { p: { numero: n.numero, cliente: n.cliente, vendedor: n.vendedor, vendedor_id: n.vendedor_id || null, chave_nfe: n.chave_nfe || null, itens: its.map((it) => ({ produto_id: it.produto_id || null, descricao: it.descricao, codigo: it.codigo || null, quantidade: it.quantidade })) } });
           }));
         }
         return { ...relatorio(itens, "nota na fila", "notas na fila", " Os conferentes já foram avisados."), itens, acoes: [{ rotulo: "Ver a fila de notas", rota: "notas", params: {} }] };
@@ -418,6 +426,7 @@
         for (const ref0 of refs) {
           const ref = U.txt(ref0); const r = achar.nota(achadas.filter((n) => n.status !== "cancelada").concat(achadas.filter((n) => n.status === "cancelada")), ref); if (r.erro) { fora.push(`${ref}: ${r.erro}`); continue; }
           const n = r.item; if (n.status === "cancelada") { fora.push(`${n.numero}: já está cancelada`); continue; } if (n.status === "conferida") { fora.push(`${n.numero}: já foi conferida e não pode ser cancelada`); continue; }
+          if (dom.escopoDe(ctx.eu) === "vendas" && !D().ehMinhaNota(n, ctx.eu)) { fora.push(`${n.numero}: só dá para cancelar notas suas`); continue; }
           if (bons.some((b) => b.id === n.id)) continue;
           bons.push({ id: n.id, numero: n.numero }); linhas.push(linha(`Nota ${n.numero}${n.cliente ? ` · ${n.cliente}` : ""} (${D().plural((n.itens || []).length, "item", "itens")})`));
         }
@@ -600,8 +609,10 @@
     esq({ tipos: lista(str("Tipo de aviso"), "Lista completa", 20), adicionar: lista(str("Tipo de aviso"), "Tipos a acrescentar", 20), remover: lista(str("Tipo de aviso"), "Tipos a tirar", 20) }),
     {
       async propor(ctx, e) {
-        const T = D().TIPOS_ALERTA; const valida = (l) => { const ruim = U.arr(l).filter((t) => !T[t]); if (ruim.length) throw new ErroProposta(`Tipo de aviso desconhecido: ${ruim.join(", ")}. Os tipos são: ${Object.keys(T).join(", ")}.`); return U.arr(l); };
-        const atual = ctx.eu.alertas || D().alertasPadrao(ctx.eu.papel); let novo;
+        const T = D().TIPOS_ALERTA; const vend = dom.escopoDe(ctx.eu) === "vendas";
+        const permitidos = Object.keys(T).filter((t) => (vend ? D().ALERTAS_VENDEDOR.includes(t) : !t.startsWith("minha_")));
+        const valida = (l) => { const ruim = U.arr(l).filter((t) => !permitidos.includes(t)); if (ruim.length) throw new ErroProposta(`Tipo de aviso não existe para esta pessoa: ${ruim.join(", ")}. Os tipos são: ${permitidos.join(", ")}.`); return U.arr(l); };
+        const atual = ctx.eu.alertas || D().alertasPadrao(ctx.eu.papel, ctx.eu.funcao); let novo;
         if (U.arr(e.tipos).length) novo = [...new Set(valida(e.tipos))]; else { novo = new Set(atual); valida(e.adicionar).forEach((t) => novo.add(t)); valida(e.remover).forEach((t) => novo.delete(t)); novo = [...novo]; }
         if (novo.length === atual.length && novo.every((t) => atual.includes(t))) throw new ErroProposta("Os avisos já estão assim.");
         const rot = (t) => T[t].rotulo;
