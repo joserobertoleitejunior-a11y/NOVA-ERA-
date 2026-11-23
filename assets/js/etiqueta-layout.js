@@ -63,7 +63,7 @@
   function ajustar(medir, texto, { largura, tamanho, minimo, linhas = 1, negrito = false }) {
     const t = String(texto == null ? "" : texto).trim().replace(/\s+/g, " ");
     if (!t) return { linhas: [], tamanho };
-    for (let s = tamanho; s >= minimo - 1e-6; s -= 0.2) {
+    for (let s = Math.max(tamanho, minimo); s >= minimo - 1e-6; s -= 0.2) {   // se o tamanho pedido é menor que o mínimo, vale o mínimo (e só corta se nem assim couber)
       const ls = quebrar(medir, t, largura, s, negrito);
       if (ls.length <= linhas) return { linhas: ls, tamanho: Math.round(s * 100) / 100 };
     }
@@ -122,14 +122,16 @@
     y += 0.5 * u - nome.tamanho * 0.08 + 0.2;
     // campos pequenos. Etiqueta de nota: o primeiro (cliente) ocupa a linha toda e os outros dividem a de baixo.
     // Cartão de acesso (spec.emLinha): usuário e senha lado a lado, os dois importam igual.
-    const tc = 2.0 * u, tv = 3.5 * u; const fim = H - m - (u >= 0.6 ? 2.4 * u : 0) - 0.4; const altura = tc * 0.78 + tv + 0.65;
+    const tc = Math.max(1.5, 2.0 * u), tv = Math.max(2.2, 3.5 * u); const fim = H - m - (u >= 0.6 ? 2.4 * u : 0) - 0.4; const altura = tc * 0.78 + tv + 0.65;   // letra miúda demais não sai na térmica: títulos >= 1,5 mm, dados >= 2,2 mm
+    // etiqueta pequena: data com ano de 2 dígitos (23/11/26) para não ser cortada
+    const curto = (v) => (W < 70 && /^\d{2}\/\d{2}\/\d{4}$/.test(String(v)) ? String(v).replace(/\/\d{2}(\d{2})$/, "/$1") : v);
     const campos = (spec.campos || []).filter(([, v]) => v);
     let linha;
     if (spec.emLinha) linha = campos.slice(0, 3);
-    else { const [c1, ...resto] = campos; if (c1) { const c = campo({ x: m, y, w: tw, rotulo: c1[0], valor: c1[1], tc, tv, medir }); if (y + c.h <= fim) { itens.push(...c.itens); y += c.h + 1.4 * u; } } linha = resto.slice(0, 2); }
+    else { const [c1, ...resto] = campos; if (c1) { const c = campo({ x: m, y, w: tw, rotulo: c1[0], valor: curto(c1[1]), tc, tv, medir }); if (y + c.h <= fim) { itens.push(...c.itens); y += c.h + 1.4 * u; } } linha = resto.slice(0, 2); }
     if (linha.length && y + altura <= fim) {
       const larg = (tw - 2 * u * (linha.length - 1)) / linha.length;
-      linha.forEach(([r, v], i) => itens.push(...campo({ x: m + i * (larg + 2 * u), y, w: larg, rotulo: r, valor: v, tc, tv, medir }).itens));
+      linha.forEach(([r, v], i) => itens.push(...campo({ x: m + i * (larg + 2 * u), y, w: larg, rotulo: r, valor: curto(v), tc, tv, medir }).itens));
     }
     if (u >= 0.6) itens.push(rodapeMarca(m, H - m, medir, 2.0 * u));
     return itens;
