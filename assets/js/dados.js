@@ -223,15 +223,18 @@
 
   NE.dados = dados;
 
-  // A IA só aparece quando existe DE VERDADE: contratada (config.js → premiumIA) e a função do servidor respondendo.
-  // Na demonstração aparece para mostrar como é. Antes o botão aparecia sempre e levava a uma tela "ainda não foi ligada".
+  // A IA só aparece quando existe DE VERDADE: contratada (config.js → premiumIA) e a função do servidor respondendo com a chave.
+  // Duas permissões diferentes: o CHAT é só da administração (ativo); LER A NOTA POR FOTO vale também para quem confere (leitura).
+  // Na demonstração aparece para mostrar como é.
   let iaCache = null;
-  NE.iaLigada = () => {
-    if (!iaCache) iaCache = (!C.premiumIA && !(NE.demo && NE.demo.ativo)) ? Promise.resolve(false)
-      : NE.dados.iaDisponivel().then((st) => !!(st && st.ativo)).catch(() => false);
+  const statusIA = () => {
+    if (!iaCache) iaCache = (!C.premiumIA && !(NE.demo && NE.demo.ativo)) ? Promise.resolve({ ativo: false, leitura: false })
+      : NE.dados.iaDisponivel().then((st) => ({ ativo: !!(st && st.ativo), leitura: !!(st && (st.leitura || st.ativo)) })).catch(() => ({ ativo: false, leitura: false }));
     return iaCache;
   };
-  NE.iaReiniciar = () => { iaCache = null; };   // chamada quando a pessoa entra ou sai
+  NE.iaLigada = () => statusIA().then((st) => st.ativo);     // o assistente (chat)
+  NE.iaLeitura = () => statusIA().then((st) => st.leitura);  // ler a nota pela foto
+  NE.iaReiniciar = () => { iaCache = null; };                // chamada quando a pessoa entra ou sai
   Object.defineProperty(NE, "modoTeste", { get: () => !!ligar().modoTeste, set() {}, configurable: true });
   NE.tiposVeiculo = { caminhao: "Caminhão", truck_munck: "Truck com munck", betoneira: "Betoneira", basculante: "Basculante", outro: "Outro" };
   NE.funcoes = { conferente: "Conferente", expedicao: "Expedição", vendedor: "Vendedor", motorista: "Motorista", ajudante: "Ajudante", diretoria: "Diretoria", administrativo: "Administrativo" };

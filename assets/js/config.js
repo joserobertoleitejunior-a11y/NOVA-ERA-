@@ -9,9 +9,9 @@ window.NOVA_ERA = {
   // Sem ?demo= no endereço o app é sempre o de verdade. Para entregar ao cliente sem a demonstração, troque para `false`.
   demo: true,
   // ★ PREMIUM IA: `true` liga a leitura da nota por IA (foto → número, cliente e itens) e o assistente com Claude.
-  // Só vira botão na tela quando a função do servidor também está no ar; sem isso, nada de IA aparece para ninguém.
-  // Hoje está desligada: ligue quando a empresa contratar a versão completa.
-  premiumIA: false,
+  // Só vira botão na tela quando a função `assistente` do Supabase responde com a chave (ANTHROPIC_API_KEY) guardada.
+  // Sem a chave, nada de IA aparece para ninguém.
+  premiumIA: true,
   urlPublica: "", // endereço do site quando for hospedado (ex.: "https://www.novaera.com.br/") — usado nos links de rastreio
 
   // Contato (aparece no site inteiro)

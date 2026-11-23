@@ -17,7 +17,7 @@
   // ───────────────────────── 1. Lançar uma nota ─────────────────────────
   G.nota = async (raiz, app) => {
     const produtos = await NE.dados.produtos();
-    const iaOn = NE.iaLigada ? await NE.iaLigada().catch(() => false) : false;   // só promete ler a nota por IA se ela estiver ligada de verdade
+    const iaOn = NE.iaLeitura ? await NE.iaLeitura().catch(() => false) : false;   // só promete ler a nota por IA se ela estiver ligada de verdade
     const n = { como: "", numero: "", cliente: "", vendedor: "", itens: [], fotos: [] };
     NE.assistente({
       raiz, rotuloFinal: "Colocar na fila", aoCancelar: () => app.voltar(),

@@ -170,12 +170,13 @@
     contagem_divergente: { rotulo: "Contagem com diferença", severidade: "atencao", dica: "A contagem física não bateu com o sistema." },
     nota_parada: { rotulo: "Nota esperando conferência", severidade: "atencao", dica: "Nota na fila há mais tempo que o limite." },
     fora_horario: { rotulo: "Conferência fora do expediente", severidade: "atencao", dica: "Carga conferida fora do horário de trabalho." },
+    senha_esquecida: { rotulo: "Pedido de ajuda para entrar", severidade: "atencao", dica: "Alguém esqueceu a senha e pediu ajuda." },
     resumo_dia: { rotulo: "Resumo do dia", severidade: "info", dica: "Resumo enviado no fim do expediente." },
     nota_nova: { rotulo: "Nota nova na fila", severidade: "info", dica: "Chegou uma nota para conferir." },
     contagem_solicitada: { rotulo: "Contagem solicitada", severidade: "info", dica: "A expedição pediu uma contagem de estoque." },
     sistema: { rotulo: "Aviso do sistema", severidade: "info", dica: "Avisos gerais." },
   };
-  const ALERTAS_ADMIN = ["saida_sem_nota", "divergencia_carga", "estoque_negativo", "estoque_baixo", "contagem_divergente", "nota_parada", "fora_horario", "resumo_dia", "sistema"];
+  const ALERTAS_ADMIN = ["saida_sem_nota", "divergencia_carga", "estoque_negativo", "estoque_baixo", "contagem_divergente", "nota_parada", "fora_horario", "senha_esquecida", "resumo_dia", "sistema"];
   const ALERTAS_FUNCIONARIO = ["nota_nova", "contagem_solicitada"];
   const alertasPadrao = (papel) => (papel === "admin" ? ALERTAS_ADMIN.slice() : ALERTAS_FUNCIONARIO.slice());
   const destinatarios = (tipo, perfis) => (perfis || []).filter((p) => p.ativo !== false && (p.alertas || alertasPadrao(p.papel)).includes(tipo)).map((p) => p.id);
