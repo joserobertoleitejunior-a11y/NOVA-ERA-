@@ -251,3 +251,12 @@ body.imprimindo-cartoes #area-cartoes { display: block !important; padding: 8mm;
 .btn-mini:active { transform: scale(.97); }
 /* Linha de estoque só para olhar (quem não é da administração não abre o detalhe) */
 .linha-cartao.so-leitura { cursor: default; }
+
+/* Lista de produtos compacta (passo "O que tem na nota?") */
+.lista-produtos { display: grid; gap: 6px; margin: 8px 0 4px; }
+.lp-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; padding: 8px 14px; border-radius: 14px; background: #fff; border: 1px solid var(--linha); text-align: left; font: inherit; cursor: pointer; }
+.lp-linha[hidden] { display: none; }
+.lp-linha strong { font-size: 1.02rem; font-weight: 700; overflow-wrap: anywhere; }
+.lp-mais { display: inline-flex; align-items: center; gap: 4px; color: var(--azul); font-weight: 700; font-size: .9rem; flex: none; }
+.lp-mais svg { width: 18px; height: 18px; }
+.lp-linha:active { background: var(--ok-fundo); }

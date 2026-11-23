@@ -11,6 +11,8 @@
    */
   NE.assistente = ({ raiz, passos, rotuloFinal = "Concluir", iconeFinal = "check", aoConcluir, aoCancelar, rotuloPasso = "Passo" }) => {
     let atual = 0;
+    // Tocar numa opção redesenha o passo, mas a tela fica onde estava (não volta para o topo)
+    const redesenhar = () => { const y = window.scrollY; desenhar(); window.scrollTo(0, y); };
     const desenhar = () => {
       const p = passos[atual];
       const avisoBox = el("div", { id: "aviso-passo" });
@@ -23,7 +25,7 @@
           el("div", { class: "icone-grande", html: NE.icone[p.icone] || NE.icone.check }),
           el("div", {}, el("h1", { id: "titulo-passo" }, p.titulo), p.ajuda && el("p", {}, p.ajuda))),
         avisoBox,
-        p.tela(desenhar));
+        p.tela(redesenhar));
       // Qualquer toque ou digitação apaga o aviso antigo
       tela.addEventListener("click", (e) => { if (e.target.closest("button, label") && !e.target.closest("#aviso-passo")) avisoBox.replaceChildren(); });
       tela.addEventListener("input", () => avisoBox.replaceChildren());
