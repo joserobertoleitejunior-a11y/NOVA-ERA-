@@ -160,6 +160,31 @@
       const dias = Math.floor((Date.now() - e.criadoEm) / DIA);
       if (dias > 0) { const mov = (o) => { if (Array.isArray(o)) o.forEach(mov); else if (o && typeof o === "object") for (const k of Object.keys(o)) { if (CAMPOS_TEMPO.includes(k) && typeof o[k] === "string") o[k] = new Date(D.aMs(o[k]) + dias * DIA).toISOString(); else mov(o[k]); } }; mov(e); e.criadoEm += dias * DIA; }
     }
+    const historicoDe = (e) => {
+      const por = (id, alt) => { const p = e.perfis.find((x) => x.id === id) || (alt && e.perfis.find((x) => x.funcao === alt)) || null; return { usuario_id: p ? p.id : null, usuario_nome: p ? p.nome : "Sistema", usuario_funcao: p ? p.funcao : null }; };
+      const nomeProd = (id, d) => ((e.produtos.find((p) => p.id === id) || {}).nome) || d || "Produto"; const un = (id) => (e.produtos.find((p) => p.id === id) || {}).unidade || "un";
+      const L = []; const add = (a) => L.push({ id: `h-${L.length}`, ref_tipo: null, ref_id: null, nota_numero: null, cliente: null, itens: [], detalhes: {}, ...a });
+      for (const n of e.notas) {
+        const itens = (n.itens || []).map((i) => ({ produto: nomeProd(i.produto_id, i.descricao), quantidade: i.quantidade, unidade: un(i.produto_id) }));
+        add({ ...por(n.criado_por, "administrativo"), criado_em: n.criado_em, acao: "nota_lancada", categoria: "nota", resumo: `Lançou a nota ${n.numero}${n.cliente ? " de " + n.cliente : ""} (${D.plural(itens.length, "item", "itens")})`, nota_numero: n.numero, cliente: n.cliente || null, ref_tipo: "nota", ref_id: n.id, itens, detalhes: n.vendedor ? { vendedor: n.vendedor } : {} });
+        if (n.status === "cancelada" && n.cancelada_em) add({ ...por(n.cancelada_por), criado_em: n.cancelada_em, acao: "nota_cancelada", categoria: "nota", resumo: `Cancelou a nota ${n.numero}${n.cliente ? " de " + n.cliente : ""}`, nota_numero: n.numero, cliente: n.cliente || null, ref_tipo: "nota", ref_id: n.id, itens, detalhes: n.vendedor ? { vendedor: n.vendedor } : {} });
+      }
+      for (const c of e.conferencias) {
+        const itens = (c.itens || []).map((i) => ({ produto: nomeProd(i.produto_id, i.descricao), nota: i.qtd_nota, carregada: i.qtd_carregada, diferenca: i.qtd_carregada - i.qtd_nota, unidade: un(i.produto_id) })); const dif = itens.filter((i) => i.diferenca !== 0).length;
+        const nota = e.notas.find((n) => n.id === c.nota_id);
+        add({ ...por(c.conferente_id), criado_em: c.criado_em, acao: dif ? "carga_conferida_diferenca" : "carga_conferida", categoria: "carga", resumo: `Conferiu a carga da nota ${c.numero_nota}${c.cliente ? " de " + c.cliente : ""}, caminhão ${c.placa}${dif ? ` (com diferença em ${D.plural(dif, "item", "itens")})` : " (tudo conforme)"}`, nota_numero: c.numero_nota, cliente: c.cliente || null, ref_tipo: "conferencia", ref_id: c.id, itens,
+          detalhes: Object.fromEntries(Object.entries({ placa: c.placa, motorista: c.motorista, situacao: c.status, motivo: c.motivo_divergencia, observacao: c.observacao, metodo: c.metodo, duracao_s: c.duracao_s, fotos: (c.fotos || []).length, vendedor: nota && nota.vendedor }).filter(([, v]) => v !== null && v !== undefined && v !== "")) });
+      }
+      for (const m of e.movimentos.filter((x) => ["entrada", "perda"].includes(x.tipo) && !x.ref_tipo)) {
+        const q = Math.abs(m.quantidade); add({ ...por(m.usuario_id, "expedicao"), criado_em: m.criado_em, acao: m.tipo === "entrada" ? "estoque_entrada" : "estoque_perda", categoria: "estoque", resumo: `${m.tipo === "entrada" ? "Lançou entrada de" : "Lançou perda de"} ${D.fmt(q)} ${un(m.produto_id)} de ${nomeProd(m.produto_id)}${m.motivo ? ` (${m.motivo})` : ""}`, ref_tipo: "produto", ref_id: m.produto_id, itens: [{ produto: nomeProd(m.produto_id), quantidade: q, unidade: un(m.produto_id) }], detalhes: m.motivo ? { motivo: m.motivo } : {} });
+      }
+      for (const c of e.contagens) {
+        if (c.status === "solicitada") { add({ ...por(null, "expedicao"), criado_em: c.criado_em, acao: "contagem_pedida", categoria: "contagem", resumo: `Pediu contagem de ${D.lista((c.itens || []).map((i) => nomeProd(i.produto_id)), 6)}`, ref_tipo: "contagem", ref_id: c.id, itens: (c.itens || []).map((i) => ({ produto: nomeProd(i.produto_id), unidade: un(i.produto_id) })), detalhes: { escopo: c.escopo } }); continue; }
+        const itens = (c.itens || []).map((i) => ({ produto: nomeProd(i.produto_id), esperado: i.esperado, contado: i.contado, diferenca: i.diferenca, unidade: un(i.produto_id) })); const dif = itens.filter((i) => i.diferenca).length;
+        add({ ...por(c.criado_por), criado_em: c.criado_em, acao: c.status === "descartada" ? "contagem_descartada" : "contagem_feita", categoria: "contagem", resumo: c.status === "descartada" ? "Descartou a contagem" : `Contou o estoque (${D.plural(itens.length, "produto", "produtos")}${dif ? `, diferença em ${dif}` : ", tudo certo"})`, ref_tipo: "contagem", ref_id: c.id, itens, detalhes: { escopo: c.escopo, situacao: c.status } });
+      }
+      return L.map((a) => ({ ...a, busca: `${a.resumo} ${a.nota_numero || ""} ${a.cliente || ""} ${a.usuario_nome} ${JSON.stringify(a.itens)} ${a.detalhes.placa || ""} ${a.detalhes.motorista || ""}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() })).sort((a, b) => D.aMs(b.criado_em) - D.aMs(a.criado_em));
+    };
     const salvar = () => NE.memoria.gravar(CHAVE, e);
     const eu = () => e.perfis.find((p) => p.id === e.perfilId) || e.perfis[0];
     const fotos = new Map();
@@ -187,7 +212,7 @@
       if (eu().funcao === "vendedor") vend = eu();
       else if (n.vendedor_id) { vend = e.perfis.find((p) => p.id === n.vendedor_id && p.funcao === "vendedor" && p.ativo !== false); if (!vend) throw new Error("Esse vendedor não está cadastrado."); }
       else if (n.vendedor) vend = D.perfilDoVendedor(n.vendedor, e.perfis);
-      const nota = { id: uid("n"), numero, cliente: (n.cliente || "").trim(), vendedor: vend ? vend.nome : (n.vendedor || "").trim(), vendedor_id: vend ? vend.id : null, status: "pendente", chave_nfe: n.chave_nfe || "", token_publico: tokenUuid(), criado_em: new Date().toISOString(), conferencia_id: null, itens };
+      const nota = { id: uid("n"), numero, cliente: (n.cliente || "").trim(), vendedor: vend ? vend.nome : (n.vendedor || "").trim(), vendedor_id: vend ? vend.id : null, criado_por: eu().id, status: "pendente", chave_nfe: n.chave_nfe || "", token_publico: tokenUuid(), criado_em: new Date().toISOString(), conferencia_id: null, itens };
       e.notas.push(nota);
       emitir(e, { tipo: "nota_nova", severidade: "info", titulo: `Nota ${numero} na fila`, texto: `${nota.cliente ? nota.cliente + ". " : ""}${D.plural(itens.length, "item", "itens")} para conferir.`, ref_tipo: "nota", ref_id: nota.id, chave_dedupe: `nota_nova:${nota.id}` }, Date.now());
       return nota;
@@ -229,7 +254,7 @@
       async notas({ status } = {}) { varredura(e, Date.now()); return copia(e.notas.filter((n) => !status || (Array.isArray(status) ? status.includes(n.status) : n.status === status)).sort((a, b) => D.aMs(a.criado_em) - D.aMs(b.criado_em))); },
       async criarNota(n) { await pausa(); const nota = novaNota(n); salvar(); return copia(nota); },
       async importarNotas(lista) { await pausa(); const out = []; for (const n of lista) { try { out.push({ ok: true, nota: copia(novaNota(n)) }); } catch (er) { out.push({ ok: false, numero: n.numero, erro: er.message }); } } salvar(); return out; },
-      async cancelarNota(id) { const n = e.notas.find((x) => x.id === id); if (n && n.status !== "conferida") { n.status = "cancelada"; salvar(); } },
+      async cancelarNota(id) { const n = e.notas.find((x) => x.id === id); if (n && n.status !== "conferida") { n.status = "cancelada"; n.cancelada_em = new Date().toISOString(); n.cancelada_por = eu().id; salvar(); } },
 
       // fotos
       async enviarFoto(blob) { await pausa(80); const c = `teste/foto/${uid("f")}`; fotos.set(c, URL.createObjectURL(blob)); return c; },
@@ -260,6 +285,14 @@
       async conferencias({ dia, somenteMinhas, idPerfil, de, ate } = {}) {
         let ini, fim; if (dia) { ini = D.inicioDoDia(new Date(`${dia}T12:00:00-03:00`).getTime()); fim = ini + DIA; } else { ini = de ?? 0; fim = ate ?? Infinity; }
         return copia(e.conferencias.filter((c) => { const t = D.aMs(c.criado_em); return t >= ini && t < fim && (!somenteMinhas || c.conferente_id === idPerfil); }).sort((a, b) => D.aMs(b.criado_em) - D.aMs(a.criado_em)).map(completaConf));
+      },
+      // Histórico de atividades: na demonstração é montado a partir do que existe (mesmo formato do banco)
+      async atividades({ de, ate, categoria, usuario_id, busca, antes, limite = 60 } = {}) {
+        if (!["diretoria", "administrativo"].includes(eu().funcao)) throw new Error("O histórico é só da diretoria e do administrativo.");
+        const lista = historicoDe(e);
+        const t = String(busca || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().split(/\s+/).filter(Boolean);
+        const out = lista.filter((a) => { const ms = D.aMs(a.criado_em); return (!de || ms >= de) && (!ate || ms < ate) && (!antes || ms < D.aMs(antes)) && (!categoria || a.categoria === categoria) && (!usuario_id || a.usuario_id === usuario_id) && t.every((p) => a.busca.includes(p)); });
+        return copia(out.slice(0, limite).map(({ busca: _b, ...a }) => a));
       },
       async contexto() { varredura(e, Date.now()); return copia(contextoDe(e)); },
 

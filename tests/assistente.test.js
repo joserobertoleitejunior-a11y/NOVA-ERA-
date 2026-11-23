@@ -51,6 +51,7 @@ function criarRepo({ eu = EU, dados = semente() } = {}) {
       for (const [k, v] of Object.entries(o.neq || {})) rows = rows.filter((r) => r[k] !== v);
       for (const [k, v] of Object.entries(o.in || {})) rows = rows.filter((r) => v.includes(r[k]));
       for (const [k, v] of Object.entries(o.gte || {})) rows = rows.filter((r) => String(r[k]) >= String(v));
+      for (const [k, v] of Object.entries(o.lt || {})) rows = rows.filter((r) => String(r[k]) < String(v));
       for (const k of o.nulos || []) rows = rows.filter((r) => r[k] == null);
       if (o.ordem) { const [k, asc] = o.ordem; rows.sort((a, b) => (asc === false ? -1 : 1) * cmp(a[k], b[k])); }
       if (o.limite) rows = rows.slice(0, o.limite);
@@ -394,7 +395,7 @@ test("vendedor: a IA só recebe as ferramentas de venda; as de administração n
   const r = await perguntar(repoVend(), [dizer("ok")]); const nomes = r.claude.pedidos[0].tools.map((t) => t.name);
   assert.deepEqual(nomes.sort(), ["abrir_tela", "avisos", "cancelar_notas", "conferencias", "estoque", "lancar_notas", "link_rastreio", "marcar_avisos", "notas", "preferencias_avisos", "produtos"]);
   assert.match(r.claude.pedidos[0].system[0].text, /assistente de vendas/); assert.match(r.claude.pedidos[0].system[0].text, /Wesley Costa, vendedor/); assert.doesNotMatch(r.claude.pedidos[0].system[0].text, /cadastrar_funcionarios/);
-  const adm = await perguntar(criarRepo(), [dizer("ok")]); assert.equal(adm.claude.pedidos[0].tools.length, 37); assert.doesNotMatch(adm.claude.pedidos[0].system[0].text, /assistente de vendas/);
+  const adm = await perguntar(criarRepo(), [dizer("ok")]); assert.equal(adm.claude.pedidos[0].tools.length, 38); assert.doesNotMatch(adm.claude.pedidos[0].system[0].text, /assistente de vendas/);
 });
 test("vendedor: se a IA tentar uma ferramenta de administração, a trava recusa (e nada é preparado)", async () => {
   const repo = repoVend(); const r = await perguntar(repo, [usar("cadastrar_funcionarios", { pessoas: [{ nome: "X Y", funcao: "ajudante" }] }), dizer("Isso é com a administração.")]);
@@ -438,4 +439,28 @@ test("domínio do vendedor: dono da nota, disponível, falta de estoque e aviso 
   assert.equal(a.tipo, "minha_carga_diferenca"); assert.match(a.texto, /X \+2\. Caminhão AAA1A11, às 12:00/); assert.equal(D.alertaMinhaCarga({ nota: { numero: "9" }, conf: { id: "c", placa: "A", criado_em: AGORA }, itens: [{ descricao: "X", qtd_nota: 1, qtd_carregada: 1 }] }).tipo, "minha_carga_saiu");
   assert.deepEqual(D.alertasPadrao("admin", "vendedor"), ["minha_carga_saiu", "minha_carga_diferenca", "minha_nota_parada"]); assert.ok(D.alertasPadrao("admin", "expedicao").includes("estoque_negativo")); assert.deepEqual(D.destinatarios("estoque_negativo", [...perfis, { id: "adm", funcao: "expedicao", papel: "admin", ativo: true }]), ["adm"]);
   const v = D.alertasDaVarredura({ notas: [{ id: "n", numero: "7", cliente: "C", status: "pendente", criado_em: new Date(AGORA - 5 * 3600e3).toISOString(), vendedor: "Fábio" }], saldos: [], contagens: [], config: null, agora: AGORA, perfis }); assert.equal(v.find((x) => x.tipo === "minha_nota_parada").destinatario_id, "u3");
+});
+
+// ───────────────────────── histórico de atividades ─────────────────────────
+const atividadesDeTeste = () => [
+  { criado_em: "2026-11-23T13:00:00Z", usuario_nome: "Eduardo", usuario_funcao: "expedicao", acao: "carga_conferida_diferenca", categoria: "carga", resumo: "Conferiu a carga da nota 48172, caminhão ABC1D23 (com diferença em 1 item)", nota_numero: "48172", cliente: "JB Obras", itens: [{ produto: "Boca de lobo", nota: 20, carregada: 22, diferenca: 2 }], detalhes: { placa: "ABC1D23", motivo: "separaram a mais" }, busca: "conferiu a carga da nota 48172 jb obras eduardo boca de lobo abc1d23" },
+  { criado_em: "2026-11-23T12:00:00Z", usuario_nome: "José Roberto", usuario_funcao: "administrativo", acao: "nota_lancada", categoria: "nota", resumo: "Lançou a nota 48180 de Construtora Alfa (1 item)", nota_numero: "48180", cliente: "Construtora Alfa", itens: [{ produto: "Meio-fio", quantidade: 60 }], detalhes: {}, busca: "lancou a nota 48180 construtora alfa jose roberto meio-fio" },
+  { criado_em: "2026-09-01T12:00:00Z", usuario_nome: "José Roberto", usuario_funcao: "administrativo", acao: "nota_lancada", categoria: "nota", resumo: "Lançou a nota 100 antiga", nota_numero: "100", cliente: null, itens: [], detalhes: {}, busca: "nota 100 antiga" },
+];
+test("historico_de_atividades: diretoria e administrativo consultam por período, tipo, pessoa e mercadoria", async () => {
+  const repo = criarRepo(); repo.db.atividades = atividadesDeTeste();
+  const r = await perguntar(repo, [usarVarias([["historico_de_atividades", { periodo: "7d" }], ["historico_de_atividades", { busca: "boca de lobo" }], ["historico_de_atividades", { pessoa: "jose", tipo: "nota" }], ["historico_de_atividades", { periodo: "30d" }]]), dizer("ok")]);
+  const [todos, mercadoria, pessoa, trinta] = r.claude.pedidos[1].messages.at(-1).content.map((x) => JSON.parse(x.content.replace(/^<dados>|<\/dados>$/g, "")));
+  assert.equal(todos.total, 2); assert.equal(todos.atividades[0].quem, "Eduardo"); assert.equal(todos.atividades[0].funcao, "Expedição"); assert.equal(todos.atividades[0].nota, "48172"); assert.equal(todos.atividades[0].mercadoria[0].diferenca, 2); assert.equal(todos.atividades[0].detalhes.placa, "ABC1D23");
+  assert.equal(mercadoria.total, 1); assert.equal(mercadoria.atividades[0].cliente, "JB Obras");
+  assert.equal(pessoa.total, 1); assert.equal(pessoa.atividades[0].nota, "48180");
+  assert.equal(trinta.total, 2, "a nota de setembro fica fora dos 30 dias");
+  assert.equal(repo.escritas.length, 0, "consulta não grava nada");
+});
+test("historico_de_atividades: expedição não vê; vendedor nem recebe a ferramenta", async () => {
+  const edu = clone(semente().perfis[1]); const repo = criarRepo({ eu: edu }); repo.db.atividades = atividadesDeTeste();
+  const r = await perguntar(repo, [usar("historico_de_atividades", { periodo: "7d" }), dizer("ok")]);
+  const res = r.claude.pedidos[1].messages.at(-1).content[0].content; assert.match(res, /só da diretoria e do administrativo/); assert.doesNotMatch(res, /48172/);
+  const vend = { id: "u-vend", nome: "Wesley", funcao: "vendedor", papel: "admin", ativo: true, alertas: null, criado_em: "2026-11-20T15:33:00Z" }; const d = semente(); d.perfis.push(vend);
+  const rv = await perguntar(criarRepo({ eu: vend, dados: d }), [dizer("oi")]); assert.ok(!rv.claude.pedidos[0].tools.some((t) => t.name === "historico_de_atividades"));
 });

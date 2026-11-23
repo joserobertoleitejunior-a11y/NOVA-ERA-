@@ -147,6 +147,19 @@
       aplicarAjuste: async (id) => ok(await sb.rpc("aplicar_ajuste_contagem", { p_id: id })),
       descartarContagem: async (id) => ok(await sb.rpc("descartar_contagem", { p_id: id })),
 
+      // Histórico de atividades (só a administração; o banco recusa os outros). Filtros: período, tipo, pessoa e busca por texto.
+      async atividades({ de, ate, categoria, usuario_id, busca, antes, limite = 60 } = {}) {
+        let q = sb.from("atividades").select("*").order("criado_em", { ascending: false }).order("id", { ascending: false }).limit(limite);
+        if (de) q = q.gte("criado_em", new Date(de).toISOString());
+        if (ate) q = q.lt("criado_em", new Date(ate).toISOString());
+        if (antes) q = q.lt("criado_em", antes);
+        if (categoria) q = q.eq("categoria", categoria);
+        if (usuario_id) q = q.eq("usuario_id", usuario_id);
+        const t = String(busca || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[%_,()*\\]/g, " ").trim();
+        for (const palavra of t.split(/\s+/).filter(Boolean).slice(0, 5)) q = q.ilike("busca", `%${palavra}%`);
+        return ok(await q);
+      },
+
       async alertas({ soNaoLidos = false, limite = 80 } = {}) {
         let q = sb.from("alertas").select("*").eq("destinatario_id", meuId).is("resolvido_em", null).order("criado_em", { ascending: false }).limit(limite);
         if (soNaoLidos) q = q.is("lido_em", null);
@@ -203,7 +216,7 @@
   const USUARIOS_TESTE = ["admin", "adminvendas", "adminexpedicao", "admindiretoria", "adminadministrativo", "conferente", "ajudante", "motorista"];
   const nomes = ["emCache", "perfil", "veiculos", "produtos", "funcionarios", "criarFuncionario", "criarFuncionarios", "redefinirSenha", "alterarFuncionario", "criarVeiculo", "alterarVeiculo", "criarProduto", "alterarProduto", "excluirVeiculo", "excluirProduto",
     "notas", "criarNota", "importarNotas", "cancelarNota", "enviarFoto", "urlFoto", "fotoExemplo", "registrarConferencia", "sincronizar", "pendentes", "conferencias", "contexto",
-    "saldos", "movimentos", "lancarMovimento", "contagens", "pedirContagem", "concluirContagem", "aplicarAjuste", "descartarContagem", "alertas", "marcarLidos", "resolverAlerta", "preferencias", "salvarPreferencias", "config", "salvarConfig",
+    "saldos", "movimentos", "lancarMovimento", "contagens", "pedirContagem", "concluirContagem", "aplicarAjuste", "descartarContagem", "alertas", "atividades", "marcarLidos", "resolverAlerta", "preferencias", "salvarPreferencias", "config", "salvarConfig",
     "pushSuportado", "pushAssinar", "pushRemover", "pushTestar", "iaDisponivel", "iaPerguntar", "iaExecutar", "iaLerNota", "trocarPerfil", "reiniciar"];
   // Antes do login não há sessão: na demonstração o pedido fica na demonstração; fora dela vai ao banco de verdade.
   const pedirAjudaSenhaAntesLogin = (d) => (naDemo() ? NE.criarTeste().pedirAjudaSenha(d) : real_().pedirAjudaSenha(d));

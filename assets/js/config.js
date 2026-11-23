@@ -17,6 +17,9 @@ window.NOVA_ERA = {
   // Contato (aparece no site inteiro)
   telefoneEmpresa: "(15) 3273-1159",
   telefoneLink: "+551532731159",
+  // Suporte do app (Confere Carga): quem resolve problemas. Aparece em Mais → Suporte e na tela "Esqueci a senha".
+  suporteNome: "José Roberto",
+  whatsappAdmin: "5515991441475",
   whatsapp: "", // ← WhatsApp comercial só com números, ex.: "5515999999999". Vazio = o site oferece ligar/copiar
   instagram: "https://www.instagram.com/novaeradrenagem/",
   endereco: "Rodovia Raposo Tavares (SP-270), km 167 · Itapetininga/SP",

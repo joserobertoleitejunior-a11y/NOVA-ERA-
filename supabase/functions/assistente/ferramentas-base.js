@@ -86,7 +86,7 @@
   const UNIDADES = { un: "unidade", m: "metro", m3: "metro cúbico", t: "tonelada" };
   const unidadeDe = (v) => { const k = norm(v).replace(/ /g, ""); if (UNIDADES[k]) return k; if (/^(unidade|unidades|und|pc|peca|pecas)$/.test(k)) return "un"; if (/^(metro|metros|mt)$/.test(k)) return "m"; if (/^(m3|metrocubico|metroscubicos|metro3)$/.test(k)) return "m3"; if (/^(tonelada|toneladas|ton)$/.test(k)) return "t"; return null; };
 
-  const TELAS = { inicio: "Início", notas: "Notas", estoque: "Estoque", cargas: "Cargas", alertas: "Avisos", equipe: "Equipe", cadastros: "Produtos e caminhões", config: "Ajustes", exportar: "Exportar relatórios", mais: "Mais opções", contar: "Contagem de estoque", resumo: "Resumo" };
+  const TELAS = { inicio: "Início", notas: "Notas", estoque: "Estoque", cargas: "Cargas", alertas: "Avisos", equipe: "Equipe", cadastros: "Produtos e caminhões", config: "Ajustes", exportar: "Exportar relatórios", mais: "Mais opções", contar: "Contagem de estoque", resumo: "Resumo", historico: "Histórico de atividades" };
   const FLUXOS = { nota: "Lançar uma nota", xml: "Importar notas por XML", mov: "Lançar entrada ou perda", contagem: "Pedir contagem", novaPessoa: "Cadastrar uma pessoa", novoVeiculo: "Cadastrar um caminhão", novoProduto: "Cadastrar um produto", ajustes: "Ajustes dos avisos" };
 
   const placaDe = (v) => String(v == null ? "" : v).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 7);

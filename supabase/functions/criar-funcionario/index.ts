@@ -38,6 +38,11 @@ async function criarUm(admin: any, b: any, cadastradoPor: string) {
   return { id: criado.user.id, usuario, senha, nome };
 }
 
+// Anota no histórico de atividades (só quem é administração enxerga). Nunca derruba a ação principal.
+async function anotar(admin: any, quem: string, acao: string, resumo: string, ref: string, detalhes: Record<string, unknown>) {
+  try { await admin.rpc("registrar_atividade", { p_acao: acao, p_categoria: "pessoa", p_resumo: resumo, p_ref_tipo: "perfil", p_ref_id: ref, p_detalhes: detalhes, p_usuario: quem }); } catch (_) { /* histórico é complementar */ }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return resp(405, { erro: "Método não permitido." });
@@ -54,10 +59,11 @@ Deno.serve(async (req) => {
     if (b.acao === "redefinir") {
       const id = String(b.id ?? ""); const senha = String(b.senha ?? "") || senhaNova();
       if (senha.length < 6) return resp(400, { erro: "A senha precisa ter pelo menos 6 caracteres." });
-      const { data: p } = await admin.from("perfis").select("usuario").eq("id", id).maybeSingle();
+      const { data: p } = await admin.from("perfis").select("usuario, nome").eq("id", id).maybeSingle();
       if (!p) return resp(404, { erro: "Funcionário não encontrado." });
       const { error } = await admin.auth.admin.updateUserById(id, { password: senha });
       if (error) return resp(400, { erro: "Não foi possível trocar a senha." });
+      await anotar(admin, euId, "senha_redefinida", `Gerou uma senha nova para ${p.nome}`, id, {}); // a senha em si nunca é anotada
       return resp(200, { usuario: p.usuario, senha });
     }
     if (b.acao === "apagar") {
@@ -77,6 +83,7 @@ Deno.serve(async (req) => {
       }
       const { error } = await admin.auth.admin.deleteUser(id); // a ficha (perfis) some junto: perfis.id → auth.users ON DELETE CASCADE
       if (error) return resp(400, { erro: "Não foi possível apagar. Desative a pessoa em vez de apagar." });
+      await anotar(admin, euId, "pessoa_apagada", `Apagou o cadastro de ${p.nome}`, id, {});
       return resp(200, { ok: true });
     }
     if (Array.isArray(b.lote)) {

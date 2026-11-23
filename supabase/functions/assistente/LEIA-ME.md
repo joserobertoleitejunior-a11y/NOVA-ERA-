@@ -17,7 +17,7 @@ Sem a chave, nenhuma IA aparece para ninguém. Para desligar de vez: apague o se
 - `ler_nota` — quem confere carga (e a administração): foto da nota → número, cliente e itens.
 - `status` — diz se a IA está ligada e para quem (`ativo`, `leitura`, `acoes`).
 
-Ferramentas de **leitura**: resumo, diferenças, estoque, contagem sugerida, desempenho da equipe, funcionários, produtos, caminhões, notas, conferências, movimentos, contagens, avisos, ajustes, histórico do assistente, abrir tela, link de rastreio.
+Ferramentas de **leitura**: resumo, diferenças, estoque, contagem sugerida, desempenho da equipe, funcionários, produtos, caminhões, notas, conferências, movimentos, contagens, avisos, ajustes, histórico do assistente, **histórico de atividades** (só diretoria e administrativo: quem fez o quê, quando, mercadoria e nota), abrir tela, link de rastreio.
 Ferramentas de **ação** (sempre viram um cartão Confirmar/Cancelar):
 cadastrar / editar / apagar funcionários · redefinir senhas · cadastrar / editar / apagar produtos · cadastrar / editar / apagar caminhões (com fotos) ·
 lançar notas (digitadas, de foto ou de XML) · cancelar notas · **conferir carga** (fotos da carga e da placa obrigatórias) ·
@@ -63,4 +63,6 @@ Deno.serve(montar({ createClient, env: Deno.env, fetch }));
 ```
 A ordem dos imports importa (o domínio e a base vêm antes). Se algum desses arquivos mudar, republique apontando para o commit novo.
 
-A função `criar-funcionario` (cadastrar, redefinir senha e **apagar** funcionário) também precisa estar publicada na versão mais recente.
+A função `criar-funcionario` (cadastrar, redefinir senha e **apagar** funcionário) também precisa estar publicada na versão mais recente: ela anota no histórico de atividades quando alguém apaga um cadastro ou gera senha nova (sem guardar a senha).
+
+Migrações do histórico: `009_historico.sql` e `010_historico_busca.sql` (ou `EXECUTAR-TUDO.sql`).

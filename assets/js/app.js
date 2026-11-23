@@ -19,8 +19,8 @@
   const NOMES_ABA = { inicio: ["Início", "casa"], notas: ["Notas", "nota"], fila: ["Fila", "nota"], estoque: ["Estoque", "caixas"], cargas: ["Cargas", "caminhao"], alertas: ["Avisos", "sino"], mais: ["Mais", "mais_menu"] };
   const TODAS_ADMIN = ["inicio", "resumo", "notas", "estoque", "cargas", "mais", "alertas", "equipe", "cadastros", "config", "exportar", "guia", "contar"];
   const PAPEIS = {
-    diretoria:      { nav: ["inicio", "cargas", "estoque", "mais"],                  painel: "empresa", telas: TODAS_ADMIN,                                                              conferir: false, ia: true,  cadastra: true,  lancaNota: false, fluxos: ["ajustes", "pessoa", "veiculo", "produto", "novaPessoa", "novoVeiculo", "novoProduto"] },
-    administrativo: { nav: ["inicio", "notas", "estoque", "mais"],                   painel: "escritorio", telas: TODAS_ADMIN,                                                           conferir: false, ia: true,  cadastra: true,  lancaNota: true,  fluxos: null },
+    diretoria:      { nav: ["inicio", "cargas", "estoque", "mais"],                  painel: "empresa", telas: TODAS_ADMIN.concat("historico"),                                                              conferir: false, ia: true,  cadastra: true,  lancaNota: false, fluxos: ["ajustes", "pessoa", "veiculo", "produto", "novaPessoa", "novoVeiculo", "novoProduto"] },
+    administrativo: { nav: ["inicio", "notas", "estoque", "mais"],                   painel: "escritorio", telas: TODAS_ADMIN.concat("historico"),                                                           conferir: false, ia: true,  cadastra: true,  lancaNota: true,  fluxos: null },
     expedicao:      { nav: ["inicio", "notas", "estoque", "cargas", "mais"],         painel: "patio",   telas: TODAS_ADMIN.concat("conferir"),                                           conferir: true,  ia: true,  cadastra: true,  lancaNota: true,  fluxos: null },
     vendedor:       { nav: ["inicio", "notas", "estoque", "cargas", "mais"],         painel: "vendas",  telas: ["inicio", "notas", "estoque", "cargas", "mais", "alertas", "guia"],      conferir: false, ia: true,  cadastra: false, lancaNota: true,  fluxos: ["nota", "xml"] },
     conferente:     { nav: ["notas", "estoque", "alertas"],                          painel: "fila",    telas: ["notas", "estoque", "alertas", "conferir", "contar", "guia", "inicio"],  conferir: true,  ia: false, cadastra: false, lancaNota: false, fluxos: ["resolver"] },
@@ -64,7 +64,7 @@
     const { rota, params } = atual;
     const sem = SEM_NAV.has(rota);
     document.body.classList.toggle("com-nav", !sem);
-    $("main").className = ["resumo", "cargas", "estoque", "notas", "equipe", "cadastros", "config", "exportar"].includes(rota) && ehAdmin() ? "largo" : "";
+    $("main").className = ["resumo", "cargas", "estoque", "notas", "equipe", "cadastros", "config", "exportar", "historico"].includes(rota) && ehAdmin() ? "largo" : "";
     nav(rota, sem); botaoIA(sem);
     window.scrollTo({ top: 0 });
     if (!podeAbrir(rota, params)) return semPermissao(rota);   // digitou o endereço de uma tela de outra função

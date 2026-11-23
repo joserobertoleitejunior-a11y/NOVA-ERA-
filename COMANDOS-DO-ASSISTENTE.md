@@ -10,6 +10,7 @@ Dá para escrever, falar no microfone e anexar foto, PDF ou XML (botão do clipe
 - "Como está o estoque do meio-fio?" · "O que está abaixo do mínimo?" · "O que eu devo contar hoje?"
 - "Quem conferiu hoje?" · "Quais foram as conferências com diferença?" · "Quem trabalha aqui?"
 - "Mostre os avisos que eu ainda não li." · "O que o assistente fez hoje?"
+- Só diretoria e administrativo: "Quem lançou a nota 48213 e a que horas?" · "O que o Eduardo fez hoje?" · "Quem mexeu no meio-fio esta semana?" · "Quem conferiu a carga da placa ABC1D23?" (lê o histórico de atividades).
 
 ## Equipe
 - "Cadastre a Maria Lima como vendedora, WhatsApp 15 99888-7766."
@@ -51,6 +52,7 @@ Dá para escrever, falar no microfone e anexar foto, PDF ou XML (botão do clipe
 - Só quem tem acesso de administração usa o assistente (diretoria, administrativo, expedição e, só para vender, o vendedor), com o login da própria pessoa: ele não faz nada que o banco não deixaria essa pessoa fazer.
 - Ninguém apaga o próprio cadastro, o sistema nunca fica sem administrador, e quem tem histórico não é apagado (só desativado).
 - Tudo que foi confirmado fica registrado (quem, o quê, quando), sem senhas: pergunte "o que o assistente fez hoje?".
+- O **histórico de atividades** (tela Mais → Histórico) guarda quem fez, quando, a mercadoria e os dados da nota. Só diretoria e administrativo enxergam; ninguém edita nem apaga.
 
 ## Para o vendedor (só venda)
 O vendedor também tem o botão **Assistente**, mas o assistente dele só enxerga e faz o que é da venda:

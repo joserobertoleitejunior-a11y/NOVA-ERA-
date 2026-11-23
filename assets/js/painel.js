@@ -107,17 +107,20 @@
   // ───────────────────────── MAIS ─────────────────────────
   NE.rotas.mais = (raiz, params, app) => {
     const item = (icone, titulo, sub, acao, id) => el("button", { type: "button", class: "cartao-guia", id, onclick: acao }, ic(icone), el("span", {}, titulo, el("small", { style: "display:block" }, sub)));
+    const cfgApp = window.NOVA_ERA || {}; const suporte = { numero: NE.soDigitos(cfgApp.whatsappAdmin || ""), nome: cfgApp.suporteNome || "o suporte" };
     const pode = (r) => (app.perm.telas || []).includes(r); const tutorial = app.perm.painel === "vendas" ? "vendas" : "painel";
     // O tutorial mostra as telas de verdade: vai para o Início e começa quando ele terminou de desenhar
     const abrirTutorial = () => { app.ir("inicio"); const t0 = Date.now(); const esperar = () => { if (document.querySelector(".tiles") || Date.now() - t0 > 4000) NE.iniciarTour(tutorial, { verDicas: () => NE.abrirGuia(tutorial, raiz, () => app.ir("mais"), { novaConferencia: () => app.ir("conferir") }) }); else setTimeout(esperar, 150); }; esperar(); };
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Mais"), el("p", {}, `${NE.rotuloFuncao(app.perfil.funcao)} · o que mais você pode fazer aqui.`))),
       el("div", { class: "menu-grade" },
         pode("alertas") && item("sino", "Avisos", "O que aconteceu", () => app.ir("alertas")),
+        pode("historico") && item("relogio", "Histórico", "Quem fez o quê e quando", () => app.ir("historico"), "mais-historico"),
         pode("equipe") && app.perm.cadastra && item("pessoas", "Equipe", "Funcionários e acesso", () => app.ir("equipe")),
         pode("cadastros") && app.perm.cadastra && item("caminhao", "Caminhões", "Placas da frota", () => app.ir("cadastros", { aba: "caminhoes" })),
         pode("cadastros") && app.perm.cadastra && item("caixas", "Produtos", "Mínimo e pilha", () => app.ir("cadastros", { aba: "produtos" })),
         pode("guia") && app.perm.cadastra && item("engrenagem", "Ajustes", "Horário e prazos", () => app.ir("guia", { fluxo: "ajustes" })),
         item("ajuda", "Tutorial", "Aprender em 1 minuto", abrirTutorial, "mais-tutorial"),
+        suporte.numero && item("whatsapp", "Suporte do app", `Fale com ${suporte.nome} no WhatsApp`, () => window.open(`https://wa.me/${suporte.numero}?text=${encodeURIComponent(`Olá, ${suporte.nome.split(" ")[0]}! Aqui é ${app.perfil.nome} (${NE.rotuloFuncao(app.perfil.funcao)}). Preciso de ajuda com o Confere Carga: `)}`, "_blank", "noopener"), "mais-suporte"),
         pode("cargas") && app.perm.painel !== "vendas" && item("baixar", "Planilha de cargas", "30 dias em CSV", async () => baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA })))),
         item("mapa", "Ver o site", "Abre em outra aba", () => window.open("index.html", "_blank", "noopener"))));
   };

@@ -101,6 +101,15 @@
     return { total: lista.length, acoes: lista.map((a) => ({ quando: a.criado_em, quem: a.usuario_nome, ferramenta: a.ferramenta, resumo: a.resumo, resultado: a.status })) };
   });
 
+  ler("historico_de_atividades", "Histórico de atividades da empresa: quem fez, quando, qual mercadoria e dados da nota (nota lançada ou cancelada, carga conferida, entrada/perda de estoque, contagem, produtos, caminhões, pessoas, ajustes). Só diretoria e administrativo.",
+    esq({ periodo: periodoProp, tipo: str("Tipo de atividade", { enum: ["nota", "carga", "estoque", "contagem", "produto", "caminhao", "pessoa", "ajuste"] }), pessoa: str("Parte do nome de quem fez"), busca: str("Parte do número da nota, cliente, mercadoria ou placa"), limite: { type: "number", description: "Quantas listar (padrão 20, máximo 60)" } }), async (ctx, e) => {
+      if (!["diretoria", "administrativo"].includes(ctx.eu && ctx.eu.funcao)) return { erro: "O histórico de atividades é só da diretoria e do administrativo." };
+      const per = D().periodo(e.periodo || "7d", ctx.agora); const b = U.norm(e.busca || ""); const p = U.norm(e.pessoa || "");
+      const lista = await ctx.repo.listar("atividades", { selecao: "criado_em, usuario_nome, usuario_funcao, acao, categoria, resumo, nota_numero, cliente, itens, detalhes, busca", gte: { criado_em: new Date(per.de).toISOString() }, lt: { criado_em: new Date(per.ate).toISOString() }, ...(e.tipo ? { eq: { categoria: e.tipo } } : {}), ordem: ["criado_em", false], limite: 1000 });
+      const bate = lista.filter((a) => (!b || b.split(/\s+/).every((w) => U.norm(a.busca || a.resumo).includes(w))) && (!p || U.norm(a.usuario_nome).includes(p)));
+      return { periodo: per.rotulo, total: bate.length, atividades: bate.slice(0, lim(e.limite, 20, 60)).map((a) => ({ quando: a.criado_em, quem: a.usuario_nome, funcao: dom.ROTULO_FUNCAO[a.usuario_funcao] || a.usuario_funcao || null, tipo: a.categoria, o_que_fez: a.resumo, nota: a.nota_numero || null, cliente: a.cliente || null, mercadoria: a.itens, detalhes: a.detalhes })) };
+    });
+
   // ───────────────────────── navegação (só manda o app abrir algo) ─────────────────────────
   ler("abrir_tela", "Mostra um botão para a pessoa abrir uma tela do app (ou um passo a passo). Use quando ela quiser ver ou fazer algo na tela.",
     esq({ tela: str("Tela do app", { enum: Object.keys(dom.TELAS) }), aba: str("Só para cadastros: produtos ou caminhoes", { enum: ["produtos", "caminhoes"] }), passo_a_passo: str("Abrir um passo a passo guiado em vez de uma tela", { enum: Object.keys(dom.FLUXOS) }) }), async (ctx, e) => {

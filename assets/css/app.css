@@ -166,6 +166,13 @@ body.imprimindo-cartoes #area-cartoes { display: block !important; padding: 8mm;
 .menu-grade .cartao-guia small { color: var(--texto-suave); font-weight: 500; }
 .pessoa-aviso { font-size: .88rem; color: var(--texto-suave); }
 
+
+/* Histórico de atividades */
+.hist-filtros { display: grid; gap: 10px; margin-bottom: 12px; }
+.hist-campos { display: grid; grid-template-columns: 1fr; gap: 8px; } @media (min-width: 640px) { .hist-campos { grid-template-columns: 220px 1fr; } }
+.hist-dia { font-size: .95rem; text-transform: capitalize; color: var(--texto-suave); margin: 18px 2px 8px; font-weight: 800; letter-spacing: .02em; }
+.linha-cartao.hist { margin-bottom: 8px; } .linha-cartao.hist .hist-itens { grid-column: 1; color: var(--texto); font-size: .88rem; }
+.lista-historico { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 @media print { .nav-inferior, .fab-ia, .faixa-teste, .topo { display: none !important; } }
 
 /* Topo compacto em telas estreitas: nome some, botões encolhem (nada passa da borda) */
