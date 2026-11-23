@@ -128,6 +128,7 @@
           if (/\.xml$/i.test(f.name || "") || /xml/i.test(f.type || "")) anexos.push({ id, tipo: "xml", nome: f.name || "nota.xml", dados: await NE.nfeXml.lerArquivo(f), novo: true });
           else {
             const blob = await NE.reduzirFoto(await NE.arquivoImagem(f));
+            try { (await createImageBitmap(blob)).close?.(); } catch { throw new Error("Esse arquivo não abriu como imagem. Tire a foto de novo ou escolha outra."); }
             const caminho = await NE.dados.enviarFoto(blob, NE.app.perfil.id);
             anexos.push({ id, tipo: "imagem", nome: f.name && !/^image\.(jpe?g|png)$/i.test(f.name) ? f.name : `foto ${contador}.jpg`, caminho, previa: URL.createObjectURL(blob), novo: true });
           }

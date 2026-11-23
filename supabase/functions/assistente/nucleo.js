@@ -160,9 +160,10 @@ Agora são: ${dataPorExtenso(agora)} (horário de Brasília).`;
     while (mensagens.length && mensagens[0].role !== "user") mensagens.shift();
     const blocos = [];
     const novas = anexos.filter((a) => a.tipo === "imagem" && a.novo).slice(0, 6);
-    for (const a of novas) { try { const f = await ctx.repo.baixarFoto(a.caminho); if (f) blocos.push({ type: "image", source: { type: "base64", media_type: f.tipo, data: f.base64 } }); } catch (e) { console.error("anexo", a.id, e && e.message); } }
+    const ilegiveis = [];
+    for (const a of novas) { try { const f = await ctx.repo.baixarFoto(a.caminho); if (!f) { ilegiveis.push(a.id); continue; } blocos.push({ type: "image", source: { type: "base64", media_type: f.tipo, data: f.base64 } }); } catch (e) { console.error("anexo", a.id, e && e.message); } }
     const res = (Array.isArray(resultados) ? resultados : []).filter((r) => typeof r === "string").slice(-8).map((r) => `• ${r.slice(0, 300)}`);
-    blocos.push({ type: "text", text: `${res.length ? `<resultados_das_acoes_desde_sua_ultima_mensagem>\n${res.join("\n")}\n</resultados_das_acoes_desde_sua_ultima_mensagem>\n` : ""}${resumoAnexos(anexos)}${pergunta}` });
+    blocos.push({ type: "text", text: `${res.length ? `<resultados_das_acoes_desde_sua_ultima_mensagem>\n${res.join("\n")}\n</resultados_das_acoes_desde_sua_ultima_mensagem>\n` : ""}${resumoAnexos(anexos)}${ilegiveis.length ? `<aviso>As fotos ${ilegiveis.join(", ")} não puderam ser abertas como imagem. Diga isso à pessoa e peça para enviar de novo (foto ou PDF).</aviso>\n` : ""}${pergunta}` });
     if (mensagens.length && mensagens[mensagens.length - 1].role === "user") mensagens.pop();   // evita duas mensagens seguidas da pessoa
     mensagens.push({ role: "user", content: blocos });
     const sis = [{ type: "text", text: sistema(ctx.eu, ctx.agora), cache_control: { type: "ephemeral" } }];
@@ -197,9 +198,9 @@ Agora são: ${dataPorExtenso(agora)} (horário de Brasília).`;
   // ───────────────────────── ler a nota por foto (quem confere também usa) ─────────────────────────
   async function lerNota({ claude, modelo, imagem }) {
     const img = String(imagem || ""); if (img.length < 100 || img.length > 8000000) throw ErroAssistente("Foto inválida ou grande demais.", 400);
-    const r = await claude({ model: modelo, max_tokens: 1500, system: "Você lê notas fiscais brasileiras (DANFE) de uma fábrica de pré-moldados. Extraia número da nota, cliente (destinatário) e itens com quantidade. Se não tiver certeza de um dado, omita; nunca invente.",
+    const r = await claude({ model: modelo, max_tokens: 1500, system: "Você lê notas fiscais brasileiras (DANFE) de uma fábrica de pré-moldados. Extraia número da nota, cliente (destinatário) e itens com quantidade. Se não tiver certeza de um dado, omita; nunca invente. Responda SEMPRE chamando a ferramenta nota.",
       tools: [{ name: "nota", description: "Dados lidos da nota fiscal", input_schema: { type: "object", properties: { numero: { type: "string" }, cliente: { type: "string" }, itens: { type: "array", items: { type: "object", properties: { codigo: { type: "string" }, descricao: { type: "string" }, quantidade: { type: "number" } }, required: ["descricao", "quantidade"] } } }, required: ["itens"] } }],
-      tool_choice: { type: "tool", name: "nota" }, messages: [{ role: "user", content: [{ type: "image", source: { type: "base64", media_type: "image/jpeg", data: img } }, { type: "text", text: "Leia esta nota fiscal." }] }] });
+      messages: [{ role: "user", content: [{ type: "image", source: { type: "base64", media_type: "image/jpeg", data: img } }, { type: "text", text: "Leia esta nota fiscal." }] }] });
     const uso = (r.content || []).find((x) => x.type === "tool_use"); if (!uso) throw ErroAssistente("Não consegui ler a nota. Tire outra foto, mais perto e sem sombra.", 422);
     return { numero: String(uso.input.numero ?? "").replace(/\D/g, ""), cliente: uso.input.cliente ?? "", itens: (uso.input.itens ?? []).filter((i) => i.quantidade > 0), origem: "claude" };
   }
@@ -268,6 +269,7 @@ Agora são: ${dataPorExtenso(agora)} (horário de Brasília).`;
       async baixarFoto(caminho) {
         const { data, error } = await c.storage.from(BUCKET).download(caminho); if (error || !data) return null;
         const buf = new Uint8Array(await data.arrayBuffer()); if (buf.length > 5 * 1024 * 1024) return null;
+        const ehJpg = buf[0] === 0xff && buf[1] === 0xd8, ehPng = buf[0] === 0x89 && buf[1] === 0x50, ehGif = buf[0] === 0x47 && buf[1] === 0x49, ehWebp = buf[0] === 0x52 && buf[1] === 0x49 && buf[8] === 0x57; if (!ehJpg && !ehPng && !ehGif && !ehWebp) return null;
         const tipo = buf[0] === 0x89 && buf[1] === 0x50 ? "image/png" : buf[0] === 0x47 && buf[1] === 0x49 ? "image/gif" : buf[0] === 0x52 && buf[1] === 0x49 && buf[8] === 0x57 ? "image/webp" : "image/jpeg";
         return { base64: b64std(buf), tipo };
       },
