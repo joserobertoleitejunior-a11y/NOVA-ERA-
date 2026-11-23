@@ -142,7 +142,7 @@
     conferir(redesenhar) {
       const tudo = el("button", { type: "button", class: "btn btn-verde btn-bloco btn-gigante", id: "btn-tudo-confere" }, ic("check"), "Tudo confere");
       tudo.addEventListener("click", () => { estado.itens.forEach((it) => { it.situacao = "confere"; it.qtd_carregada = it.qtd_nota; }); redesenhar(); });
-      const ler = estado.nota && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ler-etiquetas", onclick: () => lerEtiquetas(redesenhar) }, ic("qr"), "Contar lendo as etiquetas");
+      const ler = estado.nota && NE.pacote.tem("etiquetas") && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ler-etiquetas", onclick: () => lerEtiquetas(redesenhar) }, ic("qr"), "Contar lendo as etiquetas");
       const todosOk = estado.itens.length > 0 && estado.itens.every((i) => i.situacao === "confere");
       return el("div", {}, el("div", { style: "display:grid;gap:10px;margin-bottom:16px" }, todosOk ? el("div", { class: "aviso ok" }, ic("check"), el("span", {}, "Tudo marcado como conferido. Toque em Continuar, ou ajuste algum item abaixo.")) : tudo, ler),
         ...estado.itens.map((it, i) => {

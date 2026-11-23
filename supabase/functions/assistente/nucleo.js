@@ -9,6 +9,7 @@
   "use strict";
   const F = () => raiz.NEFerramentas;
   const D = () => raiz.NEDominio;
+  const P = () => raiz.NEPacoteRegras;   // regras de pacote (assets/js/pacote.js): a IA é do Premium
   const ErroAssistente = (...a) => new (F().ErroAssistente)(...a);
   const TTL_MS = 10 * 60 * 1000;
   const MAX_VOLTAS = 8;
@@ -222,11 +223,18 @@ Agora são: ${dataPorExtenso(agora)} (horário de Brasília).`;
     return { numero: String(uso.input.numero ?? "").replace(/\D/g, ""), cliente: uso.input.cliente ?? "", itens: (uso.input.itens ?? []).filter((i) => i.quantidade > 0), origem: "claude" };
   }
 
+  // Pacote contratado (tabela licenca, que só o dono do sistema altera). Sem informação vale Premium: nada some de quem já usa.
+  async function pacoteDe(repo) {
+    try { const l = await repo.listar("licenca", { limite: 1 }); const p = l && l[0] && l[0].pacote; return (P() && P().valido(p)) || "premium"; } catch { return "premium"; }
+  }
+
   // ───────────────────────── despacho das ações ─────────────────────────
   // env: { ligado, segredo, modelo }.  Devolve { status, corpo }.
   async function processar({ corpo, repo, claude, env, agora = Date.now() }) {
     const eu = await repo.quem(); const podeUsar = F().dom.podeUsarAssistente(eu); const b = corpo || {};
-    if (b.acao === "status") return { status: 200, corpo: { ativo: env.ligado && podeUsar, leitura: env.ligado, modo: env.ligado ? "claude" : "local", acoes: env.ligado && podeUsar, escopo: F().dom.escopoDe(eu) } };
+    const pacote = await pacoteDe(repo); const iaNoPacote = !P() || P().tem(pacote, "ia");
+    if (b.acao === "status") return { status: 200, corpo: { ativo: env.ligado && podeUsar && iaNoPacote, leitura: env.ligado && iaNoPacote, modo: env.ligado ? "claude" : "local", acoes: env.ligado && podeUsar && iaNoPacote, escopo: F().dom.escopoDe(eu), pacote } };
+    if (!iaNoPacote) throw ErroAssistente("O assistente com IA faz parte do pacote Premium.", 403);
     if (b.acao === "executar") {
       if (!podeUsar) throw ErroAssistente("O assistente é só da administração.", 403);
       const ctx = criarCtx({ repo, eu, agora }); return { status: 200, corpo: await executarProposta(ctx, b.token, env.segredo) };

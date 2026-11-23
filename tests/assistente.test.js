@@ -3,6 +3,7 @@
 // (4) travas: não apagar a si mesmo nem o último administrador, não apagar quem tem histórico, fotos só da própria pasta, etc.
 const test = require("node:test"); const assert = require("node:assert/strict");
 globalThis.NEDominio = require("../assets/js/dominio.js");
+require("../assets/js/pacote.js");   // regras de pacote (a IA é do Premium); registra NEPacoteRegras
 const base = "../supabase/functions/assistente/";
 require(base + "ferramentas-base.js"); require(base + "ferramentas-leitura.js"); require(base + "ferramentas-escrita.js");
 const N = require(base + "nucleo.js");
@@ -371,7 +372,7 @@ test("handler HTTP: CORS, método, JSON ruim, login ausente, status e erro de a�
   const pedir = (tratar, metodo, corpo, headers = {}) => tratar(new Request("http://f", { method: metodo, headers: { Authorization: "Bearer t", ...headers }, body: metodo === "POST" ? corpo : undefined }));
   const tratar = N.montar({ createClient: criar(true), env, fetch: async () => { throw new Error("sem rede"); } });
   assert.equal((await pedir(tratar, "OPTIONS")).status, 200); assert.equal((await pedir(tratar, "GET")).status, 405); assert.equal((await pedir(tratar, "POST", "{ruim")).status, 400);
-  const st = await pedir(tratar, "POST", JSON.stringify({ acao: "status" })); assert.deepEqual(await st.json(), { ativo: true, leitura: true, modo: "claude", acoes: true, escopo: "total" });
+  const st = await pedir(tratar, "POST", JSON.stringify({ acao: "status" })); assert.deepEqual(await st.json(), { ativo: true, leitura: true, modo: "claude", acoes: true, escopo: "total", pacote: "premium" });
   const sem = await N.montar({ createClient: criar(false), env, fetch: async () => { throw new Error("x"); } })(new Request("http://f", { method: "POST", body: JSON.stringify({ acao: "status" }) })); assert.equal(sem.status, 401);
   const inv = await pedir(tratar, "POST", JSON.stringify({ acao: "voar" })); assert.equal(inv.status, 400); assert.equal((await inv.json()).erro, "Ação inválida.");
   const ruim = await pedir(tratar, "POST", JSON.stringify({ acao: "executar", token: "lixo" })); assert.equal(ruim.status, 400);
@@ -463,4 +464,23 @@ test("historico_de_atividades: expedição não vê; vendedor nem recebe a ferra
   const res = r.claude.pedidos[1].messages.at(-1).content[0].content; assert.match(res, /só da diretoria e do administrativo/); assert.doesNotMatch(res, /48172/);
   const vend = { id: "u-vend", nome: "Wesley", funcao: "vendedor", papel: "admin", ativo: true, alertas: null, criado_em: "2026-11-20T15:33:00Z" }; const d = semente(); d.perfis.push(vend);
   const rv = await perguntar(criarRepo({ eu: vend, dados: d }), [dizer("oi")]); assert.ok(!rv.claude.pedidos[0].tools.some((t) => t.name === "historico_de_atividades"));
+});
+
+// ───────────────────────── pacote: a IA é só do Premium ─────────────────────────
+test("pacote: Básico e Intermediário não têm IA (status desligado, perguntar/executar/ler_nota recusados); Premium ou sem licença têm", async () => {
+  for (const pacote of ["basico", "intermediario"]) {
+    const repo = criarRepo(); repo.db.licenca = [{ id: 1, pacote }];
+    const st = await N.processar({ corpo: { acao: "status" }, repo, claude: null, env: ENV, agora: AGORA });
+    assert.equal(st.corpo.ativo, false, pacote); assert.equal(st.corpo.leitura, false, pacote); assert.equal(st.corpo.acoes, false, pacote); assert.equal(st.corpo.pacote, pacote);
+    for (const acao of ["perguntar", "executar", "ler_nota"]) {
+      await falha(() => N.processar({ corpo: { acao, pergunta: "oi", token: "x", imagem: "x".repeat(200) }, repo, claude: claudeFalso([dizer("oi")]), env: ENV, agora: AGORA }), 403, /Premium/);
+    }
+  }
+  for (const licenca of [[{ id: 1, pacote: "premium" }], [], undefined]) {
+    const repo = criarRepo(); if (licenca) repo.db.licenca = licenca;
+    const st = await N.processar({ corpo: { acao: "status" }, repo, claude: null, env: ENV, agora: AGORA });
+    assert.equal(st.corpo.ativo, true); assert.equal(st.corpo.leitura, true);
+  }
+  const lixo = criarRepo(); lixo.db.licenca = [{ id: 1, pacote: "qualquer-coisa" }];   // valor desconhecido não tira nada de quem já usa
+  assert.equal((await N.processar({ corpo: { acao: "status" }, repo: lixo, claude: null, env: ENV, agora: AGORA })).corpo.ativo, true);
 });

@@ -30,16 +30,23 @@
   // Quem tiver uma função fora da lista cai no padrão do papel: administração vê tudo, funcionário confere.
   const PADRAO_ADMIN = { nav: ["inicio", "notas", "estoque", "cargas", "mais"], painel: "patio", telas: TODAS_ADMIN.concat("conferir"), conferir: true, ia: true, cadastra: true, lancaNota: true, fluxos: null };
   const PADRAO_FUNC = { nav: ["notas", "estoque", "alertas"], painel: "fila", telas: ["notas", "estoque", "alertas", "conferir", "contar", "guia", "inicio"], conferir: true, ia: false, cadastra: false, lancaNota: false, fluxos: ["resolver"] };
-  const papelDe = () => PAPEIS[perfil?.funcao] || (ehAdmin() ? PADRAO_ADMIN : PADRAO_FUNC);
+  // O pacote contratado tira do painel o que ele não inclui: menu, telas e passos a passo (ver pacote.js).
+  const TELA_RECURSO = { estoque: "estoque", contar: "estoque", resumo: "resumo", exportar: "planilhas", historico: "historico" };
+  const FLUXO_RECURSO = { xml: "xml", mov: "estoque", contagem: "estoque", ajustes: "avisos" };
+  const telaDoPacote = (t) => !TELA_RECURSO[t] || NE.pacote.tem(TELA_RECURSO[t]);
+  const fluxoDoPacote = (f) => !FLUXO_RECURSO[f] || NE.pacote.tem(FLUXO_RECURSO[f]);
+  const doPacote = (r) => ({ ...r, nav: r.nav.filter(telaDoPacote), telas: r.telas.filter(telaDoPacote), fluxos: r.fluxos && r.fluxos.filter(fluxoDoPacote) });
+  const papelDe = () => doPacote(PAPEIS[perfil?.funcao] || (ehAdmin() ? PADRAO_ADMIN : PADRAO_FUNC));
   const NOMES_FUNCAO = { diretoria: "Diretoria", administrativo: "Administrativo", expedicao: "Expedição", vendedor: "Vendedor", conferente: "Conferente", ajudante: "Ajudante", motorista: "Motorista" };
   NE.rotuloFuncao = (f) => NOMES_FUNCAO[f] || "funcionário";
   const perm = () => {
     const r = papelDe();
-    return { nav: r.nav, painel: r.painel, telas: r.telas, fluxos: r.fluxos, conferir: r.conferir, ia: r.ia && ehAdmin(), cadastra: r.cadastra && ehAdmin(), lancaNota: r.lancaNota, limitado: !r.cadastra };
+    return { nav: r.nav, painel: r.painel, telas: r.telas, fluxos: r.fluxos, conferir: r.conferir, ia: r.ia && ehAdmin() && NE.pacote.tem("ia"), cadastra: r.cadastra && ehAdmin(), lancaNota: r.lancaNota, limitado: !r.cadastra };
   };
   const podeAbrir = (rota, params = {}) => {
     const r = papelDe();
     if (!r.telas.includes(rota)) return false;
+    if (rota === "guia" && params.fluxo && !fluxoDoPacote(params.fluxo)) return false;
     if (rota === "guia" && r.fluxos && params.fluxo && !r.fluxos.includes(params.fluxo)) return false;
     return true;
   };
@@ -67,18 +74,30 @@
     $("main").className = ["resumo", "cargas", "estoque", "notas", "equipe", "cadastros", "config", "exportar", "historico"].includes(rota) && ehAdmin() ? "largo" : "";
     nav(rota, sem); botaoIA(sem);
     window.scrollTo({ top: 0 });
-    if (!podeAbrir(rota, params)) return semPermissao(rota);   // digitou o endereço de uma tela de outra função
+    if (!podeAbrir(rota, params)) return semPermissao(rota, params);   // digitou o endereço de uma tela de outra função (ou de outro pacote)
     const f = NE.rotas[rota] || NE.rotas[inicial()];
     try { f(raiz(), params, NE.app); } catch (e) { console.error(e); raiz().replaceChildren(el("div", { class: "aviso erro" }, ic("alerta"), el("span", {}, "Esta tela não abriu. Volte e tente de novo."))); }
   }
 
   // Tela de outra função: explica e leva de volta, em vez de abrir pela metade.
-  function semPermissao() {
+  function semPermissao(rota, params = {}) {
     document.body.classList.add("com-nav"); nav(inicial(), false);
+    const recurso = (rota === "guia" ? FLUXO_RECURSO[params.fluxo] : TELA_RECURSO[rota]);
+    if (recurso && !NE.pacote.tem(recurso)) return semPacote(recurso);
     raiz().replaceChildren(el("div", { class: "vazio-grande" },
       el("strong", {}, "Esta tela não é da sua função"),
       el("p", {}, `Você entrou como ${NE.rotuloFuncao(perfil?.funcao)}. Peça à administração se precisar de acesso.`),
       el("button", { type: "button", class: "btn btn-principal", onclick: () => ir(inicial(), {}, { substituir: true }) }, "Voltar para a minha tela")));
+  }
+
+  // Recurso de outro pacote: diz qual é e como pedir (sem deixar a pessoa numa tela quebrada)
+  function semPacote(recurso) {
+    raiz().replaceChildren(el("div", { class: "vazio-grande", id: "fora-do-pacote" },
+      el("strong", {}, "Este recurso é de outro pacote"),
+      el("p", {}, `${NE.pacote.ROTULOS[recurso]} faz parte do pacote ${NE.pacote.pacoteDe(recurso)}. O seu pacote é o ${NE.pacote.nome}.`),
+      el("div", { style: "display:grid;gap:12px;justify-items:center;margin-top:6px" },
+        NE.pedirPacote ? el("button", { type: "button", class: "btn btn-verde", id: "btn-pedir-pacote", onclick: () => NE.pedirPacote(recurso) }, ic("whatsapp"), "Quero este recurso") : null,
+        el("button", { type: "button", class: "btn btn-principal", onclick: () => ir(inicial(), {}, { substituir: true }) }, "Voltar para a minha tela"))));
   }
 
   function nav(rota, esconder) {
@@ -183,6 +202,7 @@
     if (!perfil) { pararSondagem(); return telaEntrar(); }
     if (!perfil.ativo) { await NE.dados.sair(); perfil = null; topo(); return telaEntrar("Seu acesso está desativado. Fale com a expedição."); }
     if (window.NE_ENTRADA === "admin" && perfil.papel !== "admin") { await NE.dados.sair(); perfil = null; topo(); return telaEntrar("Esta área é só da administração. Entre com um usuário de administrador."); }
+    try { NE.pacote.definir(await NE.dados.pacote()); } catch { /* sem sinal: vale o último pacote conhecido */ }   // o pacote decide o que aparece, por isso vem antes da primeira tela
     NE.dados.veiculos().catch(() => {}); NE.dados.produtos().catch(() => {});
     NE.dados.sincronizar?.().catch(() => {});
     NE.dados.aoMudarFila = mostrarFila; mostrarFila();

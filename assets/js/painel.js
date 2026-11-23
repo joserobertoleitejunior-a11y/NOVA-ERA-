@@ -67,7 +67,7 @@
     const planilha = el("button", { type: "button", class: "link-acao", onclick: async () => { const c = await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA }); baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(c)); } }, ic("baixar"), "Baixar planilha (30 dias)");
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, vendedor ? "Minhas cargas" : "Cargas"), el("p", {}, vendedor ? "As entregas das suas notas: confira e mande o rastreio ao cliente." : "Tudo que saiu, com fotos e conferência.")),
       app.perm.conferir && el("button", { class: "btn btn-principal", type: "button", id: "btn-nova-painel", onclick: () => app.ir("conferir", {}) }, ic("mais"), "Nova conferência")),
-      numeros, el("div", { class: "filtros" }, navDia, campoBusca, vendedor && chipsDono, chips), extra, lista, vendedor ? null : el("div", { style: "margin-top:12px" }, planilha));
+      numeros, el("div", { class: "filtros" }, navDia, campoBusca, vendedor && chipsDono, chips), extra, lista, vendedor || !NE.pacote.tem("planilhas") ? null : el("div", { style: "margin-top:12px" }, planilha));
 
     const mudarDia = (d) => { dia = d; carregar(); };
     const desenharNav = () => {
@@ -104,6 +104,23 @@
     desenharChips(); carregar();
   };
 
+  // ───────────────────────── PACOTE: o que está ligado e como pedir mais ─────────────────────────
+  const suporteApp = () => { const c = window.NOVA_ERA || {}; return { numero: NE.soDigitos(c.whatsappAdmin || ""), nome: c.suporteNome || "o suporte" }; };
+  NE.pedirPacote = (recurso) => {
+    const su = suporteApp(); const eu = NE.app.perfil;
+    const texto = `Olá, ${su.nome.split(" ")[0]}! Aqui é ${eu.nome} (${NE.rotuloFuncao(eu.funcao)}) da Nova Era. Quero ligar "${NE.pacote.ROTULOS[recurso]}" no Confere Carga (hoje o pacote é o ${NE.pacote.nome}). Pode me passar os valores?`;
+    window.open(`https://wa.me/${su.numero}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
+  };
+  NE.abrirPacotes = () => {
+    const su = suporteApp(); const P = NE.pacote; const R = P.ROTULOS;
+    const ligados = Object.keys(R).filter((r) => P.tem(r)); const faltam = Object.keys(R).filter((r) => !P.tem(r));
+    const grupo = (titulo, ids, ok) => (ids.length ? el("div", { style: "margin-bottom:14px" }, el("h3", { style: "margin:0 0 8px" }, titulo), el("ul", { class: "lista-historico" }, ids.map((r) => el("li", {}, ok ? R[r] : `${R[r]} · pacote ${P.pacoteDe(r)}`)))) : null);
+    const corpo = el("div", {}, el("p", { style: "margin-top:0" }, `O seu pacote é o `, el("b", {}, P.nome), `. Conferir carga, notas, rastreio ao cliente, equipe, caminhões e produtos vêm em todos os pacotes.`),
+      grupo("Ligado no seu pacote", ligados, true), grupo("Dá para ligar", faltam, false),
+      faltam.length && su.numero ? el("button", { type: "button", class: "btn btn-verde btn-bloco", id: "btn-pedir-mais", onclick: () => NE.pedirPacote(faltam[0]) }, ic("whatsapp"), `Falar com ${su.nome} sobre mais recursos`) : null);
+    NE.janelaSimples({ etiqueta: "Pacote", titulo: `Pacote ${P.nome}`, corpo });
+  };
+
   // ───────────────────────── MAIS ─────────────────────────
   NE.rotas.mais = (raiz, params, app) => {
     const item = (icone, titulo, sub, acao, id) => el("button", { type: "button", class: "cartao-guia", id, onclick: acao }, ic(icone), el("span", {}, titulo, el("small", { style: "display:block" }, sub)));
@@ -117,11 +134,12 @@
         pode("historico") && item("relogio", "Histórico", "Quem fez o quê e quando", () => app.ir("historico"), "mais-historico"),
         pode("equipe") && app.perm.cadastra && item("pessoas", "Equipe", "Funcionários e acesso", () => app.ir("equipe")),
         pode("cadastros") && app.perm.cadastra && item("caminhao", "Caminhões", "Placas da frota", () => app.ir("cadastros", { aba: "caminhoes" })),
-        pode("cadastros") && app.perm.cadastra && item("caixas", "Produtos", "Mínimo e pilha", () => app.ir("cadastros", { aba: "produtos" })),
-        pode("guia") && app.perm.cadastra && item("engrenagem", "Ajustes", "Horário e prazos", () => app.ir("guia", { fluxo: "ajustes" })),
+        pode("cadastros") && app.perm.cadastra && item("caixas", "Produtos", NE.pacote.tem("estoque") ? "Mínimo e pilha" : "Lista de produtos", () => app.ir("cadastros", { aba: "produtos" })),
+        pode("guia") && app.perm.cadastra && NE.pacote.tem("avisos") && item("engrenagem", "Ajustes", "Horário e prazos", () => app.ir("guia", { fluxo: "ajustes" })),
         item("ajuda", "Tutorial", "Aprender em 1 minuto", abrirTutorial, "mais-tutorial"),
         suporte.numero && item("whatsapp", "Suporte do app", `Fale com ${suporte.nome} no WhatsApp`, () => window.open(`https://wa.me/${suporte.numero}?text=${encodeURIComponent(`Olá, ${suporte.nome.split(" ")[0]}! Aqui é ${app.perfil.nome} (${NE.rotuloFuncao(app.perfil.funcao)}). Preciso de ajuda com o Confere Carga: `)}`, "_blank", "noopener"), "mais-suporte"),
-        pode("cargas") && app.perm.painel !== "vendas" && item("baixar", "Planilha de cargas", "30 dias em CSV", async () => baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA })))),
+        app.perm.cadastra && item("grade", "Meu pacote", `${NE.pacote.nome}${NE.pacote.recursos().length === Object.keys(NE.pacote.ROTULOS).length ? " · tudo ligado" : " · veja o que dá para ligar"}`, () => NE.abrirPacotes(), "mais-pacote"),
+        pode("cargas") && app.perm.painel !== "vendas" && NE.pacote.tem("planilhas") && item("baixar", "Planilha de cargas", "30 dias em CSV", async () => baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA })))),
         item("mapa", "Ver o site", "Abre em outra aba", () => window.open("index.html", "_blank", "noopener"))));
   };
 
@@ -146,7 +164,7 @@
             acoesCadastro({ nome: v.placa, editar: () => app.ir("guia", { fluxo: "veiculo", id: v.id }), apagar: () => NE.dados.excluirVeiculo(v.id), desativar: () => NE.dados.alterarVeiculo(v.id, { ativo: false }), aoFim: () => app.ir("cadastros", { aba: "caminhoes" }, { substituir: true }) })));
       }) : [vazio("Nenhum caminhão ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
     } else {
-      conteudo.replaceChildren(cabecalhoAba("Produtos", "Mínimo e peças por pilha deixam o estoque e a contagem mais inteligentes.", "Cadastrar produto", () => app.ir("guia", { fluxo: "novoProduto" })), lista);
+      conteudo.replaceChildren(cabecalhoAba("Produtos", (NE.pacote.tem("estoque") ? "Mínimo e peças por pilha deixam o estoque e a contagem mais inteligentes." : "Os produtos que aparecem na hora de lançar a nota."), "Cadastrar produto", () => app.ir("guia", { fluxo: "novoProduto" })), lista);
       NE.dados.produtos(true).then((ps) => lista.replaceChildren(...(ps.length ? ps.map((p) => el("div", {}, el("button", { type: "button", class: "link-acao", style: "text-align:left;display:block", onclick: () => app.ir("guia", { fluxo: "produto", id: p.id }) }, el("strong", {}, p.nome), el("div", { class: "meta" }, `mínimo ${D.fmt(p.minimo || 0)}${p.por_pilha ? ` · ${p.por_pilha} por pilha` : ""} · toque para ajustar`)), el("div", { class: "linha-cadastro" }, NE.chave(p.ativo, "Em uso", (x) => NE.dados.alterarProduto(p.id, { ativo: x })),
         acoesCadastro({ nome: p.nome, editar: () => app.ir("guia", { fluxo: "produto", id: p.id }), apagar: () => NE.dados.excluirProduto(p.id), desativar: () => NE.dados.alterarProduto(p.id, { ativo: false }), aoFim: () => app.ir("cadastros", { aba: "produtos" }, { substituir: true }) })))) : [vazio("Nenhum produto ainda.")]))).catch((e) => NE.aviso(NE.mensagemErro(e), "erro", lista));
     }

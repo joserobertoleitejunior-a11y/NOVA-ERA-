@@ -147,6 +147,17 @@
       aplicarAjuste: async (id) => ok(await sb.rpc("aplicar_ajuste_contagem", { p_id: id })),
       descartarContagem: async (id) => ok(await sb.rpc("descartar_contagem", { p_id: id })),
 
+      // Pacote contratado (Básico, Intermediário ou Premium). Vem do banco; sem sinal vale o último conhecido.
+      async pacote() {
+        const ultimo = () => cache.ler("pacote") || "premium";
+        try {
+          const r = await Promise.race([sb.from("licenca").select("pacote").eq("id", 1).maybeSingle(), new Promise((ok) => setTimeout(() => ok(null), 4000))]);
+          const id = r && !r.error && r.data && r.data.pacote;
+          if (id) { cache.gravar("pacote", id); return id; }
+        } catch { /* sem sinal: usa o último conhecido */ }
+        return ultimo();
+      },
+
       // Histórico de atividades (só a administração; o banco recusa os outros). Filtros: período, tipo, pessoa e busca por texto.
       async atividades({ de, ate, categoria, usuario_id, busca, antes, limite = 60 } = {}) {
         let q = sb.from("atividades").select("*").order("criado_em", { ascending: false }).order("id", { ascending: false }).limit(limite);
@@ -216,7 +227,7 @@
   const USUARIOS_TESTE = ["admin", "adminvendas", "adminexpedicao", "admindiretoria", "adminadministrativo", "conferente", "ajudante", "motorista"];
   const nomes = ["emCache", "perfil", "veiculos", "produtos", "funcionarios", "criarFuncionario", "criarFuncionarios", "redefinirSenha", "alterarFuncionario", "criarVeiculo", "alterarVeiculo", "criarProduto", "alterarProduto", "excluirVeiculo", "excluirProduto",
     "notas", "criarNota", "importarNotas", "cancelarNota", "enviarFoto", "urlFoto", "fotoExemplo", "registrarConferencia", "sincronizar", "pendentes", "conferencias", "contexto",
-    "saldos", "movimentos", "lancarMovimento", "contagens", "pedirContagem", "concluirContagem", "aplicarAjuste", "descartarContagem", "alertas", "atividades", "marcarLidos", "resolverAlerta", "preferencias", "salvarPreferencias", "config", "salvarConfig",
+    "saldos", "movimentos", "lancarMovimento", "contagens", "pedirContagem", "concluirContagem", "aplicarAjuste", "descartarContagem", "alertas", "atividades", "pacote", "marcarLidos", "resolverAlerta", "preferencias", "salvarPreferencias", "config", "salvarConfig",
     "pushSuportado", "pushAssinar", "pushRemover", "pushTestar", "iaDisponivel", "iaPerguntar", "iaExecutar", "iaLerNota", "trocarPerfil", "reiniciar"];
   // Antes do login não há sessão: na demonstração o pedido fica na demonstração; fora dela vai ao banco de verdade.
   const pedirAjudaSenhaAntesLogin = (d) => (naDemo() ? NE.criarTeste().pedirAjudaSenha(d) : real_().pedirAjudaSenha(d));
@@ -234,7 +245,9 @@
   };
   let realSolto = null; const real_ = () => (realSolto = realSolto || real());
   dados.pedirAjudaSenha = (d) => pedirAjudaSenhaAntesLogin(d);
-  for (const n of nomes) dados[n] = (...a) => { const f = ligar()[n]; if (!f) { if (n === "sincronizar" || n === "pendentes") return Promise.resolve(0); throw new Error("Isto não está disponível aqui."); } return f.apply(ligar(), a); };
+  // O pacote decide quais avisos aparecem (no Básico só os essenciais): vale para o sino, a lista e os avisos na tela
+  dados.alertas = (...a) => ligar().alertas(...a).then((l) => (NE.pacote ? l.filter((x) => NE.pacote.avisoPermitido(x.tipo)) : l));
+  for (const n of nomes.filter((x) => x !== "alertas")) dados[n] = (...a) => { const f = ligar()[n]; if (!f) { if (n === "sincronizar" || n === "pendentes") return Promise.resolve(0); throw new Error("Isto não está disponível aqui."); } return f.apply(ligar(), a); };
   Object.defineProperty(dados, "aoMudarFila", { get: () => ligar().aoMudarFila, set: (f) => { ligar().aoMudarFila = f; } });
 
   NE.dados = dados;
@@ -244,7 +257,7 @@
   // Na demonstração aparece para mostrar como é.
   let iaCache = null;
   const statusIA = () => {
-    if (!iaCache) iaCache = (!C.premiumIA && !(NE.demo && NE.demo.ativo)) ? Promise.resolve({ ativo: false, leitura: false })
+    if (!iaCache) iaCache = ((!C.premiumIA && !(NE.demo && NE.demo.ativo)) || (NE.pacote && !NE.pacote.tem("ia"))) ? Promise.resolve({ ativo: false, leitura: false })
       : NE.dados.iaDisponivel().then((st) => ({ ativo: !!(st && st.ativo), leitura: !!(st && (st.leitura || st.ativo)) })).catch(() => ({ ativo: false, leitura: false }));
     return iaCache;
   };

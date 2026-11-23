@@ -116,6 +116,9 @@
       el("button", { type: "button", class: "btn btn-azul btn-bloco", onclick: () => NE.abrirEtiquetas(exemplo()) }, ic("etiqueta"), "Ver etiquetas de exemplo"),
       el("button", { type: "button", class: "btn btn-verde btn-bloco", onclick: () => NE.enviarRastreio(exemplo()) }, ic("whatsapp"), "Enviar ao cliente (exemplo)")),
 
+    rastreioCliente: () => el("div", { class: "treino" },
+      el("button", { type: "button", class: "btn btn-verde btn-bloco", onclick: () => NE.enviarRastreio(exemplo()) }, ic("whatsapp"), "Enviar ao cliente (exemplo)")),
+
     acesso() {
       const fb = el("div", { "aria-live": "polite" });
       return el("div", { class: "treino" }, el("div", { class: "lista-simples", style: "margin:0" },
@@ -151,13 +154,13 @@
     painel: [
       { icone: "lista", titulo: "Resumo do dia", texto: "Laranja é carga com diferença. Experimente o filtro:", treino: "resumo" },
       { icone: "olho", titulo: "Ver tudo", texto: "Toque numa conferência para ver itens, fotos e local.", treino: "abrir" },
-      { icone: "etiqueta", titulo: "Etiquetas e cliente", texto: "Imprima etiquetas e mande o rastreio no WhatsApp.", treino: "etiquetasCliente" },
+      { icone: "etiqueta", titulo: "Etiquetas e cliente", texto: "Imprima etiquetas e mande o rastreio no WhatsApp.", treino: "etiquetasCliente", recurso: "etiquetas" },
       { icone: "usuario", titulo: "Funcionários", texto: "Saiu da empresa? Desligue o acesso. Experimente:", treino: "acesso" },
     ],
   };
 
   NE.abrirGuia = (tipo, raiz, aoFechar, acoes = {}) => {
-    const passos = GUIAS[tipo].map((g) => ({
+    const passos = GUIAS[tipo].map((g) => (g.recurso && !NE.pacote.tem(g.recurso) ? { ...g, titulo: "Rastreio do cliente", icone: "whatsapp", texto: "Depois de conferida, mande o link de rastreio no WhatsApp.", treino: "rastreioCliente" } : g)).map((g) => ({
       titulo: g.titulo, icone: g.icone, ajuda: null,
       tela: () => el("div", { class: "guia" }, el("p", { class: "guia-texto" }, g.texto), g.treino ? treino[g.treino](acoes) : null),
     }));

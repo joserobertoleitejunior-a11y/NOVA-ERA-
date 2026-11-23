@@ -12,7 +12,7 @@
     conferente: [
       { alvo: "#btn-nova", titulo: "Conferir uma carga", texto: "Sem nota na fila? Toque aqui para conferir do zero." },
       { alvo: "#lista-minhas", titulo: "Fila de carga", texto: "Notas esperando conferência. Toque numa para conferir." },
-      { alvo: "#nav-inferior", titulo: "Menu", texto: "Fila, estoque (conte rápido) e avisos." },
+      { alvo: "#nav-inferior", titulo: "Menu", texto: () => (NE.pacote.tem("estoque") ? "Fila, estoque (conte rápido) e avisos." : "Fila e avisos.") },
       { alvo: "#btn-sino", titulo: "Avisos", texto: "O app avisa aqui quando chegar nota ou pedirem contagem." },
     ],
     vendas: [
@@ -25,7 +25,7 @@
     painel: [
       { alvo: ".status-simples", titulo: "Como está a empresa", texto: "Verde: tudo certo. Amarelo ou vermelho: toque em \"Resolver agora\"." },
       { alvo: "#tile-nota", titulo: "O que você quer fazer?", texto: "Cada botão abre um passo a passo. É só seguir as telas." },
-      { alvo: "#nav-inferior", titulo: "Menu", texto: "Notas, estoque, cargas e o resto em Mais." },
+      { alvo: "#nav-inferior", titulo: "Menu", texto: () => (NE.pacote.tem("estoque") ? "Notas, estoque, cargas e o resto em Mais." : "Notas, cargas e o resto em Mais.") },
       { alvo: "#btn-sino", titulo: "Avisos", texto: "Problemas chegam aqui na hora, e no celular." },
       { alvo: "#fab-ia", titulo: "Assistente", texto: "Pergunte qualquer coisa sobre a empresa." },
     ],
@@ -76,7 +76,7 @@
       const ultimo = i === passos.length - 1;
       balao.replaceChildren(
         el("div", { class: "tour-contagem" }, passos.map((_, k) => el("i", { class: k <= i ? "ativo" : "" }))),
-        el("h2", { id: "tour-titulo" }, p.titulo), el("p", {}, p.texto),
+        el("h2", { id: "tour-titulo" }, p.titulo), el("p", {}, typeof p.texto === "function" ? p.texto() : p.texto),
         el("div", { class: "tour-botoes" },
           ultimo ? (verDicas ? el("button", { type: "button", class: "btn btn-secundario", onclick: () => { terminar(); verDicas(); } }, "Ver dicas") : null)
                  : el("button", { type: "button", class: "btn btn-secundario", onclick: terminar }, "Pular"),

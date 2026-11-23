@@ -10,7 +10,8 @@
   // Quem vende e quanto tem para vender. O vendedor logado lança sempre em nome dele; a administração escolhe entre os vendedores cadastrados.
   const contextoVenda = async (app) => {
     const ehVendedor = app.perfil.funcao === "vendedor";
-    const [pessoas, saldos, fila] = await Promise.all([ehVendedor ? Promise.resolve([]) : NE.dados.funcionarios().catch(() => []), NE.dados.saldos().catch(() => []), NE.dados.notas({ status: ["pendente", "em_conferencia"] }).catch(() => [])]);
+    const comEstoque = NE.pacote.tem("estoque");   // sem estoque no pacote não há "disponível" nem aviso de falta
+    const [pessoas, saldos, fila] = await Promise.all([ehVendedor ? Promise.resolve([]) : NE.dados.funcionarios().catch(() => []), comEstoque ? NE.dados.saldos().catch(() => []) : Promise.resolve([]), comEstoque ? NE.dados.notas({ status: ["pendente", "em_conferencia"] }).catch(() => []) : Promise.resolve([])]);
     return { ehVendedor, vendedores: pessoas.filter((p) => p.funcao === "vendedor" && p.ativo !== false), disp: D.disponivelPorProduto(saldos, fila) };
   };
   const campoVendedor = (cv, app, n, r) => (cv.ehVendedor ? el("div", { class: "campo" }, el("label", {}, "Vendedor"), el("p", { class: "suave", id: "nn-vendedor-fixo" }, `${app.perfil.nome} (você)`))
@@ -35,8 +36,8 @@
           tela: (r) => NE.escolhaUnica([
             { valor: "xml", rotulo: "Tenho o arquivo XML", dica: "O mais rápido: lê várias notas de uma vez" },
             { valor: "foto", rotulo: "Tenho a foto da nota", dica: iaOn ? "O assistente lê o número e os itens (Premium)" : "Eu tiro a foto e digito os dados" },
-            { valor: "digitar", rotulo: "Vou digitar", dica: "Número, cliente e itens" }], n.como, (v) => { if (v === "xml") return app.ir("guia", { fluxo: "xml" }, { substituir: true }); n.como = v; r(); }),
-          validar: () => (!n.como ? "Toque em uma das três opções." : null) },
+            { valor: "digitar", rotulo: "Vou digitar", dica: "Número, cliente e itens" }].filter((o) => o.valor !== "xml" || NE.pacote.tem("xml")), n.como, (v) => { if (v === "xml") return app.ir("guia", { fluxo: "xml" }, { substituir: true }); n.como = v; r(); }),
+          validar: () => (!n.como ? "Toque em uma das opções." : null) },
         { titulo: "Número e cliente", icone: "conferir", ajuda: "O número fica no alto da nota, ao lado de \"Nº\".",
           tela: (r) => el("div", {},
             n.como === "foto" && el("div", {}, NE.seletorFoto({ titulo: "Foto da nota", dica: "Pegue a nota inteira, sem sombra.", lista: n.fotos, varias: false, aoMudar: r }),
@@ -182,8 +183,8 @@
         const foto = d.fotos[0] ? await NE.dados.enviarFoto(d.fotos[0].blob, app.perfil.id) : null; const u = usuario();
         await NE.dados.criarFuncionario({ nome: d.nome.trim(), usuario: u, senha: d.senha, funcao: d.funcao, papel: U.papelDe(d.funcao), telefone: NE.soDigitos(d.telefone) || null, foto });
         const cartao = { nome: d.nome.trim(), usuario: u, senha: d.senha, funcao: d.funcao, telefone: NE.soDigitos(d.telefone) };
-        NE.telaFim(raiz, { titulo: "Pessoa cadastrada", texto: `${d.nome.trim().split(" ")[0]} já pode entrar no app. O cadastro ficou registrado em nome de ${app.perfil.nome}. Mande o acesso e o vídeo tutorial da função pelo WhatsApp agora: a senha não aparece de novo.`,
-          botoes: [{ rotulo: "Mandar acesso e vídeo no WhatsApp", icone: "whatsapp", acao: () => window.open(U.zapBV(cartao), "_blank", "noopener") }, { rotulo: "Mostrar o cartão de acesso", icone: "qr", acao: () => U.cartoes([cartao], "Cartão de acesso") }, { rotulo: "Cadastrar outra pessoa", icone: "mais", acao: () => G.novaPessoa(raiz, app, { funcao: d.funcao }) }, { rotulo: "Voltar à equipe", acao: () => app.ir("equipe", {}, { substituir: true }) }] });
+        NE.telaFim(raiz, { titulo: "Pessoa cadastrada", texto: `${d.nome.trim().split(" ")[0]} já pode entrar no app. O cadastro ficou registrado em nome de ${app.perfil.nome}. Mande o acesso${NE.pacote.tem("videos") ? " e o vídeo tutorial da função" : ""} pelo WhatsApp agora: a senha não aparece de novo.`,
+          botoes: [{ rotulo: NE.pacote.tem("videos") ? "Mandar acesso e vídeo no WhatsApp" : "Mandar acesso no WhatsApp", icone: "whatsapp", acao: () => window.open(U.zapBV(cartao), "_blank", "noopener") }, { rotulo: "Mostrar o cartão de acesso", icone: "qr", acao: () => U.cartoes([cartao], "Cartão de acesso") }, { rotulo: "Cadastrar outra pessoa", icone: "mais", acao: () => G.novaPessoa(raiz, app, { funcao: d.funcao }) }, { rotulo: "Voltar à equipe", acao: () => app.ir("equipe", {}, { substituir: true }) }] });
       },
     });
   };

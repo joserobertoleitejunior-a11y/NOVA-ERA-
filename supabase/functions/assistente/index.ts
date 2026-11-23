@@ -6,6 +6,7 @@
 //   · "status"    — diz se a IA está ligada (chave configurada) e para quem.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import "./dominio.js";
+import "./pacote.js";
 import "./ferramentas-base.js";
 import "./ferramentas-leitura.js";
 import "./ferramentas-escrita.js";

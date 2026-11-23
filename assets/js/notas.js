@@ -27,7 +27,7 @@
     const cab = el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, vendedor ? "Minhas notas" : lanca ? "Notas" : "Fila de carga"), el("p", {}, vendedor ? "As notas que você lançou: o que espera carregar e o que já saiu." : lanca ? "O que está esperando conferência e o histórico." : app.perm.conferir ? "Toque numa nota para conferir. Sem nota? Use o botão abaixo." : "Notas esperando conferência.")),
       lanca && el("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
         el("button", { type: "button", class: "btn btn-azul", id: "btn-nota-nova", onclick: () => app.ir("guia", { fluxo: "nota" }) }, ic("mais"), "Nova nota"),
-        (app.perm.fluxos === null || (app.perm.fluxos || []).includes("xml")) && el("button", { type: "button", class: "btn btn-secundario", id: "btn-importar", onclick: () => app.ir("guia", { fluxo: "xml" }) }, ic("baixar"), "Importar XML")));
+        NE.pacote.tem("xml") && (app.perm.fluxos === null || (app.perm.fluxos || []).includes("xml")) && el("button", { type: "button", class: "btn btn-secundario", id: "btn-importar", onclick: () => app.ir("guia", { fluxo: "xml" }) }, ic("baixar"), "Importar XML")));
     raiz.replaceChildren(cab, app.perm.conferir ? nova : null, el("div", { style: "height:14px" }), admin && el("div", { class: "busca-linha" }, busca), vendedor && chipsDono, admin && chips, resumo, box);
     let todas = [];
     const desenharChips = () => chips.replaceChildren(...[["fila", "Na fila"], ["todas", "Todas"]].map(([id, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(aba === id), onclick: () => { aba = id; desenharChips(); desenharLista(); } }, nome)));
@@ -39,7 +39,7 @@
       else { vis = vis.filter((n) => (admin && aba === "todas" ? true : ["pendente", "em_conferencia"].includes(n.status))); if (admin && aba === "todas") vis.sort((a, b) => D.aMs(b.criado_em) - D.aMs(a.criado_em)); }
       resumo.replaceChildren(q ? el("div", { class: "filtro-ativo" }, el("span", {}, resumoBusca(vis, busca.value.trim()))) : "");
       box.replaceChildren(...(vis.length ? vis.map((n) => cartao(n, agora, cfg, app)) : [el("div", { class: "vazio-grande" }, el("strong", {}, q ? "Nada encontrado" : vendedor && escopo === "minhas" ? "Nenhuma nota sua na fila" : "Fila vazia"),
-        q ? "Confira o número ou o nome do cliente." : vendedor && escopo === "minhas" ? "Lance uma nota nova ou toque em \"De todos\" para ver as dos outros vendedores." : admin ? "Cadastre uma nota nova ou importe o XML." : "Quando chegar nota nova, ela aparece aqui e você recebe um aviso.")]));
+        q ? "Confira o número ou o nome do cliente." : vendedor && escopo === "minhas" ? "Lance uma nota nova ou toque em \"De todos\" para ver as dos outros vendedores." : admin ? (NE.pacote.tem("xml") ? "Cadastre uma nota nova ou importe o XML." : "Cadastre uma nota nova.") : "Quando chegar nota nova, ela aparece aqui e você recebe um aviso.")]));
     };
     busca.addEventListener("input", desenharLista);
     if (admin) desenharChips(); if (vendedor) desenharDono();
@@ -75,7 +75,7 @@
     const linhas = [["Cliente", n.cliente || "—"], ["Vendedor", n.vendedor || "—"], ["Situação", situacao], ["Lançada", `${NE.dataHora(n.criado_em)} (${D.tempoRelativo(n.criado_em, Date.now())})`]];
     const botoes = [
       fila && app.perm.conferir && el("button", { type: "button", class: "btn btn-principal", onclick: () => { j.fechar(); app.ir("conferir", { nota_id: n.id }); } }, ic("conferir"), "Conferir"),
-      !vendedor && el("button", { type: "button", class: "btn btn-azul", onclick: () => NE.abrirEtiquetas({ ...n, tipo: "nota" }) }, ic("etiqueta"), "Etiquetas"),
+      !vendedor && NE.pacote.tem("etiquetas") && el("button", { type: "button", class: "btn btn-azul", onclick: () => NE.abrirEtiquetas({ ...n, tipo: "nota" }) }, ic("etiqueta"), "Etiquetas"),
       n.conferencia_id && el("button", { type: "button", class: "btn btn-secundario", onclick: async () => { const l = await NE.dados.conferencias({ de: 0 }); const c = l.find((x) => x.id === n.conferencia_id); if (c) { j.fechar(); NE.abrirConferencia(c, { podeEnviar: true }); } else NE.aviso("Conferência não encontrada.", "alerta"); } }, ic("olho"), vendedor ? "Ver a carga e mandar o rastreio" : "Ver conferência"),
       fila && (!vendedor || minha) && el("button", { type: "button", class: "btn btn-secundario", onclick: async () => { if (!confirm(`Cancelar a nota ${n.numero}?`)) return; await NE.dados.cancelarNota(n.id); j.fechar(); NE.aviso("Nota cancelada.", "ok"); app.recarregar(); } }, ic("lixeira"), "Cancelar nota"),
     ].filter(Boolean);

@@ -81,9 +81,9 @@
       numeros: [N(r.kpis.total, "carga conferida hoje", "cargas conferidas hoje"), N(r.kpis.divergentes, "carga com diferença", "cargas com diferença")],
       pergunta: "O que você quer ver?",
       tiles: [
-        ["grafico", "Resumo completo", "Números do dia, da semana e do mês", ir("resumo")],
+        ["grafico", "Resumo completo", "Números do dia, da semana e do mês", ir("resumo"), "resumo"],
         ["caminhao", "As cargas que saíram", "Com foto e conferência", ir("cargas")],
-        ["caixas", "O estoque agora", `${nEst ? `${nEst} produto${nEst > 1 ? "s" : ""} pedindo atenção` : "Tudo dentro do mínimo"}`, ir("estoque")],
+        ["caixas", "O estoque agora", `${nEst ? `${nEst} produto${nEst > 1 ? "s" : ""} pedindo atenção` : "Tudo dentro do mínimo"}`, ir("estoque"), "estoque"],
         ["pessoas", "A equipe", "Quem confere e quanto erra", ir("equipe")],
       ],
     };
@@ -93,11 +93,11 @@
       pergunta: "O que você quer fazer?",
       tiles: [
         ["nota", "Lançar uma nota", "A nota chegou? Coloque na fila", guia("nota")],
-        ["baixar", "Importar XML", "Várias notas de uma vez", guia("xml")],
+        ["baixar", "Importar XML", "Várias notas de uma vez", guia("xml"), "xml"],
         ["conferir", "Conferir uma carga", "Caminhão carregado", ir("conferir")],
-        ["raio", "Pedir a contagem do dia", "Leva uns 3 minutos", ir("contar")],
+        ["raio", "Pedir a contagem do dia", "Leva uns 3 minutos", ir("contar"), "estoque"],
         ["caminhao", "Ver as cargas", "O que já saiu", ir("cargas")],
-        ["caixas", "Ver o estoque", "Quanto tem de cada peça", ir("estoque")],
+        ["caixas", "Ver o estoque", "Quanto tem de cada peça", ir("estoque"), "estoque"],
       ],
     };
     if (tipo === "escritorio") return {                    // administrativo: cadastros e papelada
@@ -105,12 +105,12 @@
       numeros: [N(r.fila.total, "nota na fila", "notas na fila"), N(cadastros.pessoas, "pessoa cadastrada", "pessoas cadastradas")],
       pergunta: "O que você quer fazer?",
       tiles: [
-        ["baixar", "Importar XML", "Várias notas de uma vez", guia("xml")],
+        ["baixar", "Importar XML", "Várias notas de uma vez", guia("xml"), "xml"],
         ["nota", "Lançar uma nota", "Digitando ou por foto", guia("nota")],
         ["usuario", "Cadastrar uma pessoa", "Cria o acesso e manda no WhatsApp", guia("novaPessoa")],
         ["caminhao", "Caminhões", `${cadastros.veiculos} na frota`, ir("cadastros", { aba: "caminhoes" })],
         ["caixas", "Produtos", `${cadastros.produtos} cadastrados`, ir("cadastros", { aba: "produtos" })],
-        ["engrenagem", "Ajustes", "Horário e prazos", guia("ajustes")],
+        ["engrenagem", "Ajustes", "Horário e prazos", guia("ajustes"), "avisos"],
       ],
     };
     if (tipo === "vendas") return {                        // vendedor: só o que é dele
@@ -119,7 +119,7 @@
       pergunta: "O que você quer fazer?",
       tiles: [
         ["nota", "Lançar uma nota", "A venda fechou? Coloque na fila", guia("nota")],
-        ["caixas", "Ver o estoque", "Quanto tem para vender agora", ir("estoque")],
+        ["caixas", "Ver o estoque", "Quanto tem para vender agora", ir("estoque"), "estoque"],
         ["lupa", "Minhas notas", "O que está na fila e o que já saiu", ir("notas")],
         ["caminhao", "Minhas cargas", "E mandar o rastreio ao cliente", ir("cargas")],
       ],
@@ -139,7 +139,7 @@
       pergunta: "O que você quer fazer?",
       tiles: [
         ["conferir", "Conferir uma carga", "Caminhão carregado", ir("conferir")],
-        ["raio", "Contagem do dia", "Leva uns 3 minutos", ir("contar")],
+        ["raio", "Contagem do dia", "Leva uns 3 minutos", ir("contar"), "estoque"],
         ["nota", "Ver a fila", "Tudo que espera conferência", ir("notas")],
       ],
     };
@@ -202,7 +202,7 @@
     const P = montarPainel(app.perm.painel, { r, ctx, app, cadastros, vendas });
 
     const numeros = el("div", { class: "numeros-simples" }, P.numeros.map((n) => el("div", {}, el("b", {}, n.valor), el("span", {}, n.texto))));
-    const tiles = el("div", { class: "tiles" }, P.tiles.map(([icone, nome, sub, acao], i) =>
+    const tiles = el("div", { class: "tiles" }, P.tiles.filter((t) => !t[4] || NE.pacote.tem(t[4])).map(([icone, nome, sub, acao], i) =>
       el("button", { type: "button", class: "tile", id: i === 0 ? "tile-nota" : null, onclick: acao }, el("span", { class: "tile-icone", html: NE.icone[icone] }), el("strong", {}, nome), el("small", {}, sub))));
 
     // "Comece por aqui": só para quem cadastra, e só enquanto faltar cadastro

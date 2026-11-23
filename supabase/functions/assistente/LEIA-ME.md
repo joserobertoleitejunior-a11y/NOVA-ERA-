@@ -9,7 +9,7 @@ Publicada no projeto Supabase `kfazxjertfzoeewfsime`. Roda só no servidor: a ch
 3. Aplique a migração `supabase/migrations/007_assistente_acoes.sql` (ou rode `supabase/EXECUTAR-TUDO.sql` de novo): cria o registro de auditoria e a trava de repetição.
 4. Abra o app como administrador: aparece o botão **Assistente**. Quem confere carga ganha o botão de **ler a nota pela foto**.
 
-Sem a chave, nenhuma IA aparece para ninguém. Para desligar de vez: apague o segredo, ou `premiumIA: false` em `assets/js/config.js`.
+A IA é do pacote **Premium**: a função confere a tabela `licenca` (migration `011_pacote.sql`) e recusa fora do Premium (sem licença cadastrada vale Premium). Sem a chave, nenhuma IA aparece para ninguém. Para desligar de vez: apague o segredo, ou `premiumIA: false` em `assets/js/config.js`.
 
 ## O que faz
 - `perguntar` — administração (função diretoria, administrativo ou expedição, com acesso de administrador) e vendedor, que usa um **escopo de vendas** (veja abaixo). O Claude **consulta** os dados reais e **prepara ações** por comando. Nada é gravado nesta etapa.
@@ -44,7 +44,7 @@ Segredo `ANTHROPIC_MODEL` troca o modelo (padrão `claude-sonnet-5-5`).
 - `nucleo.js` — assinatura, conversa com o Claude, propor/executar, acesso ao Supabase, entrada HTTP.
 - `ferramentas-base.js` — erros, utilitários, "achadores" (nome → registro).
 - `ferramentas-leitura.js` / `ferramentas-escrita.js` — o que a IA consulta e o que ela pode propor.
-- `dominio.js` — cópia das regras do app (`assets/js/dominio.js`), para publicar pela CLI.
+- `dominio.js` e `pacote.js` — cópias das regras do app (`assets/js/dominio.js` e `assets/js/pacote.js`), para publicar pela CLI.
 - Testes: `node --test tests/assistente.test.js` (41 testes, sem rede) e `tests/dominio.test.js`.
 
 ## Como publicar
@@ -54,6 +54,7 @@ Pelo painel/MCP: o `index.ts` publicado importa os **mesmos arquivos do reposit�
 ```ts
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/assets/js/dominio.js";
+import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/assets/js/pacote.js";
 import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/supabase/functions/assistente/ferramentas-base.js";
 import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/supabase/functions/assistente/ferramentas-leitura.js";
 import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/supabase/functions/assistente/ferramentas-escrita.js";
@@ -65,4 +66,4 @@ A ordem dos imports importa (o domínio e a base vêm antes). Se algum desses ar
 
 A função `criar-funcionario` (cadastrar, redefinir senha e **apagar** funcionário) também precisa estar publicada na versão mais recente: ela anota no histórico de atividades quando alguém apaga um cadastro ou gera senha nova (sem guardar a senha).
 
-Migrações do histórico: `009_historico.sql` e `010_historico_busca.sql` (ou `EXECUTAR-TUDO.sql`).
+Migrações do histórico e do pacote: `009_historico.sql`, `010_historico_busca.sql` e `011_pacote.sql` (ou `EXECUTAR-TUDO.sql`).

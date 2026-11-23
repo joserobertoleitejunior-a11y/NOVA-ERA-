@@ -31,7 +31,7 @@ Gerar o HTML único da demonstração: `python3 scripts/gerar-demo.py saida.html
 `python3 -m http.server 8080` → http://localhost:8080 (câmera exige HTTPS ou localhost).
 
 ## Supabase
-- Migrations em `supabase/migrations/` (001 inicial, 002 Confere Carga).
+- Migrations em `supabase/migrations/` (001 a 011; `EXECUTAR-TUDO.sql` aplica todas em ordem). A 009 e a 010 criam o histórico de atividades; a 011 cria a licença do **pacote** (Básico, Intermediário ou Premium: ver `PACOTES.md`).
 - Função `criar-funcionario`: cria login e perfil; só admin chama; chave de serviço só no servidor.
 - Funcionário entra com **usuário + senha** (não precisa de e-mail).
 

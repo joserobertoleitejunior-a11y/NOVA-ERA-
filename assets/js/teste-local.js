@@ -286,9 +286,10 @@
         let ini, fim; if (dia) { ini = D.inicioDoDia(new Date(`${dia}T12:00:00-03:00`).getTime()); fim = ini + DIA; } else { ini = de ?? 0; fim = ate ?? Infinity; }
         return copia(e.conferencias.filter((c) => { const t = D.aMs(c.criado_em); return t >= ini && t < fim && (!somenteMinhas || c.conferente_id === idPerfil); }).sort((a, b) => D.aMs(b.criado_em) - D.aMs(a.criado_em)).map(completaConf));
       },
+      async pacote() { return NE.pacote ? NE.pacote.id : "premium"; },   // na demonstração: ?pacote=basico, intermediario ou premium
       // Histórico de atividades: na demonstração é montado a partir do que existe (mesmo formato do banco)
       async atividades({ de, ate, categoria, usuario_id, busca, antes, limite = 60 } = {}) {
-        if (!["diretoria", "administrativo"].includes(eu().funcao)) throw new Error("O histórico é só da diretoria e do administrativo.");
+        if (!["diretoria", "administrativo"].includes(eu().funcao) || (NE.pacote && !NE.pacote.tem("historico"))) throw new Error("O histórico é só da diretoria e do administrativo, no pacote Premium.");
         const lista = historicoDe(e);
         const t = String(busca || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().split(/\s+/).filter(Boolean);
         const out = lista.filter((a) => { const ms = D.aMs(a.criado_em); return (!de || ms >= de) && (!ate || ms < ate) && (!antes || ms < D.aMs(antes)) && (!categoria || a.categoria === categoria) && (!usuario_id || a.usuario_id === usuario_id) && t.every((p) => a.busca.includes(p)); });

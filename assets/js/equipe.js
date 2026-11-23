@@ -14,8 +14,8 @@
   // Link que vai no WhatsApp: abre a tela de boas-vindas com o acesso (usuário e senha) e o vídeo tutorial da função.
   // Os dados vão depois do "#" (o servidor nunca recebe essa parte do endereço).
   const b64 = (o) => btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  const linkBoasVindas = (p) => `${urlApp().replace(/app\.html$/, "")}boas-vindas.html#${b64({ n: p.nome, u: p.usuario, s: p.senha, f: p.funcao })}`;
-  const mensagemBV = (p) => `Olá, ${p.nome.split(" ")[0]}! Bem-vindo à Nova Era. Abra este link: nele estão o seu acesso ao Confere Carga (usuário e senha) e o vídeo que mostra como usar o aplicativo na sua função.\n${linkBoasVindas(p)}`;
+  const linkBoasVindas = (p) => `${urlApp().replace(/app\.html$/, "")}boas-vindas.html#${b64({ n: p.nome, u: p.usuario, s: p.senha, f: p.funcao, k: NE.pacote.id })}`;
+  const mensagemBV = (p) => `Olá, ${p.nome.split(" ")[0]}! Bem-vindo à Nova Era. Abra este link: nele estão o seu acesso ao Confere Carga (usuário e senha)${NE.pacote.tem("videos") ? " e o vídeo que mostra como usar o aplicativo na sua função" : ""}.\n${linkBoasVindas(p)}`;
   const zapBV = (p) => NE.linkWhatsApp(p.telefone, mensagemBV(p)) || `https://wa.me/?text=${encodeURIComponent(mensagemBV(p))}`;
 
   NE.rotas.equipe = async (raiz, params, app) => {
@@ -46,5 +46,5 @@
     j.fundo.querySelector(".janela-fechar").addEventListener("click", () => aoFechar?.());
   }
 
-  NE.equipeUtil = { linkBoasVindas, zapBV, cartoes, usuarioDe, senhaNova, papelDe, FUNCOES };
+  NE.equipeUtil = { linkBoasVindas, zapBV, cartoes, usuarioDe, senhaNova, papelDe, get FUNCOES() { return FUNCOES.filter(([v]) => NE.pacote.funcaoDisponivel(v)); } };   // o pacote decide quais funções dá para cadastrar
 })();

@@ -42,23 +42,25 @@ a.link { color: var(--azul); font-weight: 800; }
 <main id="conteudo"></main>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/icones.js"></script>
+<script src="assets/js/pacote.js"></script>
 <script>
 (() => {
   document.getElementById("logo").innerHTML = NE.logo;
   const FUNCOES = {
     conferente: { dur: "2 min 20", nome: "Conferente", video: "conferente", diario: ["Abra a fila e toque na nota que vai sair", "Escolha o caminhão e confira cada peça com a nota", "Tire a foto da carga e da placa e confirme", "Se faltar ou sobrar peça, informe o motivo"] },
-    ajudante: { dur: "2 min 20", nome: "Ajudante", video: "conferente", diario: ["Ajude a separar e carregar as peças da nota", "Confira com o conferente antes de o caminhão sair", "Use a câmera para contar as etiquetas, se pedirem"] },
+    ajudante: { dur: "2 min 20", nome: "Ajudante", video: "conferente", diario: ["Ajude a separar e carregar as peças da nota", "Confira com o conferente antes de o caminhão sair", ["Use a câmera para contar as etiquetas, se pedirem", "etiquetas"]] },
     motorista: { dur: "1 min", nome: "Motorista", video: "motorista", diario: ["Veja na fila se a sua carga já foi conferida", "Saia do pátio só depois da conferência", "Fique de olho nos avisos do aplicativo"] },
-    vendedor: { dur: "2 min", nome: "Vendedor", video: "vendedor", diario: ["Lance as notas dos seus clientes na fila", "Veja o estoque disponível antes de prometer a entrega", "Acompanhe as suas cargas e mande o rastreio ao cliente pelo WhatsApp", "Pergunte ao assistente: ele lança a nota e acha o rastreio por você"] },
-    expedicao: { dur: "2 min", nome: "Expedição", video: "expedicao", diario: ["Acompanhe o painel: uma frase diz se está tudo certo", "Resolva os avisos: diferença de carga, estoque baixo, nota parada", "Decida o ajuste quando a contagem do estoque não bater"] },
-    administrativo: { dur: "1 min 40", nome: "Administrativo", video: "administrativo", diario: ["Lance notas e importe o XML", "Cadastre equipe, caminhões e produtos", "Dê uma senha nova para quem esquecer"] },
-    diretoria: { dur: "1 min 20", nome: "Diretoria", video: "diretoria", diario: ["Veja a empresa em uma frase na tela inicial", "Abra o resumo completo quando quiser os detalhes", "Na versão completa, pergunte ao assistente de inteligência artificial"] },
+    vendedor: { dur: "2 min", nome: "Vendedor", video: "vendedor", diario: ["Lance as notas dos seus clientes na fila", "Veja o estoque disponível antes de prometer a entrega", "Acompanhe as suas cargas e mande o rastreio ao cliente pelo WhatsApp", ["Pergunte ao assistente: ele lança a nota e acha o rastreio por você", "ia"]] },
+    expedicao: { dur: "2 min", nome: "Expedição", video: "expedicao", diario: ["Acompanhe o painel: uma frase diz se está tudo certo", ["Resolva os avisos: diferença de carga, estoque baixo, nota parada", "avisos", "Resolva os avisos de carga com diferença"], ["Decida o ajuste quando a contagem do estoque não bater", "estoque"]] },
+    administrativo: { dur: "1 min 40", nome: "Administrativo", video: "administrativo", diario: [["Lance notas e importe o XML", "xml", "Lance as notas na fila"], "Cadastre equipe, caminhões e produtos", "Dê uma senha nova para quem esquecer"] },
+    diretoria: { dur: "1 min 20", nome: "Diretoria", video: "diretoria", diario: ["Veja a empresa em uma frase na tela inicial", ["Abra o resumo completo quando quiser os detalhes", "resumo", "Veja as cargas que saíram, com foto e conferência"], ["Pergunte ao assistente de inteligência artificial", "ia"]] },
   };
   const el = (t, a = {}, ...f) => { const n = document.createElement(t); for (const [k, v] of Object.entries(a)) { if (v == null || v === false) continue; k === "class" ? (n.className = v) : k === "html" ? (n.innerHTML = v) : k.startsWith("on") ? n.addEventListener(k.slice(2), v) : n.setAttribute(k, v); } f.flat().forEach((x) => x != null && n.append(x instanceof Node ? x : document.createTextNode(x))); return n; };
   const raiz = document.getElementById("conteudo");
   let d = null;
   try { const b = decodeURIComponent(location.hash.slice(1)).replace(/^d=/, "").replace(/-/g, "+").replace(/_/g, "/"); d = JSON.parse(decodeURIComponent(escape(atob(b)))); } catch { d = null; }
   if (!d || !d.u) { raiz.append(el("div", { class: "cartao erro" }, el("h1", {}, "Link incompleto"), el("p", { class: "sub" }, "Peça um link novo para a administração da Nova Era."))); return; }
+  const K = window.NEPacoteRegras; const tem = (r) => !K || K.tem(d.k, r);   // d.k: o pacote de quem mandou o link (link antigo: tudo ligado)
   const f = FUNCOES[d.f] || FUNCOES.conferente; const primeiro = String(d.n || "").trim().split(/\s+/)[0] || "";
   const copiar = async (texto, b) => { try { await navigator.clipboard.writeText(texto); const t = b.textContent; b.textContent = "Copiado!"; setTimeout(() => { b.textContent = t; }, 1400); } catch { b.textContent = "Copie à mão"; } };
   const senha = el("b", {}, "••••••••"); let visivel = false;
@@ -71,12 +73,12 @@ a.link { color: var(--azul); font-weight: 800; }
       el("div", { class: "campo" }, el("div", {}, el("small", {}, "Usuário"), el("b", {}, d.u)), cp("Usuário", d.u)),
       d.s ? el("div", { class: "campo" }, el("div", {}, el("small", {}, "Senha"), senha), el("div", { class: "botoes" }, ver, cp("Senha", d.s))) : null,
       el("a", { class: "grande", id: "abrir-app", href: `${app}#u=${encodeURIComponent(d.u)}` }, "Abrir o aplicativo")),
-    el("section", { class: "cartao" }, el("h2", {}, `Veja como usar (${f.dur})`),
+    tem("videos") ? el("section", { class: "cartao" }, el("h2", {}, `Veja como usar (${f.dur})`),
       // Vídeo MP4 de verdade, da função da pessoa. Antes era um player ao vivo que deixava o app em "modo teste" no aparelho.
       el("div", { class: "video" }, el("video", { controls: "", playsinline: "", preload: "metadata", poster: `videos/${f.video}-poster.jpg`, src: `videos/${f.video}-vertical.mp4`, "aria-label": `Vídeo tutorial: ${f.nome}` })),
-      el("p", { style: "margin:10px 0 0" }, el("a", { class: "link", href: `videos/${f.video}-vertical.mp4`, target: "_blank", rel: "noopener" }, "Abrir o vídeo em tela cheia"))),
-    el("section", { class: "cartao" }, el("h2", {}, "No dia a dia"), el("ul", {}, f.diario.map((t) => el("li", {}, t)))),
-    el("p", { class: "aviso" }, "Guarde este link: ele mostra seu acesso e o vídeo sempre que precisar. Não mande para ninguém: quem tem o link entra como você. Esqueceu a senha? Na tela de entrada toque em “Esqueci minha senha”.")
+      el("p", { style: "margin:10px 0 0" }, el("a", { class: "link", href: `videos/${f.video}-vertical.mp4`, target: "_blank", rel: "noopener" }, "Abrir o vídeo em tela cheia"))) : null,
+    el("section", { class: "cartao" }, el("h2", {}, "No dia a dia"), el("ul", {}, f.diario.map((t) => (Array.isArray(t) ? (tem(t[1]) ? t[0] : t[2]) : t)).filter(Boolean).map((t) => el("li", {}, t)))),
+    el("p", { class: "aviso" }, `Guarde este link: ele mostra seu acesso${tem("videos") ? " e o vídeo" : ""} sempre que precisar. Não mande para ninguém: quem tem o link entra como você. Esqueceu a senha? Na tela de entrada toque em “Esqueci minha senha”.`)
   );
 })();
 </script>
