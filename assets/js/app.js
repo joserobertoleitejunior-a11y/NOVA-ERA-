@@ -159,7 +159,7 @@
     // só aparece se a IA estiver ligada de verdade; o resultado vale para a última tela desenhada
     (NE.iaLigada ? NE.iaLigada() : Promise.resolve(false)).then((ligada) => {
       if (!ligada || vez !== tokenIA || !perfil || $("#fab-ia")) return;
-      const b = el("button", { type: "button", class: "fab-ia", id: "fab-ia" }, ic("faisca"), "Perguntar");
+      const b = el("button", { type: "button", class: "fab-ia", id: "fab-ia" }, ic("faisca"), "Assistente");
       b.addEventListener("click", () => NE.abrirAssistente()); document.body.append(b);
     });
   }

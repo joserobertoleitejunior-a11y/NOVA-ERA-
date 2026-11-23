@@ -25,7 +25,7 @@
     let enviando = false, subindo = 0;
 
     const chat = el("div", { class: "chat", id: "chat", "aria-live": "polite" });
-    const campo = el("textarea", { class: "entrada", id: "chat-campo", rows: "1", placeholder: comAcoes ? "Escreva aqui…" : "Pergunte sobre cargas, estoque, equipe…", autocomplete: "off", enterkeyhint: "send", "aria-label": "Mensagem" });
+    const campo = el("textarea", { class: "entrada", id: "chat-campo", rows: "1", placeholder: comAcoes ? "Escreva aqui…" : "Escreva sobre cargas, estoque, equipe…", autocomplete: "off", enterkeyhint: "send", "aria-label": "Mensagem" });
     const enviar = el("button", { type: "button", class: "btn btn-principal", id: "chat-enviar", "aria-label": "Enviar", html: NE.icone.enviar });
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const mic = SR && el("button", { type: "button", class: "btn btn-secundario", id: "chat-mic", "aria-label": "Falar", html: NE.icone.mic });

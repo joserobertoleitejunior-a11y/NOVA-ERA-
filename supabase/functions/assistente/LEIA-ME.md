@@ -7,7 +7,7 @@ Publicada no projeto Supabase `kfazxjertfzoeewfsime`. Roda só no servidor: a ch
 2. Guarde no Supabase: https://supabase.com/dashboard/project/kfazxjertfzoeewfsime/functions/secrets
    → **Add new secret** → Name `ANTHROPIC_API_KEY` → Value a chave → Save.
 3. Aplique a migração `supabase/migrations/007_assistente_acoes.sql` (ou rode `supabase/EXECUTAR-TUDO.sql` de novo): cria o registro de auditoria e a trava de repetição.
-4. Abra o app como administrador: aparece o botão **Perguntar**. Quem confere carga ganha o botão de **ler a nota pela foto**.
+4. Abra o app como administrador: aparece o botão **Assistente**. Quem confere carga ganha o botão de **ler a nota pela foto**.
 
 Sem a chave, nenhuma IA aparece para ninguém. Para desligar de vez: apague o segredo, ou `premiumIA: false` em `assets/js/config.js`.
 
