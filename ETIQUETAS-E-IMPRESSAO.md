@@ -60,6 +60,7 @@ O botão está onde a leitura serve: Notas, Cargas, Estoque, Contagem, Entrada e
 3. **Impressora térmica direta (beta)** — Bluetooth ou USB, falando **ESC/POS** (a maioria das térmicas de cupom e Bluetooth) ou **ZPL** (Zebra e compatíveis), para a térmica que não tem driver no aparelho. Em **Imprimir → Impressora** há o **teste de impressão** (borda no tamanho exato, régua de 10 mm e um QR) para conferir escala e margem.
 
 ## Relatórios e o histórico de movimentação
+Cada relatório abre como **planilha visual** (números-chave que sobem, gráficos animados e tabela colorida), com Excel e papel: veja `PLANILHAS-VISUAIS.md`.
 **Imprimir → Relatórios**: Movimentação de estoque (entradas, saídas, perdas e ajustes, com quem lançou, por período e por produto), Estoque agora, Notas na fila, Cargas conferidas, Contagens e, no Premium, Histórico de atividades.
 Papéis: A4 em pé, A4 deitado, cupom 80 mm e cupom 58 mm; cada relatório também baixa como planilha (CSV). O rodapé diz quem imprimiu e quando.
 

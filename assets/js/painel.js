@@ -68,7 +68,7 @@
       campoBusca.value = numero; campoBusca.dispatchEvent(new Event("input"));
     } }, { rotulo: "Ler QR", id: "btn-ler-qr-cargas", classe: "btn btn-azul" });
     const extra = el("div", {}); const lista = el("div", { class: "lista-conf" }, el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }));
-    const planilha = el("button", { type: "button", class: "link-acao", onclick: async () => { const c = await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA }); baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(c)); } }, ic("baixar"), "Baixar planilha (30 dias)");
+    const planilha = el("button", { type: "button", class: "link-acao", id: "btn-planilha-cargas", onclick: () => NE.comCarregando(planilha, async () => NE.abrirRelatorio(await NE.relatorios.cargas({ dias: 30 }))) }, ic("grafico"), "Planilha e gráficos (30 dias)");
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, vendedor ? "Minhas cargas" : "Cargas"), el("p", {}, vendedor ? "As entregas das suas notas: confira e mande o rastreio ao cliente." : "Tudo que saiu, com fotos e conferência.")),
       app.perm.conferir && el("button", { class: "btn btn-principal", type: "button", id: "btn-nova-painel", onclick: () => app.ir("conferir", {}) }, ic("mais"), "Nova conferência")),
       numeros, el("div", { class: "filtros" }, navDia, el("div", { style: "display:flex;gap:8px;align-items:center" }, el("div", { style: "flex:1;min-width:0" }, campoBusca), ler), vendedor && chipsDono, chips), extra, lista, vendedor || !NE.pacote.tem("planilhas") ? null : el("div", { style: "margin-top:12px" }, planilha));
@@ -145,7 +145,7 @@
         item("ajuda", "Tutorial", "Aprender em 1 minuto", abrirTutorial, "mais-tutorial"),
         suporte.numero && item("whatsapp", "Suporte do app", `Fale com ${suporte.nome} no WhatsApp`, () => window.open(`https://wa.me/${suporte.numero}?text=${encodeURIComponent(`Olá, ${suporte.nome.split(" ")[0]}! Aqui é ${app.perfil.nome} (${NE.rotuloFuncao(app.perfil.funcao)}). Preciso de ajuda com o Confere Carga: `)}`, "_blank", "noopener"), "mais-suporte"),
         app.perm.cadastra && item("grade", "Meu pacote", `${NE.pacote.nome}${NE.pacote.recursos().length === Object.keys(NE.pacote.ROTULOS).length ? " · tudo ligado" : " · veja o que dá para ligar"}`, () => NE.abrirPacotes(), "mais-pacote"),
-        pode("cargas") && app.perm.painel !== "vendas" && NE.pacote.tem("planilhas") && item("baixar", "Planilha de cargas", "30 dias em CSV", async () => baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA })))),
+        pode("cargas") && app.perm.painel !== "vendas" && NE.pacote.tem("planilhas") && item("grafico", "Planilha de cargas", "Gráficos, tabela e Excel · 30 dias", async () => NE.abrirRelatorio(await NE.relatorios.cargas({ dias: 30 })), "mais-planilha-cargas"),
         item("mapa", "Ver o site", "Abre em outra aba", () => window.open("index.html", "_blank", "noopener"))));
   };
 

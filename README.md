@@ -23,6 +23,8 @@ App de **conferência nota × carga** da expedição. Problema definido na reuni
 
 **Prova:** o registro (itens e fotos) não pode ser alterado nem apagado por ninguém (sem políticas de UPDATE/DELETE). Fotos em bucket privado com link temporário.
 
+**Planilhas:** toda planilha (cargas, estoque, histórico, movimentação, notas, contagens e as do assistente) abre como painel visual: números-chave que sobem, gráficos animados e tabela colorida; dá para baixar em Excel (com resumo e gráficos) ou imprimir com os gráficos. Detalhes em `PLANILHAS-VISUAIS.md`.
+
 ## Modo demonstração
 `app.html?demo` roda com dados de exemplo, sem login e sem gravar nada.
 Gerar o HTML único da demonstração: `python3 scripts/gerar-demo.py saida.html`.

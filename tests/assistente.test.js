@@ -4,6 +4,7 @@
 const test = require("node:test"); const assert = require("node:assert/strict");
 globalThis.NEDominio = require("../assets/js/dominio.js");
 require("../assets/js/pacote.js");   // regras de pacote (a IA é do Premium); registra NEPacoteRegras
+require("../assets/js/relatorio-visual.js");   // números-chave e gráficos das planilhas que o assistente manda imprimir
 const base = "../supabase/functions/assistente/";
 require(base + "ferramentas-base.js"); require(base + "ferramentas-leitura.js"); require(base + "ferramentas-impressao.js"); require(base + "ferramentas-escrita.js");
 const N = require(base + "nucleo.js");
@@ -496,7 +497,12 @@ test("impressão: cada consulta devolve o bloco para imprimir com os MESMOS dado
   const [mov, est, notas] = r.impressoes;
   assert.equal(mov.titulo, "Movimentação de estoque"); assert.deepEqual(mov.colunas.map((c) => c.rotulo), ["Quando", "Produto", "O que foi", "Qtd", "Motivo"]); assert.equal(mov.colunas[3].dir, true);
   assert.equal(mov.linhas.length, 3); assert.ok(mov.linhas.some((l) => l[1] === "Meio-fio" && l[2] === "Entrada" && l[3] === "+200" && l[4] === "Produção do turno"));
-  assert.ok(mov.linhas.some((l) => l[1] === "Boca de lobo" && l[2] === "Perda" && l[3] === "−2")); assert.deepEqual(mov.resumo.find((x) => x[0] === "Perdas"), ["Perdas", "2"]);
+  assert.ok(mov.linhas.some((l) => l[1] === "Boca de lobo" && l[2] === "Perda" && l[3] === "−2")); assert.deepEqual(mov.resumo.find((x) => x[0] === "Perdas").slice(0, 2), ["Perdas", "2"]); assert.equal(mov.resumo.find((x) => x[0] === "Perdas")[2].tom, "erro");
+  // planilha visual: números-chave com tom, gráficos que somam o mesmo que a tabela e destaques de coluna
+  assert.ok(mov.graficos.some((g) => g.tipo === "barrasH" && g.itens.length >= 2), "ranking de produtos que mais se mexeram"); assert.deepEqual(mov.colunas.find((c) => c.rotulo === "Qtd").valores, mov.linhas.map((l) => Number(l[3].replace("−", "-"))), "valores seguem a ordem das linhas (as mais novas primeiro)");
+  assert.equal(mov.colunas.find((c) => c.rotulo === "O que foi").tons["Perda"], "erro");
+  assert.ok(est.graficos.some((g) => g.tipo === "rosca") && est.graficos.some((g) => g.tipo === "barrasH" && g.itens.some((i) => i.marca > 0)), "estoque: rosca da situação e barras com o risco do mínimo");
+  assert.deepEqual(est.resumo.map((x) => x[0]), ["Produtos", "Em dia", "Abaixo do mínimo", "Negativos"]); assert.equal(est.colunas.find((c) => c.rotulo === "Situação").visual, "estado");
   assert.equal(est.titulo, "Estoque agora"); assert.ok(est.linhas.some((l) => l[0] === "Meio-fio" && /340/.test(l[1]))); assert.ok(est.resumo.some((x) => x[0] === "Produtos"));
   assert.equal(notas.titulo, "Notas na fila"); assert.ok(notas.linhas.length >= 1 && notas.linhas.every((l) => l[0] && l[3] !== "Conferida"), "só o que está na fila"); assert.ok(notas.linhas.some((l) => l[1] === "Construtora Alfa"));
   for (const b of r.impressoes) { assert.ok(b.id && b.arquivo && b.subtitulo !== undefined); for (const l of b.linhas) assert.equal(l.length, b.colunas.length, `${b.titulo}: linha com ${l.length} células e ${b.colunas.length} colunas`); }
@@ -516,7 +522,8 @@ test("impressão: o prompt pede para perguntar 'Quer imprimir?' e diz que o bot�
 test("impressão: o vendedor só imprime o que ele pode ver (estoque para vender, só as notas dele)", async () => {
   const vend = { id: "u-vend", nome: "Wesley", funcao: "vendedor", papel: "admin", ativo: true, alertas: null, criado_em: "2026-11-20T15:33:00Z" }; const d = semente(); d.perfis.push(vend);
   const r = await perguntar(criarRepo({ eu: vend, dados: d }), [usarVarias([["estoque", {}], ["notas", { status: "todas" }]]), dizer("ok")]);
-  const est = r.impressoes.find((b) => b.id === "estoque"); assert.equal(est.titulo, "Estoque para vender"); assert.deepEqual(est.colunas.map((c) => c.rotulo), ["Produto", "No pátio", "Já vendido", "Disponível", "Situação"]);
+  const est = r.impressoes.find((b) => b.id === "estoque"); assert.equal(est.titulo, "Estoque para vender");
+  assert.deepEqual(est.resumo.map((x) => x[0]), ["Produtos", "Com estoque para vender", "Sem estoque para vender", "Já vendido, esperando carregar"]); assert.ok(est.graficos.some((g) => g.tipo === "barrasH" && g.titulo.includes("vender")) && est.graficos.every((g) => !JSON.stringify(g).includes("mínimo")), "o gráfico do vendedor não mostra mínimo nem saldo da administração"); assert.deepEqual(est.colunas.map((c) => c.rotulo), ["Produto", "No pátio", "Já vendido", "Disponível", "Situação"]);
   assert.ok(!est.colunas.some((c) => /Mínimo|Saldo/.test(c.rotulo)), "o vendedor não recebe saldo nem mínimo da administração");
   const notas = r.impressoes.find((b) => b.id.startsWith("notas")); assert.ok(!notas || notas.linhas.every((l) => l[2] === "Wesley"), "só notas dele");
 });
@@ -527,4 +534,15 @@ test("impressão: histórico de atividades e resumo viram blocos; o histórico s
   assert.ok(r.impressoes.find((b) => b.id === "resumo"), "o resumo do dia também imprime");
   const edu = clone(semente().perfis[1]); const r2 = await perguntar(criarRepo({ eu: edu, dados: Object.assign(semente(), { atividades: repo.db.atividades }) }), [usar("historico_de_atividades", { periodo: "7d" }), dizer("ok")]);
   assert.deepEqual(r2.impressoes, [], "expedição não vê o histórico, então nada para imprimir");
+});
+
+test("impressão: a fila de notas leva o limite da empresa e marca o que está parado; planilhas do assistente têm números-chave e gráficos válidos", async () => {
+  const repo = criarRepo(); const r = await perguntar(repo, [usarVarias([["notas", {}], ["estoque", {}], ["contagens", {}]]), dizer("ok")]);
+  const notas = r.impressoes.find((b) => b.id === "notas-na-fila"); assert.ok(notas, "bloco da fila");
+  assert.deepEqual(notas.resumo.map((x) => x[0]), ["Na fila", "Paradas", "Espera mais longa", "Espera média"]); assert.ok(notas.graficos[0].itens.every((i) => i.marca === 120), "limite padrão da empresa (120 min) marcado em cada barra");
+  for (const b of r.impressoes) {
+    assert.ok(b.resumo.length >= 1 && b.resumo.every((x) => x.length === 3 && x[2].tom), `${b.titulo}: números-chave com tom`);
+    for (const g of b.graficos) { assert.ok(["barras", "barrasH", "rosca"].includes(g.tipo) && g.titulo, `${b.titulo}: gráfico`); assert.ok(!/NaN|undefined/.test(JSON.stringify(g)), `${b.titulo}: gráfico com NaN`); }
+    for (const c of b.colunas) if (c.valores) assert.equal(c.valores.length, b.linhas.length, `${b.titulo}: valores da coluna ${c.rotulo} fecham com as linhas`);
+  }
 });

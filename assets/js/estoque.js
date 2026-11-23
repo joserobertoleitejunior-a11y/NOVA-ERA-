@@ -19,7 +19,7 @@
     const desenharAbas = () => barra.replaceChildren(...rotulos.map(([id, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(aba === id), onclick: () => { aba = id; desenharAbas(); corpo(); } }, nome)));
     const contar = el("button", { type: "button", class: "btn btn-principal", id: "btn-contagem", onclick: () => app.ir("contar", {}) }, ic("raio"), "Contagem do dia");
     const entrada = admin && el("button", { type: "button", class: "btn btn-azul", id: "btn-lancar", onclick: () => lancar(produtos, app) }, ic("mais"), "Lançar");
-    const exportar = admin && el("button", { type: "button", class: "link-acao", onclick: () => baixar(`estoque-${D.chaveDia(ctx.agora)}.csv`, D.csvEstoque(ctx.saldos, ctx.agora)) }, ic("baixar"), "Baixar planilha");
+    const exportar = admin && el("button", { type: "button", class: "link-acao", id: "btn-planilha-estoque", onclick: () => NE.comCarregando(exportar, async () => NE.abrirRelatorio(await NE.relatorios.estoque())) }, ic("grafico"), "Planilha e gráficos");
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Estoque"), el("p", {}, "Quanto tem de cada produto, agora.")), el("div", { style: "display:flex;gap:8px;flex-wrap:wrap" }, contar, entrada)), barra, caixa);
     const corpo = () => ({ saldos: () => saldos(caixa, ctx, produtos, app, exportar), contagens: () => contagens(caixa, ctx, produtos, app), movimentos: () => movimentos(caixa, ctx, produtos) })[aba]();
     desenharAbas(); corpo();

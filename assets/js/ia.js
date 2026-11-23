@@ -66,7 +66,9 @@
     const blocoValido = (b) => !!b && typeof b.titulo === "string" && Array.isArray(b.colunas) && b.colunas.length > 0 && Array.isArray(b.linhas) && b.linhas.length > 0 && b.linhas.every(Array.isArray);
     const botaoImprimir = (b) => {
       const n = b.linhas.length; const quanto = `${n} ${n === 1 ? "linha" : "linhas"}`;
-      const bloco = { ...b, colunas: b.colunas.map((c) => ({ rotulo: String(c.rotulo ?? ""), ...(c.dir ? { dir: true } : {}) })), linhas: b.linhas.map((l) => l.map((v) => (v == null ? "" : String(v)))), resumo: Array.isArray(b.resumo) ? b.resumo : [] };
+      const texto = (o) => (o && typeof o === "object" && !Array.isArray(o) ? Object.fromEntries(Object.entries(o).filter(([, v]) => typeof v === "string")) : undefined);
+      const coluna = (c) => ({ rotulo: String(c.rotulo ?? ""), ...(c.dir ? { dir: true } : {}), ...(["estado", "barra", "sinal"].includes(c.visual) ? { visual: c.visual } : {}), ...(texto(c.tons) ? { tons: texto(c.tons) } : {}), ...(texto(c.icones) ? { icones: texto(c.icones) } : {}), ...(Array.isArray(c.valores) ? { valores: c.valores.slice(0, b.linhas.length).map((v) => (Number.isFinite(v) ? v : null)) } : {}) });
+      const bloco = { ...b, colunas: b.colunas.map(coluna), linhas: b.linhas.map((l) => l.map((v) => (v == null ? "" : String(v)))), resumo: Array.isArray(b.resumo) ? b.resumo.filter(Array.isArray) : [], graficos: Array.isArray(b.graficos) ? b.graficos.filter((g) => g && typeof g === "object") : [] };
       return el("button", { type: "button", class: "link-acao btn-imprimir-ia", "data-bloco": String(b.id || b.arquivo || ""), "aria-label": `Imprimir: ${b.titulo} (${quanto})`, title: b.subtitulo || b.titulo,
         onclick: () => (NE.abrirRelatorio ? NE.abrirRelatorio(bloco) : NE.aviso("A impressão não está disponível nesta tela.", "alerta")) }, ic("impressora"), el("span", { class: "imp-txt" }, `Imprimir: ${b.titulo}`, el("span", { class: "quanto" }, quanto)));
     };

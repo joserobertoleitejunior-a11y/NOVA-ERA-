@@ -32,12 +32,13 @@
   const valor = (k, v) => (v === null || v === undefined || v === "" ? "—" : typeof v === "boolean" ? (v ? "Sim" : "Não") : k === "papel" ? (v === "admin" ? "Administração" : "Funcionário") : k === "funcao" ? NE.rotuloFuncao(v) : typeof v === "object" ? JSON.stringify(v) : String(v));
   const classeEtiqueta = (a) => (a.acao === "carga_conferida_diferenca" || /cancel|apagad|desativ/.test(a.acao) ? "erro" : a.categoria === "carga" ? "ok" : a.categoria === "nota" ? "azul" : a.categoria === "contagem" ? "alerta" : "");
 
-  function csvDe(lista) {
-    return D.csv(["Data", "Hora", "Quem", "Função", "Tipo", "O que fez", "Nota", "Cliente", "Mercadoria", "Caminhão", "Motorista", "Motivo"],
-      lista.map((a) => { const d = new Date(a.criado_em); const dd = a.detalhes || {};
-        return [d.toLocaleDateString("pt-BR"), NE.hora(d), a.usuario_nome, a.usuario_funcao ? NE.rotuloFuncao(a.usuario_funcao) : "", NOME_TIPO[a.categoria] || a.categoria, a.resumo, a.nota_numero || "", a.cliente || "", (a.itens || []).map(textoItem).join(" | "), dd.placa || "", dd.motorista || "", dd.motivo || ""]; }));
+  // A tabela completa da planilha (a mesma do CSV de sempre): é ela que vai para a tela, o papel, o Excel e o CSV
+  function tabelaDe(lista) {
+    return { colunas: ["Data", "Hora", "Quem", "Função", "Tipo", "O que fez", "Nota", "Cliente", "Mercadoria", "Caminhão", "Motorista", "Motivo"].map((rotulo) => [rotulo]),
+      linhas: lista.map((a) => { const d = new Date(a.criado_em); const dd = a.detalhes || {};
+        return [d.toLocaleDateString("pt-BR"), NE.hora(d), a.usuario_nome, a.usuario_funcao ? NE.rotuloFuncao(a.usuario_funcao) : "", NOME_TIPO[a.categoria] || a.categoria, a.resumo, a.nota_numero || "", a.cliente || "", (a.itens || []).map(textoItem).join(" | "), dd.placa || "", dd.motorista || "", dd.motivo || ""]; }) };
   }
-  const baixar = (nome, texto) => { const a = el("a", { href: URL.createObjectURL(new Blob([texto], { type: "text/csv;charset=utf-8" })), download: nome }); document.body.append(a); a.click(); a.remove(); };
+  NE.historicoTabela = tabelaDe;
 
   // Detalhe completo de uma atividade
   function detalhe(a) {
@@ -65,7 +66,7 @@
     const pessoa = el("select", { class: "entrada", id: "hist-pessoa", "aria-label": "Quem fez" }, el("option", { value: "" }, "Todas as pessoas"));
     const busca = el("input", { class: "entrada", id: "hist-busca", type: "search", placeholder: "Buscar por nota, cliente, mercadoria, placa…", autocomplete: "off", "aria-label": "Buscar no histórico" });
     const resumo = el("div", { class: "filtro-ativo meta", id: "hist-resumo" }); const caixa = el("div", { id: "hist-lista" }); const mais = el("button", { type: "button", class: "btn btn-secundario btn-bloco", id: "hist-mais", hidden: true }, "Carregar mais");
-    const planilha = el("button", { type: "button", class: "link-acao", id: "hist-planilha" }, ic("baixar"), "Baixar planilha");
+    const planilha = el("button", { type: "button", class: "link-acao", id: "hist-planilha" }, ic("grafico"), "Planilha e gráficos");
 
     const intervalo = () => { const hoje = D.inicioDoDia(Date.now()); return f.periodo === "hoje" ? { de: hoje } : f.periodo === "7" ? { de: hoje - 6 * D.DIA } : f.periodo === "30" ? { de: hoje - 29 * D.DIA } : {}; };
     const consulta = (extra = {}) => ({ ...intervalo(), categoria: f.tipo || undefined, usuario_id: f.pessoa || undefined, busca: f.busca || undefined, ...extra });
@@ -99,7 +100,9 @@
       const meu = seq; const r = await NE.dados.atividades(consulta({ limite: POR_PAGINA, antes: lista[lista.length - 1].criado_em })); if (meu !== seq) return;
       const vistos = new Set(lista.map((x) => x.id)); const novos = r.filter((x) => !vistos.has(x.id)); lista = lista.concat(novos); fim = r.length < POR_PAGINA || !novos.length; desenhar();
     }));
-    planilha.addEventListener("click", () => NE.comCarregando(planilha, async () => { const tudo = await NE.dados.atividades(consulta({ limite: 2000 })); baixar(`historico-${NE.hojeISO()}.csv`, csvDe(tudo)); NE.aviso(`Planilha com ${D.plural(tudo.length, "atividade", "atividades")} baixada.`, "ok"); }));
+    // o painel visual leva os mesmos filtros da tela (período, tipo, pessoa e busca) e até 2.000 atividades
+    const filtrosTexto = () => [(PERIODOS.find(([id]) => id === f.periodo) || [])[1], f.tipo ? NOME_TIPO[f.tipo] : "", f.pessoa ? (pessoa.selectedOptions[0] || {}).textContent : "", f.busca ? `busca “${f.busca}”` : ""].filter(Boolean).join(" · ");
+    planilha.addEventListener("click", () => NE.comCarregando(planilha, async () => { const tudo = await NE.dados.atividades(consulta({ limite: 2000 })); NE.abrirRelatorio(await NE.relatorios.historico({ lista: tudo, subtitulo: filtrosTexto() })); }));
     let espera; busca.addEventListener("input", () => { clearTimeout(espera); espera = setTimeout(() => { f.busca = busca.value.trim(); carregar(); }, 350); });
     pessoa.addEventListener("change", () => { f.pessoa = pessoa.value; carregar(); });
 
@@ -110,5 +113,5 @@
     desenharChips(); carregar();
     NE.dados.funcionarios().then((ps) => pessoa.append(...ps.map((p) => el("option", { value: p.id }, p.nome)))).catch(() => {});
   };
-  NE.historicoUtil = { textoItem, csvDe };
+  NE.historicoUtil = { textoItem, tabelaDe };
 })();

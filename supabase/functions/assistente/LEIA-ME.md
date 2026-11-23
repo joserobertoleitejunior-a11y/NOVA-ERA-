@@ -37,7 +37,7 @@ O vendedor recebe só 11 ferramentas (`estoque`, `produtos`, `notas`, `conferenc
 8. Texto vindo de dados, nomes, fotos ou XML é tratado como **dado**, nunca como instrução.
 
 ## Imprimir o que a IA mostrou
-Depois de cada consulta de lista, `ferramentas-impressao.js` (`F.coletarImpressao`) monta um **bloco** `{ id, titulo, subtitulo, colunas, linhas, resumo, arquivo }` com os **mesmos dados que a consulta devolveu à IA** (nunca com texto escrito por ela) e a resposta do `perguntar` traz a lista `impressoes` (no máximo 3, sem repetir; consulta vazia ou com erro não gera bloco; no máximo 600 linhas por bloco). O prompt manda a IA terminar com "Quer imprimir isto?" e avisa que o botão **Imprimir** é do app. O app (`assets/js/ia.js`) desenha um botão por bloco e abre a janela de relatórios (`NE.abrirRelatorio`: A4, A4 deitado, cupom 80/58 mm, CSV). O bloco respeita o escopo de quem pergunta (vendedor: "Estoque para vender" e só as notas dele) e o pacote (histórico só no Premium). Um formatador por consulta: estoque, movimentos, notas, conferências, diferenças, desempenho da equipe, funcionários, produtos, caminhões, contagens, contagem sugerida, resumo e histórico de atividades.
+Depois de cada consulta de lista, `ferramentas-impressao.js` (`F.coletarImpressao`) monta um **bloco** `{ id, titulo, subtitulo, colunas, linhas, resumo, graficos, arquivo }` (números-chave com tom e gráficos vêm de `relatorio-visual.js`; ver `PLANILHAS-VISUAIS.md`) com os **mesmos dados que a consulta devolveu à IA** (nunca com texto escrito por ela) e a resposta do `perguntar` traz a lista `impressoes` (no máximo 3, sem repetir; consulta vazia ou com erro não gera bloco; no máximo 600 linhas por bloco). O prompt manda a IA terminar com "Quer imprimir isto?" e avisa que o botão **Imprimir** é do app. O app (`assets/js/ia.js`) desenha um botão por bloco e abre a janela de relatórios (`NE.abrirRelatorio`: A4, A4 deitado, cupom 80/58 mm, CSV). O bloco respeita o escopo de quem pergunta (vendedor: "Estoque para vender" e só as notas dele) e o pacote (histórico só no Premium). Um formatador por consulta: estoque, movimentos, notas, conferências, diferenças, desempenho da equipe, funcionários, produtos, caminhões, contagens, contagem sugerida, resumo e histórico de atividades.
 
 ## Opcional
 Segredo `ANTHROPIC_MODEL` troca o modelo (padrão `claude-sonnet-5-5`).
@@ -47,8 +47,9 @@ Segredo `ANTHROPIC_MODEL` troca o modelo (padrão `claude-sonnet-5-5`).
 - `nucleo.js` — assinatura, conversa com o Claude, propor/executar, acesso ao Supabase, entrada HTTP.
 - `ferramentas-base.js` — erros, utilitários, "achadores" (nome → registro).
 - `ferramentas-leitura.js` / `ferramentas-escrita.js` — o que a IA consulta e o que ela pode propor.
-- `ferramentas-impressao.js` — para cada consulta, monta a tabela que o app imprime (veja "Imprimir o que a IA mostrou").
-- `dominio.js` e `pacote.js` — cópias das regras do app (`assets/js/dominio.js` e `assets/js/pacote.js`), para publicar pela CLI.
+- `ferramentas-impressao.js` — para cada consulta, monta a planilha que o app abre, baixa e imprime (veja "Imprimir o que a IA mostrou").
+- `relatorio-visual.js` — números-chave, gráficos e destaques de coluna das planilhas (cópia exata de `assets/js/relatorio-visual.js`).
+- `dominio.js`, `pacote.js` e `relatorio-visual.js` — cópias exatas dos arquivos do app em `assets/js/`, para publicar pela CLI (`tests/copias.test.js` confere).
 - Testes: `node --test tests/assistente.test.js` (49 testes, sem rede) e `tests/dominio.test.js`.
 
 ## Como publicar
@@ -59,6 +60,7 @@ Pelo painel/MCP: o `index.ts` publicado importa os **mesmos arquivos do reposit�
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/assets/js/dominio.js";
 import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/assets/js/pacote.js";
+import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/assets/js/relatorio-visual.js";
 import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/supabase/functions/assistente/ferramentas-base.js";
 import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/supabase/functions/assistente/ferramentas-leitura.js";
 import "https://raw.githubusercontent.com/joserobertoleitejunior-a11y/NOVA-ERA-/<commit>/supabase/functions/assistente/ferramentas-impressao.js";

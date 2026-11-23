@@ -7,6 +7,7 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import "./dominio.js";
 import "./pacote.js";
+import "./relatorio-visual.js";
 import "./ferramentas-base.js";
 import "./ferramentas-leitura.js";
 import "./ferramentas-impressao.js";
