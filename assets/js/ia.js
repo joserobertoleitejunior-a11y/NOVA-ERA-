@@ -55,8 +55,10 @@
       }
       return el("button", { type: "button", class: "link-acao", onclick: () => { fecharChat(); NE.app.ir(a.rota === "contagem" ? "contar" : a.rota, a.params || {}); } }, a.rotulo, ic("seguir"));
     };
+    // Texto limpo: sem asteriscos, sem títulos com #, sem traço como marcador (mesmo que o servidor mande markdown)
+    const limpo = (t) => String(t || "").replace(/\*\*(.+?)\*\*/gs, "$1").replace(/(^|\s)\*(\S[^*\n]*?)\*(?=\s|$|[.,;:!?])/g, "$1$2").replace(/^#{1,6}\s+/gm, "").replace(/^\s*[-*•]\s+/gm, "• ").replace(/\s[—–]\s/g, ": ").replace(/\n{3,}/g, "\n\n").trim();
     const bolha = (tipo, texto, acoes = [], mini = []) => {
-      const b = el("div", { class: `bolha ${tipo}` }, texto);
+      const b = el("div", { class: `bolha ${tipo}` }, tipo === "ia" ? limpo(texto) : texto);
       if (mini.length) b.append(el("div", { class: "anexos-mini" }, mini.map(miniatura)));
       if (acoes.length) b.append(el("div", { class: "acoes-linha" }, acoes.map(botaoAcao)));
       chat.append(b); rolar(); return b;
