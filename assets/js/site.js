@@ -128,19 +128,13 @@
     { slug: "dissipadores-alas", nome: "Dissipadores e alas", texto: "Saída de bueiros e proteção.", alt: "Estrutura pré-moldada de concreto com ala e abertura em arco" },
   ];
   const cartoes = PRODUTOS.map((p) => {
-    const host = el("div", { class: "produto-maquete", "data-slug": p.slug });
     return el("article", { class: "produto" },
       el("div", { class: "produto-midia" },
-        el("img", { class: "produto-foto", src: `assets/img/produtos/${p.slug}-720.webp`, alt: p.alt, width: 720, height: 540, loading: "lazy", decoding: "async" }), host),
+        el("img", { class: "produto-foto", src: `assets/img/produtos/${p.slug}-720.webp`, alt: p.alt, width: 720, height: 540, loading: "lazy", decoding: "async" })),
       el("div", { class: "produto-texto" }, el("h3", {}, p.nome), el("p", {}, p.texto)),
       el("button", { type: "button", class: "produto-add", "aria-label": `Adicionar ${p.nome} à lista de orçamento`, onclick: () => adicionar(p.nome, 1, "peças") }, ic("mais"), el("span", {}, "Adicionar")));
   });
   $("#grade-produtos").append(...cartoes);
-  // A maquete 3D só é montada quando o cartão chega perto da tela (a página abre leve)
-  if (window.NE && NE.maquete) {
-    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { io.unobserve(e.target); NE.maquete(e.target, e.target.dataset.slug); } }), { rootMargin: "300px" });
-    document.querySelectorAll(".produto-maquete").forEach((h) => io.observe(h));
-  }
 
   // ── Calculadora de concreto (Humberto) ───────────────
   const num = (id) => Number(String($(id).value).replace(",", ".")) || 0;
