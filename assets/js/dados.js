@@ -175,7 +175,10 @@
       pushTestar: () => funcao("push", { acao: "testar" }),
 
       iaDisponivel: async () => { try { return await funcao("assistente", { acao: "status" }); } catch { return { ativo: false }; } },
-      iaPerguntar: (pergunta, historico) => funcao("assistente", { acao: "perguntar", pergunta, historico }),
+      // extra: { anexos, resultados } — fotos e XML da conversa e o que aconteceu com as ações confirmadas. Nada é gravado ao perguntar.
+      iaPerguntar: (pergunta, historico, extra = {}) => funcao("assistente", { acao: "perguntar", pergunta, historico, ...extra }),
+      // Executa UMA ação que o assistente preparou, só com o token do botão Confirmar (assinado no servidor, de uso único, vale 10 min).
+      iaExecutar: (token) => funcao("assistente", { acao: "executar", token }),
       async iaLerNota(blob) {
         const base64 = await new Promise((res) => { const l = new FileReader(); l.onload = () => res(String(l.result).split(",")[1]); l.readAsDataURL(blob); });
         return funcao("assistente", { acao: "ler_nota", imagem: base64 });
@@ -201,7 +204,7 @@
   const nomes = ["emCache", "perfil", "veiculos", "produtos", "funcionarios", "criarFuncionario", "criarFuncionarios", "redefinirSenha", "alterarFuncionario", "criarVeiculo", "alterarVeiculo", "criarProduto", "alterarProduto", "excluirVeiculo", "excluirProduto",
     "notas", "criarNota", "importarNotas", "cancelarNota", "enviarFoto", "urlFoto", "fotoExemplo", "registrarConferencia", "sincronizar", "pendentes", "conferencias", "contexto",
     "saldos", "movimentos", "lancarMovimento", "contagens", "pedirContagem", "concluirContagem", "aplicarAjuste", "descartarContagem", "alertas", "marcarLidos", "resolverAlerta", "preferencias", "salvarPreferencias", "config", "salvarConfig",
-    "pushSuportado", "pushAssinar", "pushRemover", "pushTestar", "iaDisponivel", "iaPerguntar", "iaLerNota", "trocarPerfil", "reiniciar"];
+    "pushSuportado", "pushAssinar", "pushRemover", "pushTestar", "iaDisponivel", "iaPerguntar", "iaExecutar", "iaLerNota", "trocarPerfil", "reiniciar"];
   // Antes do login não há sessão: na demonstração o pedido fica na demonstração; fora dela vai ao banco de verdade.
   const pedirAjudaSenhaAntesLogin = (d) => (naDemo() ? NE.criarTeste().pedirAjudaSenha(d) : real_().pedirAjudaSenha(d));
   const dados = {

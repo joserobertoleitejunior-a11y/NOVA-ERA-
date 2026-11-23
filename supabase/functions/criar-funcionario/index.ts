@@ -1,5 +1,6 @@
 // Cria o login de funcionários (Supabase Auth) + ficha (perfil). Só um admin ativo pode chamar.
 // Modos: { nome, usuario, senha, ... } (um)  ·  { lote: [...] } (vários)  ·  { acao: "redefinir", id, senha? } (nova senha)
+//        { acao: "apagar", id } (apaga o login e a ficha; recusa quem já tem histórico, a si mesmo e o último administrador)
 // A chave de serviço existe apenas aqui no servidor; nunca vai para o app.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -58,6 +59,25 @@ Deno.serve(async (req) => {
       const { error } = await admin.auth.admin.updateUserById(id, { password: senha });
       if (error) return resp(400, { erro: "Não foi possível trocar a senha." });
       return resp(200, { usuario: p.usuario, senha });
+    }
+    if (b.acao === "apagar") {
+      const id = String(b.id ?? ""); if (!id) return resp(400, { erro: "Diga quem apagar." });
+      if (id === euId) return resp(400, { erro: "Você não pode apagar o seu próprio cadastro." });
+      const { data: p } = await admin.from("perfis").select("id, nome, papel, ativo").eq("id", id).maybeSingle();
+      if (!p) return resp(404, { erro: "Funcionário não encontrado." });
+      if (p.papel === "admin" && p.ativo) { // nunca ficar sem administrador
+        const { count } = await admin.from("perfis").select("id", { count: "exact", head: true }).eq("papel", "admin").eq("ativo", true).neq("id", id);
+        if (!count) return resp(400, { erro: "Este é o último administrador ativo: não dá para apagar." });
+      }
+      // Quem já registrou algo não é apagado: o histórico (conferências, notas, estoque) precisa continuar com nome. Nesse caso só se desativa.
+      const usos: [string, string, string][] = [["conferencias", "conferente_id", "conferências"], ["notas", "criado_por", "notas"], ["estoque_movimentos", "usuario_id", "lançamentos de estoque"], ["contagens", "criado_por", "contagens"]];
+      for (const [tabela, coluna, rotulo] of usos) {
+        const { count } = await admin.from(tabela).select("id", { count: "exact", head: true }).eq(coluna, id);
+        if (count) return resp(409, { erro: `${p.nome} já tem ${rotulo} registrados. Para não perder o histórico, só dá para impedir que a pessoa entre (desativar).`, emUso: true });
+      }
+      const { error } = await admin.auth.admin.deleteUser(id); // a ficha (perfis) some junto: perfis.id → auth.users ON DELETE CASCADE
+      if (error) return resp(400, { erro: "Não foi possível apagar. Desative a pessoa em vez de apagar." });
+      return resp(200, { ok: true });
     }
     if (Array.isArray(b.lote)) {
       if (b.lote.length > 50) return resp(400, { erro: "No máximo 50 pessoas por vez." });

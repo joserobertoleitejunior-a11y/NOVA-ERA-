@@ -15,6 +15,7 @@
     grade: s('<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>'),
     baixar: s('<path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/>'),
     enviar: s('<path d="M4 12 20 4l-6 16-3-7z"/>'),
+    clipe: s('<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>'),
     pessoas: s('<circle cx="9" cy="8" r="3.2"/><path d="M3 20c.5-3.5 3-5.2 6-5.2s5.5 1.7 6 5.2"/><circle cx="17.5" cy="9" r="2.4"/><path d="M17 14.4c2.2.1 3.7 1.5 4 4"/>'),
     mapa: s('<path d="M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>'),
     mais_menu: s('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'),

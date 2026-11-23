@@ -8,7 +8,7 @@
   const PAL = ["carga", "nota", "silo", "patio", "caixa", "tubo", "laje", "munck", "brita", "areia"];
   const senhaNova = () => { const n = new Uint32Array(2); crypto.getRandomValues(n); return `${PAL[n[0] % PAL.length]}${1000 + (n[1] % 9000)}`; };
   const FUNCOES = [["conferente", "Conferente"], ["motorista", "Motorista"], ["ajudante", "Ajudante"], ["expedicao", "Expedição"], ["vendedor", "Vendedor"], ["administrativo", "Administrativo"], ["diretoria", "Diretoria"]];
-  const papelDe = (f) => (["expedicao", "diretoria", "vendedor"].includes(f) ? "admin" : "funcionario");
+  const papelDe = (f) => (["expedicao", "diretoria", "vendedor", "administrativo"].includes(f) ? "admin" : "funcionario");
   const urlApp = () => { const b = (window.NOVA_ERA || {}).urlPublica || location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, ""); return `${b.replace(/\/?$/, "/")}app.html`; };
 
   // Link que vai no WhatsApp: abre a tela de boas-vindas com o acesso (usuário e senha) e o vídeo tutorial da função.
