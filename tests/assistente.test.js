@@ -5,7 +5,7 @@ const test = require("node:test"); const assert = require("node:assert/strict");
 globalThis.NEDominio = require("../assets/js/dominio.js");
 require("../assets/js/pacote.js");   // regras de pacote (a IA é do Premium); registra NEPacoteRegras
 const base = "../supabase/functions/assistente/";
-require(base + "ferramentas-base.js"); require(base + "ferramentas-leitura.js"); require(base + "ferramentas-escrita.js");
+require(base + "ferramentas-base.js"); require(base + "ferramentas-leitura.js"); require(base + "ferramentas-impressao.js"); require(base + "ferramentas-escrita.js");
 const N = require(base + "nucleo.js");
 const { ErroAssistente } = require(base + "ferramentas-base.js");
 
@@ -483,4 +483,48 @@ test("pacote: Básico e Intermediário não têm IA (status desligado, perguntar
   }
   const lixo = criarRepo(); lixo.db.licenca = [{ id: 1, pacote: "qualquer-coisa" }];   // valor desconhecido não tira nada de quem já usa
   assert.equal((await N.processar({ corpo: { acao: "status" }, repo: lixo, claude: null, env: ENV, agora: AGORA })).corpo.ativo, true);
+});
+
+// ───────────────────────── impressão pelo assistente ─────────────────────────
+test("impressão: cada consulta devolve o bloco para imprimir com os MESMOS dados que o assistente viu", async () => {
+  const repo = criarRepo(); repo.db.estoque_movimentos = [
+    { id: "m1", produto_id: "p2", tipo: "entrada", quantidade: 200, motivo: "Produção do turno", criado_em: "2026-11-23T12:00:00Z", usuario_id: "u-edu" },
+    { id: "m2", produto_id: "p2", tipo: "saida", quantidade: -60, motivo: "Nota 48172", criado_em: "2026-11-23T13:00:00Z", usuario_id: "u-edu" },
+    { id: "m3", produto_id: "p1", tipo: "perda", quantidade: -2, motivo: "Quebrou no pátio", criado_em: "2026-11-23T14:00:00Z", usuario_id: "u-jose" }];
+  const r = await perguntar(repo, [usarVarias([["movimentos", {}], ["estoque", {}], ["notas", {}]]), dizer("Aqui está. Quer imprimir isto?")]);
+  assert.equal(r.status, 200); assert.equal(r.impressoes.length, 3);
+  const [mov, est, notas] = r.impressoes;
+  assert.equal(mov.titulo, "Movimentação de estoque"); assert.deepEqual(mov.colunas.map((c) => c.rotulo), ["Quando", "Produto", "O que foi", "Qtd", "Motivo"]); assert.equal(mov.colunas[3].dir, true);
+  assert.equal(mov.linhas.length, 3); assert.ok(mov.linhas.some((l) => l[1] === "Meio-fio" && l[2] === "Entrada" && l[3] === "+200" && l[4] === "Produção do turno"));
+  assert.ok(mov.linhas.some((l) => l[1] === "Boca de lobo" && l[2] === "Perda" && l[3] === "−2")); assert.deepEqual(mov.resumo.find((x) => x[0] === "Perdas"), ["Perdas", "2"]);
+  assert.equal(est.titulo, "Estoque agora"); assert.ok(est.linhas.some((l) => l[0] === "Meio-fio" && /340/.test(l[1]))); assert.ok(est.resumo.some((x) => x[0] === "Produtos"));
+  assert.equal(notas.titulo, "Notas na fila"); assert.ok(notas.linhas.length >= 1 && notas.linhas.every((l) => l[0] && l[3] !== "Conferida"), "só o que está na fila"); assert.ok(notas.linhas.some((l) => l[1] === "Construtora Alfa"));
+  for (const b of r.impressoes) { assert.ok(b.id && b.arquivo && b.subtitulo !== undefined); for (const l of b.linhas) assert.equal(l.length, b.colunas.length, `${b.titulo}: linha com ${l.length} células e ${b.colunas.length} colunas`); }
+});
+test("impressão: consulta sem dados, com erro ou que não é lista não gera botão; repetida não duplica; no máximo 3", async () => {
+  const vazio = criarRepo(); vazio.db.estoque_movimentos = []; const r0 = await perguntar(vazio, [usar("movimentos", {}), dizer("Nada lançado.")]); assert.deepEqual(r0.impressoes, []);
+  const r1 = await perguntar(criarRepo(), [usarVarias([["movimentos", { produto: "inexistente-xyz" }], ["ajustes", {}]]), dizer("Não achei.")]); assert.deepEqual(r1.impressoes, []);
+  const r2 = await perguntar(criarRepo(), [usarVarias([["estoque", {}], ["estoque", {}]]), dizer("ok")]); assert.equal(r2.impressoes.length, 1, "a mesma consulta duas vezes vira um botão só");
+  const r3 = await perguntar(criarRepo(), [usarVarias([["estoque", {}], ["notas", {}], ["contagens", {}], ["produtos", {}], ["funcionarios", {}]]), dizer("ok")]); assert.equal(r3.impressoes.length, 3, "no máximo 3 botões por resposta");
+});
+test("impressão: o prompt pede para perguntar 'Quer imprimir?' e diz que o botão é do app; resposta sem consulta não traz nada", async () => {
+  const r = await perguntar(criarRepo(), [dizer("Oi! Em que posso ajudar?")]); assert.deepEqual(r.impressoes, []);
+  const sis = r.claude.pedidos[0].system[0].text; assert.match(sis, /Quer imprimir isto\?/); assert.match(sis, /botão Imprimir/); assert.match(sis, /não monta a impressão/);
+  const vend = { id: "u-vend", nome: "Wesley", funcao: "vendedor", papel: "admin", ativo: true, alertas: null, criado_em: "2026-11-20T15:33:00Z" }; const d = semente(); d.perfis.push(vend);
+  const rv = await perguntar(criarRepo({ eu: vend, dados: d }), [dizer("oi")]); assert.match(rv.claude.pedidos[0].system[0].text, /Quer imprimir isto\?/, "o assistente de vendas também oferece");
+});
+test("impressão: o vendedor só imprime o que ele pode ver (estoque para vender, só as notas dele)", async () => {
+  const vend = { id: "u-vend", nome: "Wesley", funcao: "vendedor", papel: "admin", ativo: true, alertas: null, criado_em: "2026-11-20T15:33:00Z" }; const d = semente(); d.perfis.push(vend);
+  const r = await perguntar(criarRepo({ eu: vend, dados: d }), [usarVarias([["estoque", {}], ["notas", { status: "todas" }]]), dizer("ok")]);
+  const est = r.impressoes.find((b) => b.id === "estoque"); assert.equal(est.titulo, "Estoque para vender"); assert.deepEqual(est.colunas.map((c) => c.rotulo), ["Produto", "No pátio", "Já vendido", "Disponível", "Situação"]);
+  assert.ok(!est.colunas.some((c) => /Mínimo|Saldo/.test(c.rotulo)), "o vendedor não recebe saldo nem mínimo da administração");
+  const notas = r.impressoes.find((b) => b.id.startsWith("notas")); assert.ok(!notas || notas.linhas.every((l) => l[2] === "Wesley"), "só notas dele");
+});
+test("impressão: histórico de atividades e resumo viram blocos; o histórico só sai para quem pode ver", async () => {
+  const repo = criarRepo(); repo.db.atividades = [{ criado_em: "2026-11-23T13:00:00Z", usuario_nome: "Eduardo", usuario_funcao: "expedicao", acao: "carga_conferida", categoria: "carga", resumo: "Conferiu a carga da nota 48172", nota_numero: "48172", cliente: "JB Obras", itens: [], detalhes: {}, busca: "conferiu a carga da nota 48172 jb obras eduardo" }];
+  const r = await perguntar(repo, [usarVarias([["historico_de_atividades", { periodo: "7d" }], ["resumo", { periodo: "hoje" }]]), dizer("ok")]);
+  const h = r.impressoes.find((b) => b.id === "historico-de-atividades"); assert.deepEqual(h.linhas[0].slice(1), ["Eduardo", "Conferiu a carga da nota 48172", "48172", "JB Obras"]);
+  assert.ok(r.impressoes.find((b) => b.id === "resumo"), "o resumo do dia também imprime");
+  const edu = clone(semente().perfis[1]); const r2 = await perguntar(criarRepo({ eu: edu, dados: Object.assign(semente(), { atividades: repo.db.atividades }) }), [usar("historico_de_atividades", { periodo: "7d" }), dizer("ok")]);
+  assert.deepEqual(r2.impressoes, [], "expedição não vê o histórico, então nada para imprimir");
 });

@@ -108,6 +108,11 @@ body.com-nav main.largo { padding-bottom: calc(112px + env(safe-area-inset-botto
 .bolha.eu { align-self: flex-end; background: var(--azul); color: #fff; border-bottom-right-radius: 6px; }
 .bolha.ia { align-self: flex-start; background: rgba(255,255,255,.9); border: 1px solid var(--linha); border-bottom-left-radius: 6px; }
 .bolha .acoes-linha { margin-top: 8px; }
+/* Botão Imprimir que o assistente oferece junto da resposta ("Quer imprimir isto?") */
+.bolha .imprimir-ia { gap: 8px; margin-top: 10px; }
+.bolha .btn-imprimir-ia { border-color: var(--azul); justify-content: flex-start; text-align: left; }
+.bolha .btn-imprimir-ia .imp-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.bolha .btn-imprimir-ia .quanto { font-size: .8rem; font-weight: 600; letter-spacing: 0; text-transform: none; opacity: .75; }
 .chat-sugestoes { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; padding: 0 16px 8px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .chat-sugestoes::-webkit-scrollbar { display: none; }
 .chat-sugestoes .chip { flex: none; }
@@ -155,12 +160,9 @@ body.com-nav main.largo { padding-bottom: calc(112px + env(safe-area-inset-botto
 /* Equipe: cartão de acesso */
 .cartao-acesso { border: 2px dashed var(--linha); border-radius: 16px; padding: 14px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; background: #fff; color: #000; break-inside: avoid; }
 .cartao-acesso h3 { font-size: 1.3rem; margin: 0 0 4px; text-transform: uppercase; } .cartao-acesso .cred { font-family: ui-monospace, monospace; font-size: 1.05rem; font-weight: 700; } .cartao-acesso small { color: #555; display: block; }
-.cartao-acesso .qr svg { width: 96px; height: 96px; display: block; }
+.cartao-acesso .qr svg { width: 132px; height: 132px; display: block; background: #fff; }
 .grade-cartoes { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .lote-area { min-height: 150px; font-family: ui-monospace, monospace; }
-body.imprimindo-cartoes > *:not(#area-cartoes) { display: none !important; }
-body.imprimindo-cartoes #area-cartoes { display: block !important; padding: 8mm; }
-#area-cartoes { display: none; }
 .menu-grade { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
 .menu-grade .cartao-guia { margin: 0; flex-direction: column; align-items: flex-start; text-align: left; min-height: 104px; }
 .menu-grade .cartao-guia small { color: var(--texto-suave); font-weight: 500; }

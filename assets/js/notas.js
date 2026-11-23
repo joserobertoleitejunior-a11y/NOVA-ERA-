@@ -10,12 +10,12 @@
   const ligarProdutos = (itens, produtos) => itens.map((i) => { const m = D.casarProduto(i, produtos); return { ...i, produto_id: m.produto ? m.produto.id : null, descricao: m.produto ? m.produto.nome : i.descricao, nivel: m.nivel }; });
 
   NE.rotas.notas = (raiz, params, app) => {
-    lista(raiz, app);
+    lista(raiz, params || {}, app);
   };
 
   // ───────────────────────── fila ─────────────────────────
   // Vendedor: começa só nas notas DELE ("Minhas"), com a opção de ver as de todos. Quem tem acesso de administração pode buscar por número ou cliente.
-  function lista(raiz, app) {
+  function lista(raiz, params, app) {
     const admin = app.admin; const vendedor = app.perm.painel === "vendas";
     const box = el("div", { id: "lista-minhas" }, el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }));
     const chips = el("div", { class: "chips" }); const chipsDono = el("div", { class: "chips" });
@@ -28,8 +28,15 @@
       lanca && el("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
         el("button", { type: "button", class: "btn btn-azul", id: "btn-nota-nova", onclick: () => app.ir("guia", { fluxo: "nota" }) }, ic("mais"), "Nova nota"),
         NE.pacote.tem("xml") && (app.perm.fluxos === null || (app.perm.fluxos || []).includes("xml")) && el("button", { type: "button", class: "btn btn-secundario", id: "btn-importar", onclick: () => app.ir("guia", { fluxo: "xml" }) }, ic("baixar"), "Importar XML")));
-    raiz.replaceChildren(cab, app.perm.conferir ? nova : null, el("div", { style: "height:14px" }), admin && el("div", { class: "busca-linha" }, busca), vendedor && chipsDono, admin && chips, resumo, box);
     let todas = [];
+    // Ler o QR da etiqueta: administração abre a nota; quem confere vai direto conferir
+    const ler = NE.pacote.tem("etiquetas") && NE.botaoLerQR({ titulo: "Ler a etiqueta da nota", aceita: ["peca", "nota"], digitar: "Número da nota", aoLer: (obj) => {
+      const n = NE.lerQR.acharNota(obj, todas); if (!n) { NE.aviso(admin ? "Não achei essa nota. Ela pode ser de outro sistema." : "Essa nota não está na fila de conferência.", "alerta"); return false; }
+      if (admin) return detalhe(n, app);
+      if (app.perm.conferir && ["pendente", "em_conferencia"].includes(n.status)) return app.ir("conferir", { nota_id: n.id });
+      NE.aviso("Essa nota espera conferência. Quem confere a carga é o conferente.", "alerta"); return false;
+    } }, { rotulo: "Ler QR da etiqueta", id: "btn-ler-qr-notas" });
+    raiz.replaceChildren(cab, app.perm.conferir ? nova : null, ler ? el("div", { style: "margin-top:10px" }, ler) : null, el("div", { style: "height:14px" }), admin && el("div", { class: "busca-linha" }, busca), vendedor && chipsDono, admin && chips, resumo, box);
     const desenharChips = () => chips.replaceChildren(...[["fila", "Na fila"], ["todas", "Todas"]].map(([id, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(aba === id), onclick: () => { aba = id; desenharChips(); desenharLista(); } }, nome)));
     const desenharDono = () => chipsDono.replaceChildren(...[["minhas", "Minhas"], ["todos", "De todos"]].map(([id, nome]) => el("button", { type: "button", class: "chip", "aria-pressed": String(escopo === id), onclick: () => { escopo = id; desenharDono(); desenharLista(); } }, nome)));
     const desenharLista = () => {
@@ -43,7 +50,7 @@
     };
     busca.addEventListener("input", desenharLista);
     if (admin) desenharChips(); if (vendedor) desenharDono();
-    NE.dados.notas({ status: admin ? undefined : ["pendente", "em_conferencia"] }).then((n) => { todas = n; desenharLista(); }).catch((e) => { box.replaceChildren(); NE.aviso(NE.mensagemErro(e), "erro", box); });
+    NE.dados.notas({ status: admin ? undefined : ["pendente", "em_conferencia"] }).then((n) => { todas = n; desenharLista(); const alvo = params.abrir && n.find((x) => x.id === params.abrir); if (alvo && admin) detalhe(alvo, app); }).catch((e) => { box.replaceChildren(); NE.aviso(NE.mensagemErro(e), "erro", box); });
   }
 
   // "JB Obras": 5 notas · 3 entregues · 1 na fila · 1 cancelada

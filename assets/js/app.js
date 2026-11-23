@@ -10,14 +10,14 @@
   NE.rotas = NE.rotas || {};
 
   const SEM_NAV = new Set(["conferir", "contar", "leitor", "guia"]);
-  const PAI_NAV = { resumo: "inicio", alertas: "mais", equipe: "mais", cadastros: "mais", config: "mais", exportar: "mais" };
+  const PAI_NAV = { resumo: "inicio", alertas: "mais", equipe: "mais", cadastros: "mais", config: "mais", exportar: "mais", historico: "mais", imprimir: "mais" };
   const ehAdmin = () => perfil?.papel === "admin";
 
   // ───────────────────────── o painel de cada função ─────────────────────────
   // Cada função tem o seu menu, a sua tela inicial e a sua lista fechada de telas.
   // "telas" vale também quando a pessoa digita o endereço na mão: o que não está aqui, não abre.
   const NOMES_ABA = { inicio: ["Início", "casa"], notas: ["Notas", "nota"], fila: ["Fila", "nota"], estoque: ["Estoque", "caixas"], cargas: ["Cargas", "caminhao"], alertas: ["Avisos", "sino"], mais: ["Mais", "mais_menu"] };
-  const TODAS_ADMIN = ["inicio", "resumo", "notas", "estoque", "cargas", "mais", "alertas", "equipe", "cadastros", "config", "exportar", "guia", "contar"];
+  const TODAS_ADMIN = ["inicio", "resumo", "notas", "estoque", "cargas", "mais", "alertas", "equipe", "cadastros", "config", "exportar", "guia", "contar", "imprimir"];
   const PAPEIS = {
     diretoria:      { nav: ["inicio", "cargas", "estoque", "mais"],                  painel: "empresa", telas: TODAS_ADMIN.concat("historico"),                                                              conferir: false, ia: true,  cadastra: true,  lancaNota: false, fluxos: ["ajustes", "pessoa", "veiculo", "produto", "novaPessoa", "novoVeiculo", "novoProduto"] },
     administrativo: { nav: ["inicio", "notas", "estoque", "mais"],                   painel: "escritorio", telas: TODAS_ADMIN.concat("historico"),                                                           conferir: false, ia: true,  cadastra: true,  lancaNota: true,  fluxos: null },
@@ -31,7 +31,7 @@
   const PADRAO_ADMIN = { nav: ["inicio", "notas", "estoque", "cargas", "mais"], painel: "patio", telas: TODAS_ADMIN.concat("conferir"), conferir: true, ia: true, cadastra: true, lancaNota: true, fluxos: null };
   const PADRAO_FUNC = { nav: ["notas", "estoque", "alertas"], painel: "fila", telas: ["notas", "estoque", "alertas", "conferir", "contar", "guia", "inicio"], conferir: true, ia: false, cadastra: false, lancaNota: false, fluxos: ["resolver"] };
   // O pacote contratado tira do painel o que ele não inclui: menu, telas e passos a passo (ver pacote.js).
-  const TELA_RECURSO = { estoque: "estoque", contar: "estoque", resumo: "resumo", exportar: "planilhas", historico: "historico" };
+  const TELA_RECURSO = { estoque: "estoque", contar: "estoque", resumo: "resumo", exportar: "planilhas", historico: "historico", imprimir: "etiquetas" };
   const FLUXO_RECURSO = { xml: "xml", mov: "estoque", contagem: "estoque", ajustes: "avisos" };
   const telaDoPacote = (t) => !TELA_RECURSO[t] || NE.pacote.tem(TELA_RECURSO[t]);
   const fluxoDoPacote = (f) => !FLUXO_RECURSO[f] || NE.pacote.tem(FLUXO_RECURSO[f]);
@@ -208,8 +208,10 @@
     NE.dados.aoMudarFila = mostrarFila; mostrarFila();
     iniciarSondagem();
     const alvo = (location.hash || "").slice(1);
+    const qrProduto = /(?:^|[#&])p=([A-Za-z0-9_-]{1,64})(?:&|$)/.exec(location.hash || "");   // QR de produto lido pela câmera do celular: abre o produto depois de entrar
     const rota = NE.rotas[alvo] && !SEM_NAV.has(alvo) && (ehAdmin() || ["notas", "estoque", "alertas"].includes(alvo)) && (!perm().nav || perm().nav.includes(alvo) || alvo === "alertas") ? alvo : inicial();
     ir(rota, {}, { substituir: true });
+    if (qrProduto && NE.abrirProduto && ehAdmin() && NE.pacote.tem("estoque")) setTimeout(() => NE.abrirProduto(qrProduto[1]), 700);
     if (!NE.tourJaVisto(tipoGuia())) setTimeout(() => NE.iniciarTour(tipoGuia(), { verDicas: abrirDicas }), 500);
   }
   async function mostrarFila() {

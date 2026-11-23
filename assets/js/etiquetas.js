@@ -1,83 +1,49 @@
-// Etiquetas para imprimir e colar no carregamento. Cada etiqueta tem nota, produto, quantidade
-// (ou "peça X de Y"), caminhão, data e um QR Code que abre o rastreio da entrega.
+// ETIQUETAS: o que imprimir e para quem. O desenho está em etiqueta-layout.js, o motor de impressão em impressao.js.
+//   · etiqueta de NOTA ou CARGA: uma por produto (com a quantidade) ou uma por peça ("PEÇA 3 DE 40"). O QR abre o rastreio e o app conta peça por peça.
+//   · etiqueta de PRODUTO: para pilha ou prateleira. O QR abre o produto no app (contagem, entrada, saída).
+//   · cartão de ACESSO da equipe (ver equipe.js) e página de TESTE usam o mesmo motor.
 (() => {
   const NE = window.NE;
-  const { el, ic } = NE;
-  const QR = "assets/vendor/qrcode.js";
-  const FORMATOS = {
-    termica: { rotulo: "Térmica 100 × 50 mm", dica: "Impressora de etiqueta (Zebra, Elgin, Argox)", pagina: "100mm 50mm", classe: "fmt-termica" },
-    a4: { rotulo: "Folha A4 · 10 por folha", dica: "Impressora comum, folha de etiquetas 99 × 57 mm", pagina: "A4", classe: "fmt-a4" },
+  const Dados = window.NEEtiquetaDados;
+  const { el } = NE;
+  const C = window.NOVA_ERA || {};
+
+  const base = () => C.urlPublica || location.href.replace(/[?#].*$/, "").replace(/[^/]*$/, "");
+  NE.urlBase = base;
+  const plural = (n, um, varios) => `${NE.num(n)} ${n === 1 ? um : varios}`;
+  const qtdDe = (i) => Number(i.qtd_carregada ?? i.quantidade ?? i.qtd_nota) || 0;
+
+  // c: conferência (tem placa e o que foi carregado) ou nota (tipo "nota")
+  NE.abrirEtiquetas = (c) => {
+    const itens = c.itens || []; const total = itens.reduce((n, i) => n + qtdDe(i), 0); const numero = c.numero_nota || c.numero;
+    return NE.imp.janelaEtiquetas({
+      titulo: `Etiquetas da nota ${numero}`, etiqueta: `Nota ${numero}`, tipo: "nota", nomeArquivo: `etiquetas-nf-${numero}`,
+      controles: [
+        { id: "modo", rotulo: "Quantas etiquetas", tipo: "escolha", valor: "item", itens: [
+          { valor: "item", rotulo: "Uma por produto", dica: plural(itens.length, "etiqueta com a quantidade", "etiquetas com a quantidade") },
+          { valor: "peca", rotulo: "Uma por peça", dica: plural(total, "etiqueta numerada", "etiquetas numeradas") }] },
+        { id: "copias", rotulo: "Cópias de cada etiqueta", tipo: "numero", valor: 1, min: 1, max: 10, quando: (v) => v.modo === "item" },
+      ],
+      gerar: (v) => Dados.daNota(c, { modo: v.modo, copias: v.copias, base: base() }),
+    });
   };
 
-  const plural = (n, um, varios) => `${NE.num(n)} ${n === 1 ? um : varios}`;
+  // produtos: lista de { id, nome, codigo, unidade, minimo, por_pilha }
+  NE.etiquetasDeProduto = (produtos) => NE.imp.janelaEtiquetas({
+    titulo: produtos.length === 1 ? `Etiqueta de ${produtos[0].nome}` : `Etiquetas de ${produtos.length} produtos`, etiqueta: "Produtos", tipo: "produto", nomeArquivo: "etiquetas-produtos",
+    controles: [{ id: "copias", rotulo: "Cópias de cada produto", tipo: "numero", valor: 1, min: 1, max: 20 }],
+    gerar: (v) => produtos.flatMap((p) => Dados.doProduto(p, { base: base(), copias: v.copias })),
+  });
 
-  NE.abrirEtiquetas = async (c) => {
-    let formato = "termica", modo = "item";
-    const previa = el("div", { class: "etiquetas-previa" });
-    const area = el("div", { id: "area-impressao" });
-    let svgQr = "";
-    try {
-      await NE.carregarScript(QR);
-      svgQr = true;
-    } catch { /* sem o leitor de QR local: imprime sem ele */ }
-    // QR de cada peça: abre o rastreio da nota e diz qual peça é (o leitor do app usa isso para contar na conferência)
-    const base = NE.urlRastreio(c.token_publico || c.id);
-    const qrDe = (p) => { const q = window.qrcode(0, "M"); q.addData(p ? `${base}&p=${p}` : base); q.make(); return q.createSvgTag({ cellSize: 3, margin: 0, scalable: true }); };
-    const qtdDe = (i) => Number(i.qtd_carregada ?? i.quantidade ?? i.qtd_nota);
-    const numeroNota = c.numero_nota || c.numero;
-    const rodape = c.placa ? `${c.placa} · ${new Date(c.criado_em).toLocaleDateString("pt-BR")}` : `${c.cliente || "Nova Era"} · ${new Date(c.criado_em).toLocaleDateString("pt-BR")}`;
-
-    const lista = () => {
-      const itens = c.itens || [];
-      if (modo === "item") return itens.map((i) => ({ produto: i.descricao, linha: `Quantidade: ${NE.num(qtdDe(i))}`, p: "" }));
-      const pecas = [];
-      itens.forEach((i, idx) => { const n = qtdDe(i); for (let k = 1; k <= n; k++) pecas.push({ produto: i.descricao, linha: `Peça ${k} de ${n}`, p: `${idx}-${k}` }); });
-      return pecas;
-    };
-    const etiqueta = (e) => el("div", { class: "etiqueta-impressa" },
-      el("div", { class: "et-texto" },
-        el("div", { class: "et-marca", html: NE.logo }),
-        el("div", { class: "et-nota" }, `NF ${numeroNota}`),
-        el("div", { class: "et-produto" }, e.produto),
-        el("div", { class: "et-linha" }, e.linha),
-        el("div", { class: "et-rodape" }, rodape)),
-      svgQr && el("div", { class: "et-qr" }, el("div", { html: qrDe(e.p) }), el("span", {}, "Rastreio")));
-
-    const opcoes = el("div", {});
-    const desenhar = () => {
-      const ets = lista();
-      opcoes.replaceChildren(
-        el("div", { class: "rotulo" }, "Tamanho da etiqueta"),
-        NE.escolhaUnica(Object.entries(FORMATOS).map(([valor, f]) => ({ valor, rotulo: f.rotulo, dica: f.dica })), formato, (v) => { formato = v; desenhar(); }),
-        el("div", { class: "rotulo", style: "margin-top:14px" }, "Quantas etiquetas"),
-        NE.escolhaUnica([
-          { valor: "item", rotulo: "Uma por produto", dica: plural((c.itens || []).length, "etiqueta com a quantidade", "etiquetas com a quantidade") },
-          { valor: "peca", rotulo: "Uma por peça", dica: plural((c.itens || []).reduce((n, i) => n + qtdDe(i), 0), "etiqueta numerada", "etiquetas numeradas") },
-        ], modo, (v) => { modo = v; desenhar(); }));
-      previa.className = `etiquetas-previa ${FORMATOS[formato].classe}`;
-      previa.replaceChildren(...ets.slice(0, 6).map(etiqueta), ets.length > 6 ? el("p", { class: "suave" }, `+ ${ets.length - 6} etiquetas`) : "");
-      area.className = FORMATOS[formato].classe;
-      area.replaceChildren(...ets.map(etiqueta));
-      contagem.textContent = `Imprimir ${ets.length} etiqueta${ets.length === 1 ? "" : "s"}`;
-    };
-    const contagem = el("span", {});
-    const imprimir = el("button", { type: "button", class: "btn btn-principal", onclick: () => {
-      const estilo = el("style", { id: "estilo-pagina" }, `@page { size: ${FORMATOS[formato].pagina}; margin: ${formato === "a4" ? "10mm 6mm" : "0"}; }`);
-      document.getElementById("estilo-pagina")?.remove();
-      document.head.append(estilo);
-      document.body.append(area);
-      document.body.classList.add("imprimindo");
-      window.print();
-      setTimeout(() => { document.body.classList.remove("imprimindo"); area.remove(); }, 500);
-    } }, ic("etiqueta"), contagem);
-    const fechar = el("button", { type: "button", class: "janela-fechar", "aria-label": "Fechar", html: NE.icone.fechar });
-    const tela = el("div", { class: "janela-fundo" },
-      el("div", { class: "janela", role: "dialog", "aria-modal": "true", "aria-labelledby": "titulo-etiquetas" },
-        el("div", { class: "janela-topo" }, el("div", {}, el("span", { class: "etiqueta" }, `Nota ${numeroNota}`), el("h2", { id: "titulo-etiquetas" }, "Etiquetas")), fechar),
-        el("div", { class: "janela-corpo" }, opcoes, el("div", { class: "rotulo", style: "margin-top:18px" }, "Prévia"), previa),
-        el("div", { class: "janela-rodape" }, el("button", { type: "button", class: "btn btn-secundario", onclick: () => tela.remove() }, "Voltar"), imprimir)));
-    fechar.addEventListener("click", () => tela.remove());
-    document.body.append(tela);
-    desenhar();
+  // Para quem vê a etiqueta pela primeira vez
+  NE.legendaEtiqueta = async () => {
+    const f = window.NEEtiquetaLayout.FORMATOS.t100x50;
+    const [lay] = await NE.imp.montar([{ tipo: "nota", cab: ["NF 48213", "PEÇA 3 DE 40"], nome: "Meio-fio 30 × 12", legenda: "LER NO APP", campos: [["Cliente", "JB Obras"], ["Caminhão", "ABC1D23"], ["Data", "23/11/2026"]], qr: { texto: window.NECodigos.nota(base(), "3f9a1c2e-1111-4222-8333-444455556666", "0-3"), codigo: "NF 48213 · 3/40" } }], f);
+    const linhas = [["Faixa preta", "o número da nota e a peça (\"peça 3 de 40\") ou a quantidade."], ["Nome grande", "o produto que está na peça."], ["Campos pequenos", "cliente, caminhão e data."],
+      ["QR code", "aponte a câmera do app em \"Ler QR\". Quem recebe a carga também pode ler com a câmera do celular e vê a entrega."], ["Código embaixo do QR", "se o QR estiver rasgado ou sujo, digite esse código no leitor."]];
+    NE.janelaSimples({ etiqueta: "Etiquetas", titulo: "Como ler uma etiqueta", corpo: el("div", {},
+      el("div", { class: "imp-previa" }, el("div", { class: "imp-previa-item", style: "max-width:380px", html: NE.imp.svg(lay, { mm: false, rotulo: "Exemplo de etiqueta" }) })),
+      el("ol", { class: "imp-legenda", style: "margin-top:14px" }, linhas.map(([t, d]) => el("li", {}, el("span", {}, el("b", {}, `${t}: `), d)))),
+      el("p", { class: "suave" }, "Todas as etiquetas seguem este mesmo desenho, em preto e branco, de qualquer tamanho.")) });
   };
 })();

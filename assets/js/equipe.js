@@ -35,12 +35,12 @@
 
   // Cartão de acesso: nome, usuário, senha e QR que abre o app já com o usuário preenchido
   async function cartoes(lista, titulo, aoFechar) {
-    let svgs = []; try { await NE.carregarScript("assets/vendor/qrcode.js"); svgs = lista.map((p) => { const q = window.qrcode(0, "M"); q.addData(linkBoasVindas(p)); q.make(); return q.createSvgTag({ cellSize: 3, margin: 0, scalable: true }); }); } catch { /* sem QR */ }
+    let svgs = []; try { await NE.carregarScript("assets/vendor/qrcode.js"); svgs = lista.map((p) => { const q = window.qrcode(0, "M"); q.addData(linkBoasVindas(p)); q.make(); return q.createSvgTag({ cellSize: 3, margin: 4, scalable: true }); }); } catch { /* sem QR */ }
     const card = (p, i) => el("div", { class: "cartao-acesso" }, el("div", {}, el("h3", {}, p.nome), el("div", { class: "cred" }, `Usuário: ${p.usuario}`), el("div", { class: "cred" }, `Senha: ${p.senha}`), el("small", {}, `${NE.funcoes[p.funcao] || ""} · Nova Era · Confere Carga`), el("small", {}, urlApp().replace(/^https?:\/\//, ""))), svgs[i] && el("div", { class: "qr", html: svgs[i] }));
     const zap = zapBV;
     const grade = el("div", { class: "grade-cartoes" }, lista.map(card));
     const envios = el("div", { style: "display:grid;gap:8px;margin-top:12px" }, lista.map((p) => el("a", { class: "link-acao verde", target: "_blank", rel: "noopener", href: zap(p) }, ic("whatsapp"), `Mandar para ${p.nome.split(" ")[0]} no WhatsApp`)));
-    const imprimir = el("button", { type: "button", class: "btn btn-azul", onclick: () => { const area = el("div", { id: "area-cartoes" }, lista.map(card)); document.body.append(area); document.body.classList.add("imprimindo-cartoes"); window.print(); setTimeout(() => { document.body.classList.remove("imprimindo-cartoes"); area.remove(); }, 500); } }, ic("etiqueta"), "Imprimir cartões");
+    const imprimir = el("button", { type: "button", class: "btn btn-azul", id: "btn-imprimir-cartoes", onclick: () => NE.imp.cartoesDeAcesso(lista, { link: linkBoasVindas, funcaoRotulo: (p) => NE.funcoes[p.funcao] || "" }) }, ic("etiqueta"), "Imprimir cartões");
     const j = NE.janelaSimples({ etiqueta: "Pronto", titulo, corpo: el("div", {}, el("div", { class: "aviso alerta" }, ic("alerta"), el("span", {}, "Guarde ou entregue agora: a senha não aparece de novo.")), grade, envios), rodape: [imprimir] });
     j.fundo.addEventListener("click", (e) => { if (e.target === j.fundo) aoFechar?.(); });
     j.fundo.querySelector(".janela-fechar").addEventListener("click", () => aoFechar?.());

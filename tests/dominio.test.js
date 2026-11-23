@@ -79,4 +79,28 @@ test("assistente local", () => {
   assert.match(D.responderLocal("o que significa o semáforo do painel?", ctx).texto, /Como ler o painel/);
   assert.match(D.responderLocal("explica como funciona o estoque", ctx).texto, /Como funciona o estoque/);
 });
+test("assistente local: diz o que dá para imprimir (e nada quando não há o que mostrar)", () => {
+  const ctx = { conferencias: [conf("1", [it("Meio-fio", 10, 12, 1)]), conf("2", [it("Tubo", 5, 3, 2)], { conferente: { nome: "Bia" } })],
+    notas: [{ id: "n1", numero: "48172", cliente: "JB Obras", status: "pendente", criado_em: AGORA - 3 * D.HORA, itens: [] }],
+    saldos: [{ produto_id: 1, nome: "Meio-fio", unidade: "un", saldo: 4, minimo: 10, ultima_contagem: null }],
+    movimentos: [{ produto_id: 1, tipo: "entrada", quantidade: 100, criado_em: AGORA - 2 * D.HORA }, { produto_id: 1, tipo: "saida", quantidade: -60, criado_em: AGORA - 1 * D.HORA }, { produto_id: 1, tipo: "perda", quantidade: -2, criado_em: AGORA - 1 * D.HORA }, { produto_id: 1, tipo: "entrada", quantidade: 999, criado_em: AGORA - 40 * D.DIA }], contagens: [], agora: AGORA };
+  const imp = (q) => D.responderLocal(q, ctx).imprimir;
+  assert.deepEqual(imp("estoque baixo"), { tipo: "estoque" });
+  assert.deepEqual(imp("quais notas estão paradas na fila?"), { tipo: "fila" });
+  assert.deepEqual(imp("o que saiu a mais hoje?"), { tipo: "diferencas", chave: "hoje", sentido: "mais" });
+  assert.deepEqual(imp("o que faltou esta semana?"), { tipo: "diferencas", chave: "7d", sentido: "menos" });
+  assert.deepEqual(imp("resumo do dia"), { tipo: "resumo", chave: "hoje" });
+  assert.deepEqual(imp("quem conferiu hoje?"), { tipo: "equipe", chave: "hoje" });
+  assert.deepEqual(imp("o que contar hoje?"), { tipo: "contar" });
+  // movimentação: o texto conta só o período perguntado (a entrada de 40 dias atrás fica de fora) e oferece imprimir
+  const mov = D.responderLocal("movimentação do estoque de hoje", ctx);
+  assert.match(mov.texto, /Movimentação do estoque hoje: 3 lançamentos/); assert.match(mov.texto, /Entradas: 100/); assert.match(mov.texto, /Saídas: 60/); assert.match(mov.texto, /Perdas: 2/);
+  assert.deepEqual(mov.imprimir, { tipo: "movimentacao", chave: "hoje" });
+  assert.equal(D.responderLocal("movimentação do estoque de ontem", ctx).imprimir, undefined, "sem lançamentos no período: nada para imprimir");
+  // sem o que mostrar, sem o que imprimir
+  assert.equal(D.responderLocal("qual a receita de bolo de cenoura", ctx).imprimir, undefined);
+  assert.equal(D.responderLocal("explica como funciona o estoque", ctx).imprimir, undefined);
+  assert.equal(D.responderLocal("o que saiu a mais hoje?", { ...ctx, conferencias: [] }).imprimir, undefined);
+  assert.equal(D.responderLocal("estoque baixo", { ...ctx, saldos: [{ produto_id: 1, nome: "Meio-fio", unidade: "un", saldo: 50, minimo: 10, ultima_contagem: null }] }).imprimir, undefined);
+});
 test("csv escapa", () => assert.match(D.csv(["a"], [['x;"y']]), /"x;""y"/));

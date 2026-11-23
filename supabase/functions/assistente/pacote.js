@@ -25,7 +25,7 @@
   };
 
   const ROTULOS = {
-    estoque: "Estoque e contagem", xml: "Importar notas por XML", etiquetas: "Etiquetas com QR e contagem pela câmera", resumo: "Resumo e indicadores da diretoria",
+    estoque: "Estoque e contagem", xml: "Importar notas por XML", etiquetas: "Etiquetas com QR, impressão e leitura pela câmera", resumo: "Resumo e indicadores da diretoria",
     vendedor: "Painel do vendedor", avisos: "Avisos automáticos completos", planilhas: "Planilhas de cargas e estoque", videos: "Vídeo tutorial por função",
     ia: "Assistente com IA", historico: "Histórico de atividades",
   };

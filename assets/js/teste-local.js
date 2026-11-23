@@ -353,7 +353,12 @@
 
       // assistente (no teste responde com cálculo local, sem chave do Claude)
       iaDisponivel: async () => ({ ativo: eu().papel === "admin" && eu().funcao !== "vendedor", modo: "local", leitura: true }),   // o assistente de vendas só existe no app de verdade
-      async iaPerguntar(texto) { if (eu().papel !== "admin") throw new Error("O assistente é só da administração."); await pausa(400); const r = D.responderLocal(texto, contextoDe(e)); return { ...r, origem: "local" }; },
+      async iaPerguntar(texto) {
+        if (eu().papel !== "admin") throw new Error("O assistente é só da administração."); await pausa(400);
+        const ctx = contextoDe(e); const { imprimir, ...r } = D.responderLocal(texto, ctx);
+        const bloco = imprimir && NE.relatorios ? await NE.relatorios.doAssistente(imprimir, ctx).catch(() => null) : null;   // o mesmo que o servidor real faz: oferece imprimir o que acabou de mostrar
+        return bloco ? { ...r, texto: `${r.texto}\n\nQuer imprimir isto?`, impressoes: [bloco], origem: "local" } : { ...r, origem: "local" };
+      },
       async iaLerNota() {
         await pausa(900); const ps = e.produtos;
         return { numero: String(48300 + Math.floor(Math.random() * 90)), cliente: "Construtora Exemplo Ltda", itens: [{ descricao: ps[1].nome, quantidade: 60 }, { descricao: ps[0].nome, quantidade: 6 }], origem: "local" };

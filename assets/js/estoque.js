@@ -66,7 +66,11 @@
       lista.replaceChildren(...(vis.length ? vis.map((l) => linha(l, app, ctx, produtos)) : [el("div", { class: "vazio-grande" }, el("strong", {}, "Nada por aqui"), "Nenhum produto neste filtro.")]));
     };
     busca.addEventListener("input", desenhar);
-    caixa.replaceChildren(el("div", { class: "busca-linha" }, busca), chips, lista, exportar ? el("div", { style: "margin-top:10px" }, exportar) : null); desenhar();
+    const ler = NE.pacote.tem("etiquetas") && NE.botaoLerQR({ titulo: "Ler a etiqueta do produto", aceita: ["produto"], digitar: "Código do produto (P-1A2B3C4D)", aoLer: (obj) => {
+      const p = NE.lerQR.acharProduto(obj, produtos); const s = p && ctx.saldos.find((x) => x.produto_id === p.id); if (!s) { NE.aviso("Não achei esse produto.", "alerta"); return false; }
+      if (app.admin) return detalhe(s, produtos, app); busca.value = p.nome; desenhar();
+    } }, { rotulo: "Ler QR do produto", id: "btn-ler-qr-estoque", classe: "btn btn-secundario" });
+    caixa.replaceChildren(el("div", { class: "busca-linha" }, busca), ler ? el("div", { style: "margin:8px 0" }, ler) : null, chips, lista, exportar ? el("div", { style: "margin-top:10px" }, exportar) : null); desenhar();
   }
 
   function linha({ s, sit, cob }, app, ctx, produtos) {
@@ -81,12 +85,19 @@
     return b;
   }
 
+  // Abre o produto pelo código (QR da etiqueta do produto)
+  NE.abrirProduto = async (id) => {
+    const [saldosL, produtos] = await Promise.all([NE.dados.saldos(), NE.dados.produtos(true)]); const s = saldosL.find((x) => x.produto_id === id);
+    if (!s) return NE.aviso("Não achei esse produto.", "alerta");
+    return detalhe(s, produtos, NE.app);
+  };
+
   async function detalhe(s, produtos, app) {
     const movs = await NE.dados.movimentos({ produto_id: s.produto_id, limite: 12 }); let j;
     const tab = el("div", { class: "tabela-wrap resumo" }, el("table", {}, el("thead", {}, el("tr", {}, el("th", {}, "Quando"), el("th", {}, "O quê"), el("th", { class: "num" }, "Qtd"))),
       el("tbody", {}, movs.map((m) => el("tr", {}, el("td", {}, NE.dataHora(m.criado_em)), el("td", {}, m.motivo || m.tipo), el("td", { class: "num" }, m.quantidade > 0 ? `+${fmt(m.quantidade)}` : fmt(m.quantidade)))))));
     j = NE.janelaSimples({ etiqueta: "Estoque", titulo: s.nome, corpo: el("div", {}, el("div", { class: "resumo" }, NE.linhaResumo("Saldo no sistema", `${fmt(s.saldo)} ${s.unidade}`), NE.linhaResumo("Mínimo", fmt(s.minimo)), NE.linhaResumo("Última contagem", s.ultima_contagem ? NE.dataHora(s.ultima_contagem) : "nunca")), el("h3", {}, "Últimos movimentos"), movs.length ? tab : el("p", { class: "vazio" }, "Sem movimentos.")),
-      rodape: [el("button", { type: "button", class: "btn btn-azul", onclick: () => { j.fechar(); lancar(produtos, app, s.produto_id); } }, ic("mais"), "Lançar"), el("button", { type: "button", class: "btn btn-secundario", onclick: async () => { await NE.dados.pedirContagem([s.produto_id]); j.fechar(); NE.aviso("A equipe foi avisada para contar este produto.", "ok"); } }, ic("raio"), "Pedir para contar")] });
+      rodape: [el("button", { type: "button", class: "btn btn-azul", onclick: () => { j.fechar(); lancar(produtos, app, s.produto_id); } }, ic("mais"), "Lançar"), NE.pacote.tem("etiquetas") && el("button", { type: "button", class: "btn btn-secundario", id: "btn-etiqueta-produto", onclick: () => { const p = produtos.find((x) => x.id === s.produto_id); if (p) NE.etiquetasDeProduto([p]); } }, ic("etiqueta"), "Etiqueta"), el("button", { type: "button", class: "btn btn-secundario", onclick: async () => { await NE.dados.pedirContagem([s.produto_id]); j.fechar(); NE.aviso("A equipe foi avisada para contar este produto.", "ok"); } }, ic("raio"), "Pedir para contar")] });
   }
 
   const lancar = (produtos, app, produtoId) => app.ir("guia", { fluxo: "mov", produto_id: produtoId || "" });
@@ -130,9 +141,12 @@
     const telaEscolha = () => {
       const lista = produtos.map((p) => el("button", { type: "button", class: "escolha", "aria-pressed": String(estado.selecao.has(p.id)), onclick: () => { estado.selecao.has(p.id) ? estado.selecao.delete(p.id) : estado.selecao.add(p.id); desenhar(); } },
         el("strong", {}, p.nome), el("span", {}, (motivos[p.id] || [])[0] || "Toque para incluir")));
+      const lerQr = lerProduto((p) => { estado.selecao.add(p.id); desenhar(); NE.aviso(`${p.nome} incluído na contagem.`, "ok"); });
       return [el("div", { class: "tela-titulo" }, el("div", { class: "icone-grande", html: NE.icone.raio }), el("div", {}, el("h1", {}, pedido ? "Contagem pedida" : "Contagem do dia"), el("p", {}, pedido ? "A expedição pediu para contar estes produtos." : "Escolhemos o que mais vale contar hoje. Leva uns 3 minutos."))),
-        el("div", { class: "grade-escolha" }, lista)];
+        lerQr ? el("div", { style: "margin:0 0 12px" }, lerQr) : null, el("div", { class: "grade-escolha" }, lista)];
     };
+    // botão "Ler QR do produto": a etiqueta do produto leva direto a ele na contagem
+    const lerProduto = (aoAchar) => NE.pacote.tem("etiquetas") && NE.botaoLerQR({ titulo: "Ler a etiqueta do produto", aceita: ["produto"], digitar: "Código do produto (P-1A2B3C4D)", aoLer: (obj) => { const p = NE.lerQR.acharProduto(obj, produtos); if (!p) { NE.aviso("Não achei esse produto.", "alerta"); return false; } aoAchar(p); } }, { rotulo: "Ler QR do produto", id: "btn-ler-qr-contagem", classe: "btn btn-secundario" });
     const telaProduto = () => {
       const p = ordem()[pos]; const v = val[p.id] || (val[p.id] = { pilhas: 0, soltas: 0, total: null });
       const total = p.por_pilha ? D.totalPilhas({ pilhas: v.pilhas, porPilha: p.por_pilha, soltas: v.soltas }) : (v.total ?? 0);
@@ -142,7 +156,8 @@
       const campos = p.por_pilha
         ? el("div", { class: "par-contador" }, el("div", {}, el("div", { class: "rotulo" }, `Pilhas de ${p.por_pilha}`), NE.contador(v.pilhas, (n) => { v.pilhas = n; atualizar(); }, "ct-pilhas")), el("div", {}, el("div", { class: "rotulo" }, "Peças soltas"), NE.contador(v.soltas, (n) => { v.soltas = n; atualizar(); }, "ct-soltas")))
         : el("div", {}, el("div", { class: "rotulo" }, "Quantidade contada"), NE.contador(v.total ?? 0, (n) => { v.total = n; atualizar(); }, "ct-total"));
-      return [el("div", { class: "contar-card" }, el("div", {}, el("span", { class: "etiqueta azul" }, `Produto ${pos + 1} de ${ordem().length}`)), el("h2", {}, p.nome), ajuda, campos, mostrar)];
+      const irPara = lerProduto((q) => { estado.selecao.add(q.id); pos = Math.max(0, ordem().findIndex((x) => x.id === q.id)); desenhar(); });
+      return [irPara ? el("div", { style: "margin:0 0 12px" }, irPara) : null, el("div", { class: "contar-card" }, el("div", {}, el("span", { class: "etiqueta azul" }, `Produto ${pos + 1} de ${ordem().length}`)), el("h2", {}, p.nome), ajuda, campos, mostrar)];
     };
     const telaRevisar = () => [el("div", { class: "tela-titulo" }, el("div", { class: "icone-grande", html: NE.icone.check }), el("div", {}, el("h1", {}, "Revisar contagem"), el("p", {}, "Confira os números. Depois de enviar, o sistema compara com o estoque."))),
       el("div", { class: "resumo" }, ordem().map((p) => { const v = val[p.id]; const t = v ? (p.por_pilha ? D.totalPilhas({ pilhas: v.pilhas, porPilha: p.por_pilha, soltas: v.soltas }) : (v.total ?? 0)) : 0; return NE.linhaResumo(p.nome, `${fmt(t)} ${p.unidade}`); }))];

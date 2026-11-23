@@ -432,35 +432,41 @@
     if (EXPLICA && tem("estoque", "saldo", "minimo", "contagem", "pilha")) return { texto: "Como funciona o estoque:\n• O saldo é a soma de tudo que entrou (produção) menos o que saiu (cada conferência baixa as peças carregadas).\n• Mínimo: abaixo dele o app avisa a expedição.\n• Contagem do dia: o app escolhe o que mais vale contar (negativos, diferenças recentes, tempo sem contar). A pessoa conta às cegas, por pilhas, e o sistema compara.\n• Se a contagem difere, a administração aprova o ajuste e o saldo é corrigido.", acoes: [{ rotulo: "Ir para o estoque", rota: "estoque" }] };
     const chave = tem("30 dias", "mes") ? "30d" : tem("semana", "7 dias") ? "7d" : tem("ontem") ? "ontem" : "hoje";
     const r = resumoDoPeriodo(ctx, chave);
+    if (tem("moviment", "entradas e saidas", "entrou e saiu")) {
+      const mv = (ctx.movimentos || []).filter((m) => aMs(m.criado_em) >= r.periodo.de && aMs(m.criado_em) < r.periodo.ate);
+      if (!mv.length) return { texto: `Nenhum lançamento no estoque ${r.periodo.rotulo}.`, acoes: [] };
+      const soma = (t) => mv.filter((m) => m.tipo === t).reduce((n, m) => n + Math.abs(Number(m.quantidade) || 0), 0);
+      return { texto: `Movimentação do estoque ${r.periodo.rotulo}: ${plural(mv.length, "lançamento", "lançamentos")}.\n• Entradas: ${fmt(soma("entrada"))}\n• Saídas: ${fmt(soma("saida"))}\n• Perdas: ${fmt(soma("perda"))}`, acoes: [{ rotulo: "Ir para o estoque", rota: "estoque" }], imprimir: { tipo: "movimentacao", chave } };
+    }
     if (tem("resumo", "como estamos", "como esta", "situacao", "panorama")) {
       const k = r.kpis;
       const linhas = [`${r.semaforo.titulo}: ${r.semaforo.texto}`, `Conferências ${r.periodo.rotulo}: ${k.total} (${k.acertoPct === null ? "—" : k.acertoPct + "%"} corretas). A mais: ${fmt(k.aMais)} · A menos: ${fmt(k.aMenos)}.`, `Fila de notas: ${r.fila.total}${r.fila.paradas ? ` (${r.fila.paradas} parada${r.fila.paradas > 1 ? "s" : ""})` : ""}.`, `Estoque: ${r.estoque.negativos.length} negativo(s), ${r.estoque.baixos.length} abaixo do mínimo.`];
-      return { texto: linhas.join("\n"), acoes: [{ rotulo: "Abrir o painel", rota: "painel" }] };
+      return { texto: linhas.join("\n"), acoes: [{ rotulo: "Abrir o painel", rota: "painel" }], imprimir: { tipo: "resumo", chave } };
     }
     if (tem("a mais", "sem nota", "sobrou", "vazamento", "saiu mais")) {
       const itens = r.produtos.filter((x) => x.aMais > 0); if (!itens.length) return { texto: `Nenhuma peça saiu a mais do que a nota ${r.periodo.rotulo}.`, acoes: [] };
-      return { texto: `${plural(r.kpis.aMais, "peça saiu", "peças saíram")} a mais ${r.periodo.rotulo}:\n` + itens.slice(0, 6).map((x) => `• ${x.nome}: +${fmt(x.aMais)} (${plural(x.ocorrencias, "carga", "cargas")})`).join("\n"), acoes: [{ rotulo: "Ver as cargas", rota: "conferencias", params: { dif: "1" } }] };
+      return { texto: `${plural(r.kpis.aMais, "peça saiu", "peças saíram")} a mais ${r.periodo.rotulo}:\n` + itens.slice(0, 6).map((x) => `• ${x.nome}: +${fmt(x.aMais)} (${plural(x.ocorrencias, "carga", "cargas")})`).join("\n"), acoes: [{ rotulo: "Ver as cargas", rota: "conferencias", params: { dif: "1" } }], imprimir: { tipo: "diferencas", chave, sentido: "mais" } };
     }
     if (tem("faltou", "a menos", "falta")) {
       const itens = r.produtos.filter((x) => x.aMenos > 0); if (!itens.length) return { texto: `Nenhuma peça faltou ${r.periodo.rotulo}.`, acoes: [] };
-      return { texto: `${plural(r.kpis.aMenos, "peça faltou", "peças faltaram")} ${r.periodo.rotulo}:\n` + itens.slice(0, 6).map((x) => `• ${x.nome}: −${fmt(x.aMenos)}`).join("\n"), acoes: [{ rotulo: "Ver as cargas", rota: "conferencias", params: { dif: "1" } }] };
+      return { texto: `${plural(r.kpis.aMenos, "peça faltou", "peças faltaram")} ${r.periodo.rotulo}:\n` + itens.slice(0, 6).map((x) => `• ${x.nome}: −${fmt(x.aMenos)}`).join("\n"), acoes: [{ rotulo: "Ver as cargas", rota: "conferencias", params: { dif: "1" } }], imprimir: { tipo: "diferencas", chave, sentido: "menos" } };
     }
     if (tem("parada", "paradas", "fila", "pendente", "esperando")) {
       const fila = (ctx.notas || []).filter((n) => n.status === "pendente" || n.status === "em_conferencia");
       if (!fila.length) return { texto: "A fila está vazia: todas as notas foram conferidas.", acoes: [] };
-      return { texto: `Há ${plural(fila.length, "nota", "notas")} na fila:\n` + fila.slice(0, 8).map((n) => `• Nota ${n.numero}${n.cliente ? " — " + n.cliente : ""} (espera há ${duracao((aMs(agora) - aMs(n.criado_em)) / MIN)})`).join("\n"), acoes: [{ rotulo: "Abrir a fila", rota: "notas" }] };
+      return { texto: `Há ${plural(fila.length, "nota", "notas")} na fila:\n` + fila.slice(0, 8).map((n) => `• Nota ${n.numero}${n.cliente ? " — " + n.cliente : ""} (espera há ${duracao((aMs(agora) - aMs(n.criado_em)) / MIN)})`).join("\n"), acoes: [{ rotulo: "Abrir a fila", rota: "notas" }], imprimir: { tipo: "fila" } };
     }
     if (tem("estoque baixo", "abaixo do minimo", "acabando", "negativo", "repor", "producao")) {
       const l = [...r.estoque.negativos.map((s) => `• ${s.nome}: ${fmt(s.saldo)} (NEGATIVO)`), ...r.estoque.baixos.map((s) => `• ${s.nome}: ${fmt(s.saldo)} (mínimo ${fmt(s.minimo)})`)];
-      return { texto: l.length ? `Produtos que pedem atenção:\n${l.join("\n")}` : "Nenhum produto abaixo do mínimo agora.", acoes: [{ rotulo: "Ir para o estoque", rota: "estoque" }] };
+      return { texto: l.length ? `Produtos que pedem atenção:\n${l.join("\n")}` : "Nenhum produto abaixo do mínimo agora.", acoes: [{ rotulo: "Ir para o estoque", rota: "estoque" }], ...(l.length ? { imprimir: { tipo: "estoque" } } : {}) };
     }
     if (tem("contar", "contagem")) {
       const s = r.estoque.sugestao; if (!s.length) return { texto: "Tudo foi contado recentemente. Nada urgente para contar.", acoes: [] };
-      return { texto: "Hoje vale contar:\n" + s.map((x) => `• ${x.nome} — ${lista(x.motivos, 2)}`).join("\n"), acoes: [{ rotulo: "Fazer a contagem do dia", rota: "contagem" }] };
+      return { texto: "Hoje vale contar:\n" + s.map((x) => `• ${x.nome} — ${lista(x.motivos, 2)}`).join("\n"), acoes: [{ rotulo: "Fazer a contagem do dia", rota: "contagem" }], imprimir: { tipo: "contar" } };
     }
     if (tem("quem", "equipe", "conferente", "funcionario")) {
       if (!r.equipe.length) return { texto: `Ninguém conferiu carga ${r.periodo.rotulo}.`, acoes: [] };
-      return { texto: `Conferências ${r.periodo.rotulo}:\n` + r.equipe.map((e) => `• ${e.nome}: ${e.total}${e.duracaoMediaMin ? ` (média ${fmt(e.duracaoMediaMin)} min)` : ""}`).join("\n"), acoes: [] };
+      return { texto: `Conferências ${r.periodo.rotulo}:\n` + r.equipe.map((e) => `• ${e.nome}: ${e.total}${e.duracaoMediaMin ? ` (média ${fmt(e.duracaoMediaMin)} min)` : ""}`).join("\n"), acoes: [], imprimir: { tipo: "equipe", chave } };
     }
     const prod = (ctx.saldos || []).find((s) => p.includes(normalizar(s.nome)));
     if (prod) {

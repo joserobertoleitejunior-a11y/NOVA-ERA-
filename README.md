@@ -19,7 +19,7 @@ App de **conferência nota × carga** da expedição. Problema definido na reuni
 
 **Rastreio do cliente:** na janela da conferência, "Enviar ao cliente" abre o WhatsApp com o link `rastreio.html?c=CÓDIGO`. O cliente vê situação, horário de saída, itens carregados e a foto da carga. O código é secreto; a função `rastreio` devolve só esses dados (nada de conferente, diferenças ou motivo).
 
-**Etiquetas:** térmica 100 × 50 mm ou folha A4 (10 por folha), uma por produto ou uma por peça, com QR Code do rastreio.
+**Etiquetas e impressão (Mais → Imprimir):** etiqueta padrão com QR em 7 tamanhos de papel (térmica 100 × 50, 100 × 150, 60 × 40, 50 × 30 e folha A4), uma por produto ou por peça; botão **Ler QR da etiqueta** onde a leitura serve; imprime em qualquer impressora pelo diálogo do aparelho, por PDF ou direto (beta); relatórios e o assistente também imprimem. Detalhes em `ETIQUETAS-E-IMPRESSAO.md`.
 
 **Prova:** o registro (itens e fotos) não pode ser alterado nem apagado por ninguém (sem políticas de UPDATE/DELETE). Fotos em bucket privado com link temporário.
 

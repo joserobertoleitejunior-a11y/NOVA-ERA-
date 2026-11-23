@@ -12,18 +12,19 @@ O app tem três pacotes. O pacote em uso fica no banco e liga ou desliga telas, 
 | Avisos essenciais: carga com diferença ou saída sem nota, nota nova, pedido de senha | ✔ | ✔ | ✔ |
 | Estoque: saldo, mínimo, entrada e perda, contagem com aprovação | — | ✔ | ✔ |
 | Importar notas por XML (várias de uma vez) | — | ✔ | ✔ |
-| Etiquetas com QR e contagem pela câmera | — | ✔ | ✔ |
+| Etiquetas com QR em 7 tamanhos de papel, impressão em qualquer impressora e leitura pela câmera (Mais → Imprimir) | — | ✔ | ✔ |
 | Resumo completo e indicadores da diretoria | — | ✔ | ✔ |
 | Painel do vendedor (função vendedor) | — | ✔ | ✔ |
 | Avisos automáticos completos (estoque, nota parada, fora do horário, resumo do dia), WhatsApp de 1 toque e Ajustes | — | ✔ | ✔ |
-| Planilhas (cargas e estoque) | — | ✔ | ✔ |
+| Planilhas (cargas e estoque) e relatórios para imprimir (movimentação, estoque, notas, cargas) | — | ✔ | ✔ |
 | Vídeo tutorial por função na tela de boas-vindas | — | ✔ | ✔ |
-| **Assistente com IA** (consulta e faz por comando, lê a nota por foto, assistente de vendas) | — | — | ✔ |
+| **Assistente com IA** (consulta e faz por comando, lê a nota por foto, assistente de vendas, oferece imprimir o que mostrou) | — | — | ✔ |
 | **Histórico de atividades** (quem fez, quando, mercadoria e nota) | — | — | ✔ |
 
 Serviço (fora do app): acompanhamento de 30 dias, treinamento da equipe e suporte prioritário são do Premium.
 
 ## Onde está escrito
+- Etiquetas, QR e impressão: ver `ETIQUETAS-E-IMPRESSAO.md`.
 - `assets/js/pacote.js`: a matriz (`DESDE`) e as regras (`tem`, `avisoPermitido`, `funcaoDisponivel`). É o único lugar. A cópia em `supabase/functions/assistente/pacote.js` é igual e vai junto na função.
 - `tests/pacote.test.js`: prova que um pacote contém o anterior e que todo aviso do sistema tem decisão.
 

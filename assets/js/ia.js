@@ -61,9 +61,19 @@
     };
     // Texto limpo: sem asteriscos, sem títulos com #, sem traço como marcador (mesmo que o servidor mande markdown)
     const limpo = (t) => String(t || "").replace(/\*\*(.+?)\*\*/gs, "$1").replace(/(^|\s)\*(\S[^*\n]*?)\*(?=\s|$|[.,;:!?])/g, "$1$2").replace(/^#{1,6}\s+/gm, "").replace(/^\s*[-*•]\s+/gm, "• ").replace(/\s[—–]\s/g, ": ").replace(/\n{3,}/g, "\n\n").trim();
-    const bolha = (tipo, texto, acoes = [], mini = []) => {
+    // Botão "Imprimir" logo abaixo da resposta: o servidor monta a tabela com os MESMOS dados que o assistente mostrou (nunca com texto escrito por ele),
+    // e o app abre a janela de impressão de relatórios (A4, A4 deitado, cupom 80/58 mm, planilha). O assistente termina a resposta com "Quer imprimir isto?".
+    const blocoValido = (b) => !!b && typeof b.titulo === "string" && Array.isArray(b.colunas) && b.colunas.length > 0 && Array.isArray(b.linhas) && b.linhas.length > 0 && b.linhas.every(Array.isArray);
+    const botaoImprimir = (b) => {
+      const n = b.linhas.length; const quanto = `${n} ${n === 1 ? "linha" : "linhas"}`;
+      const bloco = { ...b, colunas: b.colunas.map((c) => ({ rotulo: String(c.rotulo ?? ""), ...(c.dir ? { dir: true } : {}) })), linhas: b.linhas.map((l) => l.map((v) => (v == null ? "" : String(v)))), resumo: Array.isArray(b.resumo) ? b.resumo : [] };
+      return el("button", { type: "button", class: "link-acao btn-imprimir-ia", "data-bloco": String(b.id || b.arquivo || ""), "aria-label": `Imprimir: ${b.titulo} (${quanto})`, title: b.subtitulo || b.titulo,
+        onclick: () => (NE.abrirRelatorio ? NE.abrirRelatorio(bloco) : NE.aviso("A impressão não está disponível nesta tela.", "alerta")) }, ic("impressora"), el("span", { class: "imp-txt" }, `Imprimir: ${b.titulo}`, el("span", { class: "quanto" }, quanto)));
+    };
+    const bolha = (tipo, texto, acoes = [], mini = [], impressoes = []) => {
       const b = el("div", { class: `bolha ${tipo}` }, tipo === "ia" ? limpo(texto) : texto);
       if (mini.length) b.append(el("div", { class: "anexos-mini" }, mini.map(miniatura)));
+      const imp = impressoes.filter(blocoValido); if (imp.length) b.append(el("div", { class: "acoes-linha imprimir-ia" }, imp.map(botaoImprimir)));
       if (acoes.length) b.append(el("div", { class: "acoes-linha" }, acoes.map(botaoAcao)));
       chat.append(b); rolar(); return b;
     };
@@ -169,7 +179,7 @@
         else r = D.responderLocal(pergunta, await NE.dados.contexto());
         novos.forEach((a) => { a.novo = false; }); desenharBandeja();
         historico.push({ papel: "user", texto: pergunta }, { papel: "assistant", texto: r.texto });
-        espera.replaceWith(bolha("ia", r.texto, r.acoes || [])); (r.propostas || []).forEach((p) => chat.append(cartao(p))); rolar();
+        espera.replaceWith(bolha("ia", r.texto, r.acoes || [], [], r.impressoes || [])); (r.propostas || []).forEach((p) => chat.append(cartao(p))); rolar();
       } catch (e) { resultados.unshift(...enviados); espera.replaceWith(bolha("ia", `Não consegui responder agora. ${NE.mensagemErro(e)}`)); }
       finally { enviando = false; enviar.disabled = subindo > 0; }
     }

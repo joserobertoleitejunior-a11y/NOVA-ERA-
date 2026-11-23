@@ -97,6 +97,7 @@
         ["conferir", "Conferir uma carga", "Caminhão carregado", ir("conferir")],
         ["raio", "Pedir a contagem do dia", "Leva uns 3 minutos", ir("contar"), "estoque"],
         ["caminhao", "Ver as cargas", "O que já saiu", ir("cargas")],
+        ["etiqueta", "Imprimir etiquetas", "Nota, produto e relatórios", ir("imprimir"), "etiquetas"],
         ["caixas", "Ver o estoque", "Quanto tem de cada peça", ir("estoque"), "estoque"],
       ],
     };

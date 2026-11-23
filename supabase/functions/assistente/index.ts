@@ -9,6 +9,7 @@ import "./dominio.js";
 import "./pacote.js";
 import "./ferramentas-base.js";
 import "./ferramentas-leitura.js";
+import "./ferramentas-impressao.js";
 import "./ferramentas-escrita.js";
 import "./nucleo.js";
 

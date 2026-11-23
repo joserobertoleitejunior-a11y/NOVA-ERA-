@@ -24,7 +24,7 @@
   let iaOn = false;
   NE.iniciarConferencia = async (perfilAtual, raiz, voltarInicio, opcoes = {}) => {
     perfil = perfilAtual; aoTerminar = voltarInicio; aberta = opcoes;
-    estado = novoEstado();
+    estado = novoEstado(); if (opcoes.preenchido) Object.assign(estado, opcoes.preenchido);   // ao ler o QR da nota no meio do caminho, o caminhão escolhido fica
     // Abre na hora com a lista guardada no aparelho; atualiza em segundo plano
     const cv = NE.dados.emCache("veiculos"), cp = NE.dados.emCache("produtos");
     if (cv && cp) {
@@ -88,6 +88,11 @@
         if (estado.leitura?.status === "ok" && estado.numero_nota !== estado.leitura.numero) { estado.chave_nfe = ""; estado.leitura = null; status.replaceChildren(); }
       });
       const status = el("div", { id: "leitura-nota", "aria-live": "polite" }, statusLeitura());
+      // QR da etiqueta da nota: acha a nota na fila e recomeça já com os itens dela (o caminhão escolhido continua)
+      const lerQr = NE.pacote.tem("etiquetas") && NE.botaoLerQR({ titulo: "Ler a etiqueta da nota", aceita: ["peca", "nota"], digitar: "Número da nota", aoLer: async (obj) => {
+        const n = NE.lerQR.acharNota(obj, await NE.dados.notas({ status: ["pendente", "em_conferencia"] })); if (!n) { NE.aviso("Essa nota não está na fila de conferência.", "alerta"); return false; }
+        NE.iniciarConferencia(perfil, document.querySelector("#conteudo"), aoTerminar, { nota_id: n.id, preenchido: { veiculo: estado.veiculo, placa: estado.placa, motorista: estado.motorista } });
+      } }, { rotulo: "Ler QR da etiqueta da nota", id: "btn-ler-qr-conferir", classe: "btn btn-azul btn-bloco" });
       const aoNovaFoto = async (arquivo) => {
         estado.leitura = { status: "lendo" };
         const r = await NE.nfe.lerDaFoto(arquivo);
@@ -103,6 +108,7 @@
         NE.aviso(`Nota ${estado.numero_nota}: ${estado.itens.length} ${estado.itens.length === 1 ? "item lido" : "itens lidos"}. Confira no próximo passo.`, "ok"); redesenhar();
       }) }, ic("faisca"), "Ler a nota inteira com IA · Premium");
       return el("div", {},
+        lerQr ? el("div", { style: "margin-bottom:14px" }, lerQr) : null,
         blocoFoto("nota", "Foto da nota fiscal", "Obrigatória", "Enquadre a nota inteira, com o código de barras aparecendo. O número é lido sozinho.", false, redesenhar, aoNovaFoto), ia,
         el("div", { class: "campo", style: "margin-top:16px" }, el("label", { for: "numero-nota" }, "Número da nota"),
           el("span", { class: "dica" }, "Preenchido pela foto. Se não der, digite: fica no alto da nota, ao lado de \"Nº\"."), num, status));
@@ -142,7 +148,7 @@
     conferir(redesenhar) {
       const tudo = el("button", { type: "button", class: "btn btn-verde btn-bloco btn-gigante", id: "btn-tudo-confere" }, ic("check"), "Tudo confere");
       tudo.addEventListener("click", () => { estado.itens.forEach((it) => { it.situacao = "confere"; it.qtd_carregada = it.qtd_nota; }); redesenhar(); });
-      const ler = estado.nota && NE.pacote.tem("etiquetas") && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ler-etiquetas", onclick: () => lerEtiquetas(redesenhar) }, ic("qr"), "Contar lendo as etiquetas");
+      const ler = estado.nota && NE.pacote.tem("etiquetas") && el("button", { type: "button", class: "btn btn-azul btn-bloco", id: "btn-ler-etiquetas", onclick: () => lerEtiquetas(redesenhar) }, ic("qr"), "Ler o QR das peças (conta sozinho)");
       const todosOk = estado.itens.length > 0 && estado.itens.every((i) => i.situacao === "confere");
       return el("div", {}, el("div", { style: "display:grid;gap:10px;margin-bottom:16px" }, todosOk ? el("div", { class: "aviso ok" }, ic("check"), el("span", {}, "Tudo marcado como conferido. Toque em Continuar, ou ajuste algum item abaixo.")) : tudo, ler),
         ...estado.itens.map((it, i) => {

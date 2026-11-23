@@ -63,11 +63,15 @@
     const numeros = el("div", { class: "numeros" }); const navDia = el("div", { class: "navegador-dia" }); const chips = el("div", { class: "chips" }); const chipsDono = el("div", { class: "chips" });
     const campoBusca = el("input", { class: "entrada busca", id: "busca-nota", type: "search", inputmode: "search", autocomplete: "off", placeholder: "Buscar nota, cliente ou placa" });
     campoBusca.addEventListener("input", () => { busca = campoBusca.value.trim(); const quer = busca.length > 0; if (quer !== modoPeriodo) { modoPeriodo = quer; carregar(); } else desenhar(); });
+    const ler = NE.pacote.tem("etiquetas") && NE.botaoLerQR({ titulo: "Ler a etiqueta da carga", aceita: ["peca", "nota"], digitar: "Número da nota", aoLer: async (obj) => {
+      let numero = obj.numero; if (!numero) { const n = NE.lerQR.acharNota(obj, await NE.dados.notas()); if (!n) { NE.aviso("Não achei essa nota.", "alerta"); return false; } numero = n.numero; }
+      campoBusca.value = numero; campoBusca.dispatchEvent(new Event("input"));
+    } }, { rotulo: "Ler QR", id: "btn-ler-qr-cargas", classe: "btn btn-azul" });
     const extra = el("div", {}); const lista = el("div", { class: "lista-conf" }, el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }), el("div", { class: "esqueleto" }));
     const planilha = el("button", { type: "button", class: "link-acao", onclick: async () => { const c = await NE.dados.conferencias({ de: Date.now() - 31 * D.DIA }); baixar(`cargas-${NE.hojeISO()}.csv`, D.csvConferencias(c)); } }, ic("baixar"), "Baixar planilha (30 dias)");
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, vendedor ? "Minhas cargas" : "Cargas"), el("p", {}, vendedor ? "As entregas das suas notas: confira e mande o rastreio ao cliente." : "Tudo que saiu, com fotos e conferência.")),
       app.perm.conferir && el("button", { class: "btn btn-principal", type: "button", id: "btn-nova-painel", onclick: () => app.ir("conferir", {}) }, ic("mais"), "Nova conferência")),
-      numeros, el("div", { class: "filtros" }, navDia, campoBusca, vendedor && chipsDono, chips), extra, lista, vendedor || !NE.pacote.tem("planilhas") ? null : el("div", { style: "margin-top:12px" }, planilha));
+      numeros, el("div", { class: "filtros" }, navDia, el("div", { style: "display:flex;gap:8px;align-items:center" }, el("div", { style: "flex:1;min-width:0" }, campoBusca), ler), vendedor && chipsDono, chips), extra, lista, vendedor || !NE.pacote.tem("planilhas") ? null : el("div", { style: "margin-top:12px" }, planilha));
 
     const mudarDia = (d) => { dia = d; carregar(); };
     const desenharNav = () => {
@@ -131,6 +135,8 @@
     raiz.replaceChildren(el("div", { class: "cabeca-pagina" }, el("div", {}, el("h1", {}, "Mais"), el("p", {}, `${NE.rotuloFuncao(app.perfil.funcao)} · o que mais você pode fazer aqui.`))),
       el("div", { class: "menu-grade" },
         pode("alertas") && item("sino", "Avisos", "O que aconteceu", () => app.ir("alertas")),
+        pode("imprimir") && item("etiqueta", "Imprimir", "Etiquetas, relatórios e teste", () => app.ir("imprimir"), "mais-imprimir"),
+        pode("imprimir") && NE.pacote.tem("etiquetas") && item("qr", "Ler QR code", "Abre a nota ou o produto", () => NE.lerQualquerQR(app), "mais-ler-qr"),
         pode("historico") && item("relogio", "Histórico", "Quem fez o quê e quando", () => app.ir("historico"), "mais-historico"),
         pode("equipe") && app.perm.cadastra && item("pessoas", "Equipe", "Funcionários e acesso", () => app.ir("equipe")),
         pode("cadastros") && app.perm.cadastra && item("caminhao", "Caminhões", "Placas da frota", () => app.ir("cadastros", { aba: "caminhoes" })),

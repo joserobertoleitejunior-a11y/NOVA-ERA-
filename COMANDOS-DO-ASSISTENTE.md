@@ -12,6 +12,12 @@ Dá para escrever, falar no microfone e anexar foto, PDF ou XML (botão do clipe
 - "Mostre os avisos que eu ainda não li." · "O que o assistente fez hoje?"
 - Só diretoria e administrativo: "Quem lançou a nota 48213 e a que horas?" · "O que o Eduardo fez hoje?" · "Quem mexeu no meio-fio esta semana?" · "Quem conferiu a carga da placa ABC1D23?" (lê o histórico de atividades).
 
+## Imprimir o que o assistente mostrou
+- Quando a resposta é uma lista (estoque, movimentação, notas na fila, cargas, equipe, resumo, contagens), o assistente termina com **"Quer imprimir isto?"** e aparece o botão **Imprimir: <nome da folha>** logo abaixo da resposta. Toque nele: abre a janela de relatório (A4, A4 deitado, cupom 80 ou 58 mm) e também dá para baixar a planilha.
+- Experimente: "Mostre a movimentação do estoque desta semana" · "Estoque baixo" · "Quais notas estão na fila?" · "Quem conferiu hoje?" e toque em Imprimir.
+- A folha sai **dos mesmos dados** que o assistente consultou (não do texto que ele escreveu) e respeita o seu acesso: o vendedor imprime só o estoque para vender e as notas dele; o histórico de atividades só sai para diretoria e administrativo.
+- Para etiquetas com QR code, use **Mais → Imprimir** (ver `ETIQUETAS-E-IMPRESSAO.md`).
+
 ## Equipe
 - "Cadastre a Maria Lima como vendedora, WhatsApp 15 99888-7766."
 - "Cadastre estes: Carlos conferente, Ana motorista (CNH até 15/03/2027), Pedro ajudante." (vários de uma vez, até 50)
