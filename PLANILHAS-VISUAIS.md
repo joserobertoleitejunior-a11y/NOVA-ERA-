@@ -57,3 +57,9 @@ O arquivo é escrito pelo próprio app (sem biblioteca): `assets/js/planilha.js`
 - No painel da planilha, **Ver em PDF** gera a folha (números-chave, gráficos e tabela, com texto selecionável; tabela de mais de 7 colunas sai A4 deitada) e abre **dentro do app**, no visualizador: rolar, aproximar e afastar (botões, pinça ou Ctrl+rolagem), Ajustar, **Baixar**, **Compartilhar** e **Imprimir**.
 - **Mais → Imprimir → Abrir um PDF** abre no mesmo visualizador um PDF que já está no aparelho (por exemplo, a planilha baixada antes).
 - Arquivos: `assets/js/pdf-relatorio.js` (escreve o PDF, fontes padrão Helvetica) e `assets/js/visualizador.js` (usa o pdf.js do app).
+
+## Escolher o formato e abrir tudo no app
+
+Em toda planilha, o botão **Salvar como…** abre a escolha do formato: **PDF**, **Imagem (PNG)**, **Excel (.xlsx)**, **CSV**, **XML** e **JSON**. Para cada um há **Ver no app**, **Baixar** e **Compartilhar**. O app lembra o último formato usado.
+
+O app também é a ferramenta que abre os arquivos (`assets/js/arquivos.js`): PDF (visualizador com zoom), imagem, Excel (lido do próprio .xlsx e mostrado como tabela), CSV, XML e JSON (formatados), e texto. Para abrir um arquivo que já está no aparelho: **Mais → Imprimir → Abrir um arquivo**. Outros tipos de arquivo não são abertos (o app avisa o que sabe abrir).

@@ -24,9 +24,9 @@
         btn("pdf-compartilhar", "enviar", "Compartilhar", async () => { const r = await NE.imp.compartilhar([new Blob([bruto], { type: "application/pdf" })], [nome], titulo); if (r === "baixado") NE.aviso("Este aparelho não compartilha arquivos: o PDF foi baixado.", "ok"); }),
         btn("pdf-imprimir", "impressora", "Imprimir", () => imprimir())));
     document.body.append(fundo);
-    const sair = () => { fundo.remove(); document.removeEventListener("keydown", tecla); try { pdf && pdf.destroy(); } catch { /* já fechado */ } };
-    const tecla = (e) => { if (e.key === "Escape" && !document.querySelector(".janela-fundo[data-simples]")) sair(); };
-    fechar.addEventListener("click", sair); document.addEventListener("keydown", tecla); area.focus({ preventScroll: true });
+    const sair = () => { fundo.remove(); window.removeEventListener("keydown", tecla, true); try { pdf && pdf.destroy(); } catch { /* já fechado */ } };
+    const tecla = (e) => { if (e.key === "Escape") { e.stopImmediatePropagation(); sair(); } };
+    fechar.addEventListener("click", sair); window.addEventListener("keydown", tecla, true); area.focus({ preventScroll: true });
 
     let pdf = null; let zoomAtual = 1; const paginas = [];
     const larguraBase = () => Math.max(220, Math.min(area.clientWidth - 24, 900));

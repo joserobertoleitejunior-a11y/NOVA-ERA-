@@ -376,3 +376,13 @@ html[data-qualidade="estatica"] .gf *, html[data-qualidade="estatica"] .gf-tabel
 .pdf-lupa, .pdf-btn { min-height: 44px; min-width: 44px; border-radius: 12px; border: 1px solid #ffffff33; background: #ffffff14; color: #fff; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; cursor: pointer; }
 .pdf-lupa svg, .pdf-btn svg { width: 18px; height: 18px; } .pdf-zoom { min-width: 48px; text-align: center; font-weight: 800; font-variant-numeric: tabular-nums; }
 @media print { .pdf-vista { display: none !important; } }
+
+/* ── Salvar como… e arquivos abertos no app ── */
+.fmt-grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.fmt-opcao { display: grid; justify-items: center; gap: 4px; padding: 12px 6px; border-radius: 12px; border: 2px solid var(--linha); background: var(--placa); cursor: pointer; color: var(--texto); }
+.fmt-opcao svg { width: 24px; height: 24px; color: var(--azul); } .fmt-opcao b { font: 800 .95rem var(--fonte-marca); }
+.fmt-opcao[aria-checked="true"] { border-color: var(--azul); background: #eef1ff; box-shadow: 0 2px 0 #c9d3f5; }
+.fmt-dica { margin: 10px 0 0; min-height: 3em; }
+.arq-papel { background: #fff; color: var(--texto); border-radius: 6px; padding: 12px; margin: 0 auto; max-width: 100%; box-shadow: 0 4px 18px #0006; }
+.arq-texto { white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.45 ui-monospace, Menlo, Consolas, monospace; width: min(900px, 100%); box-sizing: border-box; }
+.arq-tabela { width: min(1000px, 100%); box-sizing: border-box; overflow: auto; } .arq-imagem { display: block; margin: 0 auto; max-width: none; height: auto; background: #fff; }

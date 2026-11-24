@@ -1,7 +1,7 @@
 // Service worker: (1) abre o app na hora, mesmo com sinal fraco, usando os arquivos guardados no aparelho;
 // (2) recebe os AVISOS (Web Push) com o app fechado e abre a tela certa ao tocar.
 // Dados do Supabase NUNCA passam por aqui (sempre ao vivo e protegidos).
-const VERSAO = "confere-carga-20261124j9";
+const VERSAO = "confere-carga-20261124k1";
 const ESSENCIAIS = ["./app.html", "./manifest.json"];
 
 self.addEventListener("install", (e) => {
