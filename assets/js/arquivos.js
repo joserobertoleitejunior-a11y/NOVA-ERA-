@@ -99,4 +99,15 @@
     entrada.addEventListener("change", async () => { const a = entrada.files[0]; entrada.remove(); if (a) await NE.abrirArquivo(a, { nome: a.name }); }); document.body.append(entrada); entrada.click();
   };
   NE.abrirPdfDoAparelho = NE.abrirArquivoDoAparelho;
+  // Arquivo que chegou pelo "Compartilhar" do celular (service worker guarda) ou pelo "Abrir com" do computador
+  NE.abrirCompartilhado = async () => {
+    try {
+      const cache = await caches.open("ne-compartilhado"); const ks = await cache.keys(); let n = 0;
+      for (const k of ks) { const r = await cache.match(k); const nome = decodeURIComponent(k.url.split("/").pop()); const b = await r.blob(); await cache.delete(k); if (!n++) await NE.abrirArquivo(new File([b], nome, { type: b.type }), { nome }); }
+      return n;
+    } catch { return 0; }
+  };
+  const params = new URLSearchParams(location.search);
+  if (params.get("abrir") === "compartilhado") { params.delete("abrir"); try { history.replaceState(null, "", location.pathname + (params.toString() ? "?" + params : "") + location.hash); } catch { /* ok */ } setTimeout(NE.abrirCompartilhado, 700); }
+  if ("launchQueue" in window) window.launchQueue.setConsumer(async (l) => { for (const h of l.files || []) { const f = await h.getFile(); NE.abrirArquivo(f, { nome: f.name }); break; } });
 })();

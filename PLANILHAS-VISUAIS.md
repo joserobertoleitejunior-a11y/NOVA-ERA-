@@ -63,3 +63,6 @@ O arquivo é escrito pelo próprio app (sem biblioteca): `assets/js/planilha.js`
 Em toda planilha, o botão **Salvar como…** abre a escolha do formato: **PDF**, **Imagem (PNG)**, **Excel (.xlsx)**, **CSV**, **XML** e **JSON**. Para cada um há **Ver no app**, **Baixar** e **Compartilhar**. O app lembra o último formato usado.
 
 O app também é a ferramenta que abre os arquivos (`assets/js/arquivos.js`): PDF (visualizador com zoom), imagem, Excel (lido do próprio .xlsx e mostrado como tabela), CSV, XML e JSON (formatados), e texto. Para abrir um arquivo que já está no aparelho: **Mais → Imprimir → Abrir um arquivo**. Outros tipos de arquivo não são abertos (o app avisa o que sabe abrir).
+
+### Aparecer em "Compartilhar" (Android) e "Abrir com" (computador)
+O `manifest.json` declara `share_target` (POST em `./compartilhado`, que o `sw.js` recebe, guarda no cache `ne-compartilhado` e redireciona para `app.html?abrir=compartilhado`) e `file_handlers` (Chrome/Edge no computador, via `launchQueue`). Quem **instalou** o app vê "Confere Carga" no Compartilhar de um PDF, imagem, Excel, CSV, XML, JSON ou texto, e o arquivo abre no visualizador. No Android, entrar na lista "Abrir com" exige empacotar como app nativo (APK/TWA) — não feito.

@@ -28,5 +28,64 @@
    "type": "image/png",
    "purpose": "maskable"
   }
+ ],
+ "share_target": {
+  "action": "./compartilhado",
+  "method": "POST",
+  "enctype": "multipart/form-data",
+  "params": {
+   "files": [
+    {
+     "name": "arquivo",
+     "accept": [
+      "application/pdf",
+      ".pdf",
+      "image/*",
+      ".xml",
+      "text/xml",
+      "application/xml",
+      ".csv",
+      "text/csv",
+      ".json",
+      "application/json",
+      ".txt",
+      "text/plain",
+      ".xlsx",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+     ]
+    }
+   ]
+  }
+ },
+ "file_handlers": [
+  {
+   "action": "./app.html",
+   "accept": {
+    "application/pdf": [
+     ".pdf"
+    ],
+    "image/*": [
+     ".png",
+     ".jpg",
+     ".jpeg",
+     ".webp"
+    ],
+    "text/xml": [
+     ".xml"
+    ],
+    "text/csv": [
+     ".csv"
+    ],
+    "application/json": [
+     ".json"
+    ],
+    "text/plain": [
+     ".txt"
+    ],
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+     ".xlsx"
+    ]
+   }
+  }
  ]
 }

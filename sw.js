@@ -1,7 +1,7 @@
 // Service worker: (1) abre o app na hora, mesmo com sinal fraco, usando os arquivos guardados no aparelho;
 // (2) recebe os AVISOS (Web Push) com o app fechado e abre a tela certa ao tocar.
 // Dados do Supabase NUNCA passam por aqui (sempre ao vivo e protegidos).
-const VERSAO = "confere-carga-20261124k1";
+const VERSAO = "confere-carga-20261124k2";
 const ESSENCIAIS = ["./app.html", "./manifest.json"];
 
 self.addEventListener("install", (e) => {
@@ -10,12 +10,23 @@ self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSAO).then((c) => c.addAll(ESSENCIAIS)).catch(() => {}).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => {
-  e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSAO).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== VERSAO && k !== "ne-compartilhado").map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });
 self.addEventListener("fetch", (e) => {
   const req = e.request;
-  if (req.method !== "GET") return;
   const url = new URL(req.url);
+  // Arquivo enviado pelo "Compartilhar" do celular: guarda e abre o app, que mostra o arquivo no visualizador.
+  if (req.method === "POST" && url.origin === location.origin && url.pathname.endsWith("/compartilhado")) {
+    e.respondWith((async () => {
+      try {
+        const dados = await req.formData(); const cache = await caches.open("ne-compartilhado"); const ks = await cache.keys(); await Promise.all(ks.map((k) => cache.delete(k)));
+        let i = 0; for (const v of dados.getAll("arquivo")) if (v && v.name) await cache.put(`/compartilhado/${i++}/${encodeURIComponent(v.name)}`, new Response(v, { headers: { "content-type": v.type || "application/octet-stream" } }));
+      } catch { /* sem arquivo: só abre o app */ }
+      return Response.redirect("./app.html?abrir=compartilhado", 303);
+    })());
+    return;
+  }
+  if (req.method !== "GET") return;
   if (url.hostname.endsWith("supabase.co")) return; // dados e fotos: sempre direto, nunca guardados aqui
   if (url.origin !== location.origin) return;       // tudo o que o app usa está dentro do próprio projeto
   if (req.headers.has("range") || /\.(mp4|webm)$/i.test(url.pathname)) return; // vídeo: o navegador cuida (e o cache não guarda resposta parcial)
