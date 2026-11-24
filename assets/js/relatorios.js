@@ -120,6 +120,7 @@
     const bImprimir = el("button", { type: "button", class: "btn btn-principal", id: "rel-imprimir" }, ic("impressora"), "Imprimir");
     const bPlanilha = el("button", { type: "button", class: "btn btn-azul", id: "rel-xlsx" }, ic("baixar"), "Baixar planilha");
     const bCsv = el("button", { type: "button", class: "link-acao", id: "rel-csv" }, ic("baixar"), "Baixar CSV simples");
+    const bPdf = el("button", { type: "button", class: "link-acao", id: "rel-pdf" }, ic("olho"), "Ver em PDF");
     // o painel visual e a tabela são desenhados UMA vez (a animação não recomeça quando a pessoa troca o papel)
     const painel = G ? G.painel(b) : null;
     const tabela = n ? el("div", { class: "tabela-wrap", id: "rel-previa" }, G ? G.tabela(b, { limite: 40 }) : el("p", {}, "")) : el("div", { class: "vazio-grande" }, el("strong", {}, "Nada para mostrar"), "Não há dados neste período.");
@@ -129,13 +130,14 @@
       chips.replaceChildren(...FORMATOS.map((x) => el("button", { type: "button", class: "chip", role: "radio", "aria-checked": String(x.id === fid), "aria-pressed": String(x.id === fid), "data-formato": x.id, onclick: () => { fid = x.id; NE.memoria.gravar(CHAVE, fid); desenhar(); } }, x.rotulo)));
       papel.replaceChildren(el("div", { class: "rotulo", style: "margin-top:14px" }, "Papel para imprimir"), chips, el("p", { class: "suave", style: "margin:6px 0 0" }, f.dica),
         el("div", { class: "imp-como" }, ic("ajuda"), el("span", {}, "Imprimir abre a impressão do aparelho e serve para qualquer impressora. Os gráficos vão junto no papel. Para guardar em PDF, escolha \"Salvar como PDF\" nela.")),
-        el("div", { class: "imp-como" }, ic("grafico"), el("span", {}, "A planilha abre no Excel e no Google Planilhas, já organizada e com os gráficos. Prefere os dados puros? Baixe o CSV simples.")), el("div", { style: "margin-top:10px" }, bCsv));
-      bImprimir.disabled = bPlanilha.disabled = bCsv.disabled = !n;
+        el("div", { class: "imp-como" }, ic("grafico"), el("span", {}, "A planilha abre no Excel e no Google Planilhas, já organizada e com os gráficos. Quer ver como folha? Abra o PDF aqui mesmo no app. Prefere os dados puros? Baixe o CSV simples.")), el("div", { class: "acoes-linha", style: "margin-top:10px" }, bPdf, bCsv));
+      bImprimir.disabled = bPlanilha.disabled = bCsv.disabled = bPdf.disabled = !n;
     };
     const caixa = el("div", { class: "rel-corpo" }, el("p", { class: "suave", style: "margin:0 0 10px" }, `${b.subtitulo || ""}${n ? ` · ${n} ${n === 1 ? "linha" : "linhas"}` : ""}`), painel,
       n ? el("h3", { class: "gf-titulo-tabela" }, "A planilha") : null, tabela, n > 40 ? el("p", { class: "suave" }, `Mostrando 40 de ${n}. A impressão e a planilha levam todas.`) : null, papel);
     bImprimir.addEventListener("click", () => { const f = FORMATOS.find((x) => x.id === fid); NE.imp.imprimirArea(areaDoRelatorio(b, f), f.pagina, f.margem); });
     bPlanilha.addEventListener("click", () => NE.comCarregando(bPlanilha, async () => { const nome = await NE.planilha.baixar(b); NE.aviso(`Planilha ${nome} baixada.`, "ok"); }));
+    bPdf.addEventListener("click", () => NE.comCarregando(bPdf, async () => { await NE.pdfDaPlanilha(b); }));
     bCsv.addEventListener("click", () => NE.imp.baixar(new Blob([csvDe(b)], { type: "text/csv;charset=utf-8" }), `${b.arquivo || "relatorio"}-${NE.hojeISO()}.csv`));
     const j = NE.janelaSimples({ etiqueta: "Planilha", titulo: b.titulo, corpo: caixa, rodape: [bPlanilha, bImprimir] });
     new MutationObserver((_, o) => { if (!document.body.contains(j.fundo)) { NE.imp.quitar(); o.disconnect(); } }).observe(document.body, { childList: true });

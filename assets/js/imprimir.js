@@ -97,7 +97,8 @@
         P.tem("planilhas") && item("lista", "Relatórios", "Movimentação, estoque, notas, cargas", () => escolherRelatorio(), "imp-relatorios"),
         P.tem("etiquetas") && item("qr", "Ler um QR code", "A câmera abre a nota ou o produto", () => lerQualquer(app), "imp-ler"),
         item("engrenagem", "Impressora", "Teste de impressão e como ligar", () => impressora(), "imp-impressora"),
-        P.tem("etiquetas") && item("ajuda", "Como ler uma etiqueta", "Para quem vê pela primeira vez", () => NE.legendaEtiqueta(), "imp-legenda")));
+        P.tem("etiquetas") && item("ajuda", "Como ler uma etiqueta", "Para quem vê pela primeira vez", () => NE.legendaEtiqueta(), "imp-legenda"),
+        item("olho", "Abrir um PDF", "Veja aqui uma planilha ou outro PDF que você baixou", () => NE.abrirPdfDoAparelho(), "imp-abrir-pdf")));
   };
   NE.lerQualquerQR = lerQualquer;
 })();

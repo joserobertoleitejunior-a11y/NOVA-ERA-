@@ -364,3 +364,15 @@ html[data-qualidade="estatica"] .gf *, html[data-qualidade="estatica"] .gf-tabel
 .gf-pb .t-c1 { --cor: #111; } .gf-pb .t-c2 { --cor: #555; } .gf-pb .t-c3 { --cor: #888; } .gf-pb .t-c4 { --cor: #aaa; } .gf-pb .t-c5 { --cor: #ccc; } .gf-pb .t-c6 { --cor: #e2e2e2; }
 .gf-pb .gf-seg, .gf-pb .gf-h { stroke: #000; stroke-width: .5; }
 .imp-rel.cupom .gf-pill { background: none; border: .25mm solid #000; color: #000; }
+
+/* ── Visualizador de PDF dentro do app ── */
+.pdf-vista { position: fixed; inset: 0; z-index: 77; display: flex; flex-direction: column; background: #2b2d33; color: #fff; }
+.pdf-topo { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: max(10px, env(safe-area-inset-top, 0px)) 14px 10px; background: #1f2025; }
+.pdf-titulo { display: grid; min-width: 0; } .pdf-titulo strong { font: 800 1.15rem/1.1 var(--fonte-marca); font-stretch: var(--largura-marca); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .pdf-info { font-size: .8rem; color: #b9bcc6; }
+.pdf-area { flex: 1; overflow: auto; padding: 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; -webkit-overflow-scrolling: touch; outline: none; }
+.pdf-pg { background: #fff; box-shadow: 0 4px 18px #0006; margin: 0 auto; flex: none; } .pdf-folha { display: block; }
+.pdf-aviso { color: #d6d8df; text-align: center; padding: 40px 16px; margin: 0 auto; }
+.pdf-ferramentas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; padding: 10px 12px max(10px, env(safe-area-inset-bottom, 0px)); background: #1f2025; }
+.pdf-lupa, .pdf-btn { min-height: 44px; min-width: 44px; border-radius: 12px; border: 1px solid #ffffff33; background: #ffffff14; color: #fff; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; cursor: pointer; }
+.pdf-lupa svg, .pdf-btn svg { width: 18px; height: 18px; } .pdf-zoom { min-width: 48px; text-align: center; font-weight: 800; font-variant-numeric: tabular-nums; }
+@media print { .pdf-vista { display: none !important; } }

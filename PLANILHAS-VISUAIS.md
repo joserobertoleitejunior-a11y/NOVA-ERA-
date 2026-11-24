@@ -52,3 +52,8 @@ O arquivo é escrito pelo próprio app (sem biblioteca): `assets/js/planilha.js`
 - A animação existe no app; o Excel e o papel não animam.
 - Os gráficos do Excel foram conferidos no LibreOffice e lidos por programa (openpyxl); o arquivo segue o formato padrão, mas **não abri no Excel da Microsoft, no Google Planilhas nem no Numbers**. Se algo ficar estranho, avise o modelo do programa.
 - Relatórios com mais de 2.000 linhas (histórico) ou 600 (assistente) levam só as mais recentes.
+
+## PDF e visualizador do app
+- No painel da planilha, **Ver em PDF** gera a folha (números-chave, gráficos e tabela, com texto selecionável; tabela de mais de 7 colunas sai A4 deitada) e abre **dentro do app**, no visualizador: rolar, aproximar e afastar (botões, pinça ou Ctrl+rolagem), Ajustar, **Baixar**, **Compartilhar** e **Imprimir**.
+- **Mais → Imprimir → Abrir um PDF** abre no mesmo visualizador um PDF que já está no aparelho (por exemplo, a planilha baixada antes).
+- Arquivos: `assets/js/pdf-relatorio.js` (escreve o PDF, fontes padrão Helvetica) e `assets/js/visualizador.js` (usa o pdf.js do app).
